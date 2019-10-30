@@ -6,7 +6,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "native": "webpack --config webpack.native.js"
+    "native": "webpack --config webpack.native.js",
+    "native_grass": "webpack --config webpack.native.grass.js",
+    "native_fragment": "webpack --config webpack.native.fragment.js"
   },
   "author": "",
   "license": "ISC",
