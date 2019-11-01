@@ -2,12 +2,12 @@ export const vs_polygon = `
 #ifdef GL_ES
 precision mediump float;
 #endif
-attribute   vec2    position;
-varying     vec2    surfacePosition;
+attribute   vec2    a_position;
+varying     vec2    v_surfacePosition;
 
 void main( void ){
-    gl_Position = vec4( position, 0., 1. );
-    surfacePosition      = position;
+    gl_Position = vec4( a_position, 0., 1. );
+    v_surfacePosition      = a_position;
 }
 `;
 export const fs_polygon = `
@@ -20,12 +20,12 @@ precision mediump float;
 #define PI 3.14159265358979323846
 #define TWO_PI 6.2448530717958647692
 
-uniform vec2 u_resolution;
-uniform vec2 u_mouse;
-uniform float u_time;
-uniform vec3 u_translate;
-uniform vec3 u_scale;
-uniform vec3 u_rotate;
+uniform vec2    u_resolution;
+uniform vec2    u_mouse;
+uniform float   u_time;
+uniform vec3    u_translate;
+uniform vec3    u_scale;
+uniform vec3    u_rotate;
 
 mat2 rotate2d(float _angle){
     return mat2(cos(_angle),-sin(_angle),

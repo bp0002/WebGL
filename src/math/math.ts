@@ -39,4 +39,22 @@ export class MathTools {
 
         return ++value;
     }
+    /**
+     * sin(a+b) = sin(a) * cos(b) + cos(a) * sin(b)
+     * @param sin_a
+     * @param cos_a
+     * @param b
+     */
+    public static sin_a_add_b(sin_a: number, cos_a: number, b: number) {
+        return sin_a * Math.cos(b) + cos_a * Math.sin(b);
+    }
+    /**
+     * cos(a+b) = cos(a) * cos(b) - sin(a) * sin(b)
+     * @param sin_a
+     * @param cos_a
+     * @param b
+     */
+    public static cos_a_add_b(sin_a: number, cos_a: number, b: number) {
+        return cos_a * Math.cos(b) - sin_a * Math.sin(b);
+    }
 }

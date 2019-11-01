@@ -2,12 +2,13 @@ export const vs_multi_line_cross = `
 #ifdef GL_ES
 precision mediump float;
 #endif
-attribute   vec2    position;
-varying     vec2    surfacePosition;
+
+attribute   vec2    a_position;
+varying     vec2    v_surfacePosition;
 
 void main( void ){
-    gl_Position = vec4( position, 0., 1. );
-    surfacePosition      = position;
+    gl_Position = vec4( a_position, 0., 1. );
+    v_surfacePosition      = a_position;
 }
 `;
 export const fs_multi_line_cross = `
@@ -17,11 +18,11 @@ export const fs_multi_line_cross = `
 precision mediump float;
 #endif
 
-uniform vec2 u_resolution;
-uniform float u_time;
-uniform vec3 u_translate;
-uniform vec3 u_scale;
-uniform vec3 u_rotate;
+uniform vec2    u_resolution;
+uniform float   u_time;
+uniform vec3    u_translate;
+uniform vec3    u_scale;
+uniform vec3    u_rotate;
 
 vec2 brickTile(vec2 _st, float _zoom){
     _st *= _zoom;
