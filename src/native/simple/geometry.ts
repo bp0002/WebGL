@@ -1,5 +1,7 @@
 import { MathTools } from "../../math/math";
 
+type NumberMathFunction = (x: number) => number;
+
 export interface IPolygonData {
     vertexs?: [number, number][];
     vertexs3D?: [number, number, number][];
@@ -40,8 +42,36 @@ export class GeometryTools {
         return { vertexs, faces };
     }
     public static sphere(detailH: number, detailV: number) {
-        const half          = this.sphereHalf(detailH, detailV, (x: number) => { return Math.cos(Math.PI * x / 2); }, (x: number) => { return Math.sin(Math.PI * x / 2); }, true);
-        const halfRevert    = this.sphereHalfRevert(detailH, detailV, (x: number) => { return Math.cos(Math.PI * x / 2); }, (x: number) => { return Math.sin(Math.PI * x / 2); }, true);
+        const half          = this.sphereHalf(
+                                    detailH,
+                                    detailV,
+                                    (x: number) => {
+                                        const cos = Math.cos(Math.PI * x * 2);
+                                        return Math.abs(4 * x - 2) - 1; //(1 * (cos / Math.abs(cos)) - cos); // * (cos / Math.abs(cos));
+                                    },
+                                    (x: number) => {
+                                        const sin = Math.abs(Math.cos(x) * Math.sin(x * 2)) * 0.9 + 0.2; // Math.sin(Math.PI * x * 8);
+                                        return sin; // (1 * (sin / Math.abs(sin)) - sin); // * (sin / Math.abs(sin));
+                                    },
+                                    (x: number) => { return Math.cos(Math.PI * x / 2); },
+                                    (x: number) => {
+                                        // return Math.sin(Math.PI * x / 2);
+                                        return (Math.pow((x * 2 - 1), 3) + 1) / 2;
+                                    },
+                                    true
+                                );
+        // const halfRevert    = this.sphereHalfRevert(
+        //                             detailH,
+        //                             detailV,
+        //                             (x: number) => { return Math.cos(Math.PI * x * 2); },
+        //                             (x: number) => { return Math.sin(Math.PI * x * 2); },
+        //                             (x: number) => { return Math.cos(Math.PI * x / 2); },
+        //                             // (x: number) => { return Math.sin(Math.PI * x / 2); },
+        //                             (x: number) => {
+        //                                 return (Math.pow((x * 2 - 1), 3) + 1) / 2;
+        //                             },
+        //                             true
+        //                         );
 
         const result: IPolygonData = {
             vertexs3D: [],
@@ -63,23 +93,23 @@ export class GeometryTools {
                 });
             });
 
-            const halfPointCount = result.vertexs3D.length;
+            // const halfPointCount = result.vertexs3D.length;
 
-            halfRevert.circleList.forEach((cicle) => {
-                cicle.forEach((point) => {
-                    if (result.vertexs3D) {
-                        result.vertexs3D.push(point);
-                    }
-                });
-            });
+            // halfRevert.circleList.forEach((cicle) => {
+            //     cicle.forEach((point) => {
+            //         if (result.vertexs3D) {
+            //             result.vertexs3D.push(point);
+            //         }
+            //     });
+            // });
 
-            halfRevert.facesList.forEach((faces) => {
-                faces.forEach((face) => {
-                    if (result.vertexs3D) {
-                        result.faces.push([face[0] + halfPointCount, face[1] + halfPointCount, face[2] + halfPointCount]);
-                    }
-                });
-            });
+            // halfRevert.facesList.forEach((faces) => {
+            //     faces.forEach((face) => {
+            //         if (result.vertexs3D) {
+            //             result.faces.push([face[0] + halfPointCount, face[1] + halfPointCount, face[2] + halfPointCount]);
+            //         }
+            //     });
+            // });
         }
 
         return result;
@@ -91,8 +121,24 @@ export class GeometryTools {
     public static pyramid(detailH: number) {
         const detailV: number = 1;
 
-        const half          = this.sphereHalf(detailH, detailV, (x: number) => { return Math.cos(Math.PI * x / 2); }, (x: number) => { return Math.sin(Math.PI * x / 2); }, true);
-        const halfRevert    = this.sphereHalfRevert(detailH, detailV, (x: number) => { return 1; }, (x: number) => { return 0; }, false);
+        const half          = this.sphereHalf(
+                                    detailH,
+                                    detailV,
+                                    (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                    (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                    (x: number) => { return Math.cos(Math.PI * x / 2); },
+                                    (x: number) => { return Math.sin(Math.PI * x / 2); },
+                                    true
+                                );
+        const halfRevert    = this.sphereHalfRevert(
+                                    detailH,
+                                    detailV,
+                                    (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                    (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                    (x: number) => { return 1; },
+                                    (x: number) => { return 0; },
+                                    false
+                                );
 
         const result: IPolygonData = {
             vertexs3D: [],
@@ -142,8 +188,24 @@ export class GeometryTools {
     public static column(detailH: number) {
         const detailV: number = 1;
 
-        const half          = this.sphereHalf(detailH, detailV, (x: number) => { return 1; }, (x: number) => { return x; }, false);
-        const halfRevert    = this.sphereHalfRevert(detailH, detailV, (x: number) => { return 1; }, (x: number) => { return 0; }, false);
+        const half          = this.sphereHalf(
+                                detailH,
+                                detailV,
+                                (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                (x: number) => { return 1; },
+                                (x: number) => { return x; },
+                                false
+                            );
+        const halfRevert    = this.sphereHalfRevert(
+                                detailH,
+                                detailV,
+                                (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                (x: number) => { return 1; },
+                                (x: number) => { return 0; },
+                                false
+                            );
 
         const result: IPolygonData = {
             vertexs3D: [],
@@ -193,8 +255,24 @@ export class GeometryTools {
     public static antiPrism(detailH: number) {
         const detailV: number = 1;
 
-        const half          = this.sphereHalf(detailH, detailV, (x: number) => { return 1; }, (x: number) => { return x; }, false);
-        const halfRevert    = this.sphereHalfRevert(detailH, detailV, (x: number) => { return 1; }, (x: number) => { return 0; }, false);
+        const half          = this.sphereHalf(
+                                detailH,
+                                detailV,
+                                (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                (x: number) => { return 1; },
+                                (x: number) => { return x; },
+                                false
+                            );
+        const halfRevert    = this.sphereHalfRevert(
+                                detailH,
+                                detailV,
+                                (x: number) => { return Math.cos(Math.PI * x * 2); },
+                                (x: number) => { return Math.sin(Math.PI * x * 2); },
+                                (x: number) => { return 1; },
+                                (x: number) => { return 0; },
+                                false
+                            );
 
         const result: IPolygonData = {
             vertexs3D: [],
@@ -239,8 +317,8 @@ export class GeometryTools {
 
         return result;
     }
-    public static sphereHalfRevert(detailH: number, detailV: number, detailHFucntion: (x: number) => number, detailVFucntion: (x: number) => number, topIsProtruding: boolean = true) {
-        const { circleList, facesList } = this.sphereHalf(detailH, detailV, detailHFucntion, detailVFucntion, topIsProtruding);
+    public static sphereHalfRevert(detailH: number, detailV: number, xFunction: NumberMathFunction, yFunction: NumberMathFunction, detailHFucntion: NumberMathFunction, detailVFucntion: NumberMathFunction, topIsProtruding: boolean = true) {
+        const { circleList, facesList } = this.sphereHalf(detailH, detailV, xFunction, yFunction, detailHFucntion, detailVFucntion, topIsProtruding);
 
         circleList.forEach((circle) => {
             circle.reverse();
@@ -259,8 +337,8 @@ export class GeometryTools {
 
         return { circleList, facesList };
     }
-    public static sphereHalf(detailH: number, detailV: number, detailHFucntion: (x: number) => number, detailVFucntion: (x: number) => number, topIsProtruding: boolean = true) {
-        const baseCirclePoints = this.circlePoints(detailH);
+    public static sphereHalf(detailH: number, detailV: number, xFunction: NumberMathFunction, yFunction: NumberMathFunction, detailHFucntion: NumberMathFunction, detailVFucntion: NumberMathFunction,  topIsProtruding: boolean = true) {
+        const baseCirclePoints = this.circlePoints(detailH, xFunction, yFunction);
         const circleList: [number, number, number][][] = [];
         const facesList: [number, number, number][][] = [];
 
@@ -359,18 +437,17 @@ export class GeometryTools {
 
         return result;
     }
-    private static circlePoints(detail: number) {
+    private static circlePoints(detail: number, xFunction: (x: number) => number, yFunction: (x: number) => number) {
         const points: [number, number][] = [];
-        const perRadian = Math.PI * 2 / detail;
 
         for (let i = 0; i < detail; i++) {
-            points.push([Math.cos(perRadian * i), Math.sin(perRadian * i)]);
+            points.push([xFunction(i / detail), yFunction(i / detail)]);
         }
 
         return points;
     }
-    private static circlePointsDym(detail: number, radius: number) {
-        const points = this.circlePoints(detail);
+    private static circlePointsDym(detail: number, radius: number, xFunction: (x: number) => number, yFunction: (x: number) => number) {
+        const points = this.circlePoints(detail, xFunction, yFunction);
 
         return this.circlePointsScale(points, radius);
     }

@@ -95,7 +95,7 @@ export class RenderLauncher {
 
         if (sphere.vertexs3D) {
             sphere.vertexs3D.forEach((vertex) => {
-                dataBuffer01.addVertex(vertex[0], vertex[2], vertex[1]);
+                dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
                 dataBuffer01.addColor(Math.abs(vertex[2]), 0, 0, 1);
             });
         }
@@ -127,16 +127,37 @@ export class RenderLauncher {
 
         webgldemo.loop(0);
 
+        // setInterval(() => {
+        //     dataBuffer01.clearVertex();
+        //     dataBuffer01.clearColor();
+        //     dataBuffer01.clearFace();
+
+        //     const sphere = GeometryTools.pyramid(5);
+
+        //     if (sphere.vertexs3D) {
+        //         sphere.vertexs3D.forEach((vertex) => {
+        //             dataBuffer01.addVertex(vertex[0], vertex[2], vertex[1]);
+        //             dataBuffer01.addColor(Math.abs(vertex[2]), 0, 0, 1);
+        //         });
+        //     }
+
+        //     sphere.faces.forEach((face) => {
+        //         dataBuffer01.addFace(face[0], face[1], face[2]);
+        //     });
+
+        //     dataBuffer01.update(<WebGLRenderingContext>webgldemo.gl);
+        // }, 2000);
+
         setTimeout(() => {
             dataBuffer01.clearVertex();
             dataBuffer01.clearColor();
             dataBuffer01.clearFace();
 
-            const sphere = GeometryTools.pyramid(5);
+            const sphere = GeometryTools.sphere(200, 200);
 
             if (sphere.vertexs3D) {
                 sphere.vertexs3D.forEach((vertex) => {
-                    dataBuffer01.addVertex(vertex[0], vertex[2], vertex[1]);
+                    dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
                     dataBuffer01.addColor(Math.abs(vertex[2]), 0, 0, 1);
                 });
             }
@@ -146,7 +167,7 @@ export class RenderLauncher {
             });
 
             dataBuffer01.update(<WebGLRenderingContext>webgldemo.gl);
-        }, 2000);
+        }, 4000);
     }
     public static updateProgress(num: number) {
         if (RenderLauncher.opt.meshProgress) {

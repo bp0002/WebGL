@@ -9,7 +9,8 @@
     "native_progress": "webpack --config webpack.native.progress.js",
     "native_grass": "webpack --config webpack.native.grass.js",
     "native_fragment": "webpack --config webpack.native.fragment.js",
-    "native_simple": "webpack --config webpack.native.simple.js"
+    "native_simple": "webpack --config webpack.native.simple.js",
+    "test0": "webpack --config webpack.native.test.js"
   },
   "author": "",
   "license": "ISC",

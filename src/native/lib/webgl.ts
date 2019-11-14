@@ -293,14 +293,20 @@ export class DataBufferCfg {
 
         let offset = 0;
         if (faces.length > 0) {
-            this.int_data.push(...faces);
+            // this.int_data.push(...faces);
+            faces.forEach((face) => {
+                this.int_data.push(face);
+            });
 
             this.face_offset = offset;
             offset += faces.length;
         }
 
         if (lines.length > 0) {
-            this.int_data.push(...lines);
+            // this.int_data.push(...lines);
+            lines.forEach((line) => {
+                this.int_data.push(line);
+            });
 
             this.line_offset = offset;
             offset += lines.length;
