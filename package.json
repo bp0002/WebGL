@@ -10,11 +10,14 @@
     "native_grass": "webpack --config webpack.native.grass.js",
     "native_fragment": "webpack --config webpack.native.fragment.js",
     "native_simple": "webpack --config webpack.native.simple.js",
-    "test0": "webpack --config webpack.native.test.js"
+    "native_mouse_move_ribbon": "webpack --config webpack.native.mousemove.js",
+    "test0": "webpack --config webpack.native.test.js",
+    "es6_2_es5": "babel src/test/three.js -o webpack_build/test/three.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "browserify": "^16.3.0",
     "clean-webpack-plugin": "^3.0.0",

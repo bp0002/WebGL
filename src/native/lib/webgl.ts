@@ -143,6 +143,7 @@ export class DataBufferCfg {
     public VERTEX_SIZE:      number = 3;
     public COLOR_SIZE:       number = 4;
     public FACE_SIZE:        number = 3;
+    public POINT_SIZE:       number = 1;
     public LINE_SIZE:        number = 2;
     public UV_SIZE:          number = 2;
     public readonly vname:          string;
@@ -164,6 +165,10 @@ export class DataBufferCfg {
     // public face_buffer:             WebGLBuffer | undefined;
     public face_offset:             number = 0;
 
+    public readonly point_data:      number[]    = [];
+    // public face_buffer:             WebGLBuffer | undefined;
+    public point_offset:             number = 0;
+
     public readonly line_data:      [number, number][]    = [];
     // public line_buffer:             WebGLBuffer | undefined;
     public line_offset:             number = 0;
@@ -180,6 +185,9 @@ export class DataBufferCfg {
     public addFace(a: number, b: number, c: number) {
         this.face_data.push([a, b, c]);
     }
+    public addPoint(data: number) {
+        this.point_data.push(data);
+    }
     public addColor(r: number, g: number, b: number, a: number) {
         this.color_data.push([r, g, b, a]);
     }
@@ -192,6 +200,9 @@ export class DataBufferCfg {
     public addFace2(data: [number, number, number]) {
         this.face_data.push(data);
     }
+    public addPoint2(data: number) {
+        this.point_data.push(data);
+    }
     public addColor2(data: [number, number, number, number]) {
         this.color_data.push(data);
     }
@@ -203,6 +214,9 @@ export class DataBufferCfg {
     }
     public clearFace() {
         this.face_data.length = 0;
+    }
+    public clearPoint() {
+        this.point_data.length = 0;
     }
     public clearColor() {
         this.color_data.length = 0;
@@ -312,6 +326,15 @@ export class DataBufferCfg {
             offset += lines.length;
         }
 
+        if (this.vertex_data.length > 0) {
+            this.vertex_data.forEach((point, index) => {
+                this.int_data.push(index);
+            });
+
+            this.point_offset = offset;
+            offset += this.vertex_data.length;
+        }
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.int_buffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
                         new Uint16Array(this.int_data),
@@ -323,7 +346,10 @@ export class DataBufferCfg {
 export class Mesh {
     public texture: TextureInstance | null;
     public wireFrame: boolean = false;
+    public pointFrame: boolean = false;
+    public triangleFrame: boolean = false;
     public maskTexture: TextureInstance | null;
+    public alphaMode: number = 0;
     public readonly dataBufferCfg: DataBufferCfg;
     public readonly shaderCfg: ShaderCfg;
     public readonly id: string;
@@ -402,20 +428,35 @@ export class Mesh {
 
         if (<WebGLBuffer>this.dataBufferCfg.int_buffer) {
             if (this.wireFrame) {
+                if (this.dataBufferCfg.line_data.length > 0) {
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, <WebGLBuffer>this.dataBufferCfg.int_buffer);
+                    gl.drawElements(gl.LINES,
+                                        this.dataBufferCfg.line_data.length * this.dataBufferCfg.LINE_SIZE,
+                                        gl.UNSIGNED_SHORT,
+                                        this.dataBufferCfg.line_offset * 2
+                                    );
+                }
+            }
 
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, <WebGLBuffer>this.dataBufferCfg.int_buffer);
-                gl.drawElements(gl.LINES,
-                                    this.dataBufferCfg.line_data.length * this.dataBufferCfg.LINE_SIZE,
-                                    gl.UNSIGNED_SHORT,
-                                    this.dataBufferCfg.line_offset * 2
-                                );
-            } else {
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, <WebGLBuffer>this.dataBufferCfg.int_buffer);
-                gl.drawElements(gl.TRIANGLES,
-                                    this.dataBufferCfg.face_data.length * this.dataBufferCfg.FACE_SIZE,
-                                    gl.UNSIGNED_SHORT,
-                                    this.dataBufferCfg.face_offset * 2
-                                );
+            if (this.triangleFrame) {
+                if (this.dataBufferCfg.face_data.length > 0) {
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, <WebGLBuffer>this.dataBufferCfg.int_buffer);
+                    gl.drawElements(gl.TRIANGLES,
+                                        this.dataBufferCfg.face_data.length * this.dataBufferCfg.FACE_SIZE,
+                                        gl.UNSIGNED_SHORT,
+                                        this.dataBufferCfg.face_offset * 2
+                                    );
+                }
+            }
+
+            if (this.pointFrame) {
+                if (this.dataBufferCfg.vertex_data.length > 0) {
+                    gl.drawElements(gl.POINTS,
+                                        this.dataBufferCfg.vertex_data.length * this.dataBufferCfg.POINT_SIZE,
+                                        gl.UNSIGNED_SHORT,
+                                        this.dataBufferCfg.point_offset * 2
+                                    );
+                }
             }
         }
 
@@ -446,6 +487,8 @@ export class Scene {
         gl.enable(gl.BLEND);
         gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
         this.meshMap.forEach((mesh) => {
+            const gl = this.engine.gl;
+            gl && gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
             mesh.render(this);
         });
     }

@@ -15,8 +15,10 @@ export type RenderFlag = 'grass' | 'progress';
 export class RenderLauncher {
     public static webgldemo: WebGLInstance;
     public static opt: any = {};
+    public static mesh: Mesh;
     public static active(canvas: HTMLCanvasElement, args: any) {
         RenderLauncher.simple(canvas, args);
+        return RenderLauncher.webgldemo;
     }
     public static puase() {
 
@@ -112,7 +114,12 @@ export class RenderLauncher {
         mesh01.scale[1] = 1.0;
         mesh01.rotate[0] = 1.57;
         mesh01.wireFrame = true;
+        mesh01.pointFrame = true;
+        // mesh01.triangleFrame = true;
+        // mesh01.texture = RenderLauncher.webgldemo.createTexture('/resources/alpha.png');
         scene01.addMesh(mesh01);
+
+        RenderLauncher.mesh = mesh01;
 
         webgldemo.renderLoop = (timestamp: number) => {
             webgldemo.clearColor();
@@ -148,26 +155,32 @@ export class RenderLauncher {
         //     dataBuffer01.update(<WebGLRenderingContext>webgldemo.gl);
         // }, 2000);
 
-        setTimeout(() => {
-            dataBuffer01.clearVertex();
-            dataBuffer01.clearColor();
-            dataBuffer01.clearFace();
+        // let delta = 0;
+        // setInterval(() => {
+        //     dataBuffer01.clearVertex();
+        //     dataBuffer01.clearColor();
+        //     dataBuffer01.clearFace();
 
-            const sphere = GeometryTools.sphere(200, 200);
+        //     // const sphere = GeometryTools.sphere(100, 100);
+        //     const sphere = GeometryTools.ribbon2(100, delta += 0.01);
 
-            if (sphere.vertexs3D) {
-                sphere.vertexs3D.forEach((vertex) => {
-                    dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
-                    dataBuffer01.addColor(Math.abs(vertex[2]), 0, 0, 1);
-                });
-            }
+        //     if (sphere) {
+        //         if (sphere.vertexs3D) {
+        //             sphere.vertexs3D.forEach((vertex, index, arr) => {
+        //                 dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
+        //                 dataBuffer01.addColor(0.8, 0, 0, 1);
+        //             });
+        //         }
 
-            sphere.faces.forEach((face) => {
-                dataBuffer01.addFace(face[0], face[1], face[2]);
-            });
+        //         sphere.faces.forEach((face) => {
+        //             dataBuffer01.addFace(face[0], face[1], face[2]);
+        //         });
+        //     }
 
-            dataBuffer01.update(<WebGLRenderingContext>webgldemo.gl);
-        }, 4000);
+        //     dataBuffer01.update(<WebGLRenderingContext>webgldemo.gl);
+        // }, 20);
+
+        return mesh01;
     }
     public static updateProgress(num: number) {
         if (RenderLauncher.opt.meshProgress) {
