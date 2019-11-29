@@ -1,5 +1,5 @@
 import { RenderLauncher } from "./render_launcher";
-import { GeometryTools } from "./geometry";
+import { GeometryTools } from "../../math/geometry";
 
 const canvas = <HTMLCanvasElement>document.getElementById('your_canvas');
 
@@ -86,6 +86,7 @@ const update = () => {
         dataBuffer01.clearVertex();
         dataBuffer01.clearColor();
         dataBuffer01.clearFace();
+        dataBuffer01.clearUV();
 
         // const sphere = GeometryTools.ribbon_from_line(points);
         const sphere = GeometryTools.ribbon_from_line2(points, 90, undefined, (x: number) => 0.01);

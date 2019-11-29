@@ -1,5 +1,5 @@
 import { RenderLauncher } from "./render_launcher";
-import { GeometryTools } from "./geometry";
+import { GeometryTools } from "../../math/geometry";
 
 const createButton = (tag: string, clikCall: (arg: string) => void) => {
     const div = document.createElement('div');

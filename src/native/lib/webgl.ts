@@ -138,14 +138,40 @@ export class ShaderCfg {
 }
 
 export class DataBufferCfg {
+    /**
+     * 一组 FLOAT 数据的大小
+     */
     public FLOAT_SIZE:       number = 0;
-    public INT_SIZE:         number = 2;
+    /**
+     * 一组 INT 数据的大小
+     * * 没有这个处理必要 - INT 数据为 绘制的ELEMENT
+     * * 所有线数据 - 所有面数据 - 所有点数据 没有混合保存
+     */
+    public INT_SIZE:         number = 0;
+    /**
+     * 一个点的 坐标数据 数据量
+     */
     public VERTEX_SIZE:      number = 3;
+    /**
+     * 一个点的 颜色数据 数据量
+     */
     public COLOR_SIZE:       number = 4;
-    public FACE_SIZE:        number = 3;
-    public POINT_SIZE:       number = 1;
-    public LINE_SIZE:        number = 2;
+    /**
+     * 一个点的 UV数据 数据量
+     */
     public UV_SIZE:          number = 2;
+    /**
+     * 一个面的 点数目数据 数据量
+     */
+    public FACE_SIZE:        number = 3;
+    /**
+     * 一个点的 点数目数据 数据量
+     */
+    public LINE_SIZE:        number = 2;
+    /**
+     * 一条线的 点数目数据 数据量
+     */
+    public POINT_SIZE:       number = 1;
     public readonly vname:          string;
 
     public float_buffer:            WebGLBuffer | undefined;
@@ -334,6 +360,8 @@ export class DataBufferCfg {
             this.point_offset = offset;
             offset += this.vertex_data.length;
         }
+
+        this.INT_SIZE     = offset;
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.int_buffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,

@@ -8,7 +8,7 @@ import { vs_progress, fs_progress } from "../lib/shader_progress";
 import { vs_texture_grass, fs_texture_grass } from "../lib/shader_texture_grass";
 import { vs_ribbon, fs_ribbon } from "../lib/shader_ribbon";
 import { MathTools } from "../../math/math";
-import { GeometryTools } from "./geometry";
+import { GeometryTools } from "../../math/geometry";
 import { vs_simple, fs_simple } from "../lib/shader_simple";
 
 export type RenderFlag = 'grass' | 'progress';

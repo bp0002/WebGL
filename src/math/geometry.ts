@@ -1,4 +1,4 @@
-import { MathTools } from "../../math/math";
+import { MathTools } from "./math";
 
 type NumberMathFunction = (x: number) => number;
 
@@ -10,7 +10,7 @@ export interface IPolygonData {
 
 export class GeometryTools {
     public static polygon(edgeCount: number, asCenterMode: boolean): IPolygonData {
-        const vertexs3D: [number, number, number][] = [];
+        const vertexs: [number, number][] = [];
         const faces: [number, number, number][] = [];
         const radius = 1;
         let vertexCount: number = edgeCount;
@@ -20,12 +20,12 @@ export class GeometryTools {
 
             if (asCenterMode) {
                 vertexCount++;
-                vertexs3D.push([0, 0, 0]);
+                vertexs.push([0, 0]);
             }
 
             for (let i = 0; i < edgeCount; i++) {
-                const pos: [number, number, number] = [Math.cos(perRadian * i) * radius, Math.sin(perRadian * i) * radius, 0];
-                vertexs3D.push(pos);
+                const pos: [number, number] = [Math.cos(perRadian * i) * radius, Math.sin(perRadian * i) * radius];
+                vertexs.push(pos);
             }
             if (asCenterMode) {
                 for (let i = 3; i <= vertexCount; i++) {
@@ -39,7 +39,7 @@ export class GeometryTools {
             }
         }
 
-        return { vertexs3D, faces };
+        return { vertexs, faces };
     }
     public static sphere(detailH: number, detailV: number) {
         const half          = this.sphereHalf(
@@ -424,7 +424,7 @@ export class GeometryTools {
             // result.faces = this.sphereRibbon(0, detailCount);
         }
 
-        return this.ribbon_from_line2(linePoints, 90, wFunction);
+        return this.ribbon_from_line2(linePoints, 10, wFunction);
     }
     public static ribbon_from_line2(points: [number, number][], deltaAngle: number, deltaAngleFunction?: (x: number) => number, weightFunction?: (x: number) => number) {
 
@@ -449,8 +449,8 @@ export class GeometryTools {
             deltaX  = nxtPoint[0] - prePoint[0];
             deltaY  = nxtPoint[1] - prePoint[1];
             deltaXY = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            cos     = deltaX / deltaXY;
-            sin     = deltaY / deltaXY;
+            cos     = deltaXY === 0 ? 0 : deltaX / deltaXY;
+            sin     = deltaXY === 0 ? 0 : deltaY / deltaXY;
 
             currDeltaAngle  = deltaAngleFunction ? deltaAngle * deltaAngleFunction((i - 1) / detailCount) : deltaAngle;
             deltaCos        = Math.cos(Math.PI * currDeltaAngle / 180);
