@@ -42,6 +42,7 @@ varying  vec2   v_UV;
 
 void main(void){
     // gl_FragColor = v_color;
-    gl_FragColor = vec4(texture2D( u_sampler, v_UV ).rgb, v_color.a);
+    gl_FragColor = texture2D( u_sampler, v_UV );
+    // gl_FragColor = texture2D( u_sampler, v_UV );
 }
 `;

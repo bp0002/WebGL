@@ -408,6 +408,8 @@ export class Mesh {
             if (!this.shaderCfg.texActive) {
                 return;
             }
+        } else {
+            gl.bindTexture(gl.TEXTURE0, null);
         }
 
         shader.getPrograme(gl);
@@ -509,14 +511,16 @@ export class Scene {
 
         gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
         if (isClear) {
-            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         }
 
+        gl.disable(gl.CULL_FACE);       // 不开启背面剔除
+        gl.disable(gl.DEPTH_TEST);      // 不开启深度测试
+        gl.disable(gl.SCISSOR_TEST);    // 避免渲染范围被前一个渲染过程限制
+
         gl.enable(gl.BLEND);
-        gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         this.meshMap.forEach((mesh) => {
-            const gl = this.engine.gl;
-            gl && gl.blendFuncSeparate(gl.ONE, gl.ZERO, gl.ONE, gl.ZERO);
             mesh.render(this);
         });
     }

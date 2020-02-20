@@ -426,7 +426,7 @@ export class GeometryTools {
 
         return this.ribbon_from_line2(linePoints, 10, wFunction);
     }
-    public static ribbon_from_line2(points: [number, number][], deltaAngle: number, deltaAngleFunction?: (x: number) => number, weightFunction?: (x: number) => number) {
+    public static ribbon_from_line2(points: [number, number][], deltaAngle: number, deltaAngleFunction?: (x: number) => number, weightFunction?: (x: number) => number, widthScaleHeight: number = 1) {
 
         const result: IPolygonData = {
             vertexs3D: [],
@@ -448,6 +448,7 @@ export class GeometryTools {
             nxtPoint = points[i];
             deltaX  = nxtPoint[0] - prePoint[0];
             deltaY  = nxtPoint[1] - prePoint[1];
+
             deltaXY = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             cos     = deltaXY === 0 ? 0 : deltaX / deltaXY;
             sin     = deltaXY === 0 ? 0 : deltaY / deltaXY;
@@ -462,12 +463,12 @@ export class GeometryTools {
 
                 if (result.vertexs3D) {
                     result.vertexs3D[i - 1] = [
-                        (cos * deltaCos - sin * deltaSin) * deltaDistance + prePoint[0],
+                        (cos * deltaCos - sin * deltaSin) * deltaDistance / widthScaleHeight  + prePoint[0],
                         (sin * deltaCos + cos * deltaSin) * deltaDistance + prePoint[1],
                         0
                     ];
                     result.vertexs3D[i - 1 + detailCount] = [
-                        (cos * deltaCos + sin * deltaSin) * deltaDistance + prePoint[0],
+                        (cos * deltaCos + sin * deltaSin) * deltaDistance / widthScaleHeight + prePoint[0],
                         (sin * deltaCos - cos * deltaSin) * deltaDistance + prePoint[1],
                         0
                     ];
@@ -492,14 +493,16 @@ export class GeometryTools {
             prePoint = points[i];
         }
 
+        deltaCos        = Math.cos(Math.PI * 45 / 180);
+        deltaSin        = Math.sin(Math.PI * 45 / 180);
         if (result.vertexs3D) {
             result.vertexs3D[detailCount - 1] = [
-                (cos * deltaCos - sin * deltaSin) * deltaXY + prePoint[0],
+                (cos * deltaCos - sin * deltaSin) * deltaXY / widthScaleHeight + prePoint[0],
                 (sin * deltaSin + cos * deltaCos) * deltaXY + prePoint[1],
                 0
             ];
             result.vertexs3D[detailCount - 1 + detailCount] = [
-                (cos * deltaCos + sin * deltaSin) * deltaXY + prePoint[0],
+                (cos * deltaCos + sin * deltaSin) * deltaXY / widthScaleHeight + prePoint[0],
                 (sin * deltaSin - cos * deltaCos) * deltaXY + prePoint[1],
                 0
             ];

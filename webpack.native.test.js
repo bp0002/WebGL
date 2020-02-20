@@ -5,10 +5,10 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     // entry: './src/logic_webgl/index.ts',
     entry: {
-        logic_webgl_vao: './src/test/pi_gui.es6.js'
+        logic_webgl_vao: './src/test/three.js'
     },
     output: {
-        filename: 'pi_gui.es6.min.js',
+        filename: 'three.js',
         path: path.resolve(__dirname, 'webpack_build/test')
     },
     // devtool: 'inline-source-map',                                  // 告诉 webpack 提取这些 source map，并内联到最终的 文件 中。
