@@ -50,7 +50,6 @@ createButton(
         // const resResult = arg.match(reg);
         if (arg && RenderLauncher.mesh) {
             const dataBuffer01 = RenderLauncher.mesh.dataBufferCfg;
-
             dataBuffer01.clearVertex();
             dataBuffer01.clearColor();
             dataBuffer01.clearFace();
@@ -60,10 +59,10 @@ createButton(
             const sphere = GeometryTools.polygon(edgeCount, true);
 
             if (sphere) {
-                if (sphere.vertexs3D) {
-                    sphere.vertexs3D.forEach((vertex, index, arr) => {
-                        dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
-                        dataBuffer01.addColor(Math.abs(vertex[2]), 0, 0, 1);
+                if (sphere.vertexs) {
+                    sphere.vertexs.forEach((vertex, index, arr) => {
+                        dataBuffer01.addVertex(vertex[0], vertex[1]);
+                        dataBuffer01.addColor(Math.abs(vertex[1]), 0, 0, 1);
                     });
                 }
 
