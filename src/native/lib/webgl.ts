@@ -49,6 +49,8 @@ export class ShaderCfg {
             gl.linkProgram(<WebGLProgram>this.shader_program);
         }
 
+        gl.useProgram(<WebGLProgram>this.shader_program);
+
         this.u_mouse_loc        = <WebGLUniformLocation>gl.getUniformLocation(<WebGLProgram>this.shader_program, `u_mouse`);
 
         this.u_time_loc         = <WebGLUniformLocation>gl.getUniformLocation(<WebGLProgram>this.shader_program, `u_time`);
@@ -84,8 +86,6 @@ export class ShaderCfg {
         if (this.a_uv >= 0) {
             gl.enableVertexAttribArray(this.a_uv);
         }
-
-        gl.useProgram(<WebGLProgram>this.shader_program);
 
         if (this.texActive) {
             this.u_texture && gl.uniform1i(this.u_texture, 0);
@@ -617,7 +617,7 @@ export class WebGLInstance {
         try {
             for (var ii = 0; ii < WebGLInstance.contentModes.length; ++ii) {
                 try {
-                    gl = <WebGLRenderingContext>canvas.getContext(WebGLInstance.contentModes[ii], { alpha : true, antialias : false });
+                    gl = <WebGLRenderingContext>canvas.getContext(WebGLInstance.contentModes[ii], { alpha : true, antialias : true });
                 } catch (e) {
                     //
                 }
