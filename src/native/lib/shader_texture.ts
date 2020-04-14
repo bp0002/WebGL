@@ -12,6 +12,7 @@ varying     vec2    v_UV;
 uniform     vec3    u_translate;
 uniform     vec3    u_scale;
 uniform     vec3    u_rotate;
+uniform     mat4    u_ViewMatrix;
 
 void main( void ){
     vec2 pos        = a_position.xy;
@@ -21,7 +22,7 @@ void main( void ){
 
     pos += u_translate.xy;
 
-    gl_Position     = vec4( pos, 0., 1. );
+    gl_Position     = u_ViewMatrix * vec4( pos, 0., 1. );
     v_surfacePosition      = a_position;
     v_UV = a_uv;
 }

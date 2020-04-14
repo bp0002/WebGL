@@ -13,6 +13,7 @@ uniform     vec3    u_translate;
 uniform     vec3    u_scale;
 uniform     vec3    u_rotate;
 uniform     float   u_time;
+uniform     mat4    u_ViewMatrix;
 
 void main( void ){
     vec2 pos        = a_position.xy;
@@ -23,7 +24,7 @@ void main( void ){
     pos += u_translate.xy;
     // pos.x = pos.x + sin(a_uv.y) ;
 
-    gl_Position     = vec4( pos, 0., 1. );
+    gl_Position     = u_ViewMatrix * vec4( pos, 0., 1. );
     v_surfacePosition      = a_position;
     v_UV = a_uv;
 }

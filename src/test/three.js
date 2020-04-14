@@ -1,3 +1,4 @@
+// File:../dev/three/Three.js
 _$define("pi/render3d/three", function (require, exports, module) {
 	// File:../dev/three/Three.js
 
@@ -9,7 +10,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		REVISION: '76'
 	};
 
-	var TextureCounter = 0;
 	if (Number.EPSILON === undefined) {
 
 		Number.EPSILON = Math.pow(2, -52);
@@ -280,14 +280,27 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	// PVRTC compressed texture formats
 
-	THREE.RGB_PVRTC_4BPPV1_Format = 2100;
-	THREE.RGB_PVRTC_2BPPV1_Format = 2101;
-	THREE.RGBA_PVRTC_4BPPV1_Format = 2102;
-	THREE.RGBA_PVRTC_2BPPV1_Format = 2103;
+	// ######## PI_BEGIN - 压缩纹理
+
+	// THREE.RGB_PVRTC_4BPPV1_Format = 2100;
+	// THREE.RGB_PVRTC_2BPPV1_Format = 2101;
+	// THREE.RGBA_PVRTC_4BPPV1_Format = 2102;
+	// THREE.RGBA_PVRTC_2BPPV1_Format = 2103;
+	THREE.RGB_PVRTC_4BPPV1_Format = 35840;
+	THREE.RGB_PVRTC_2BPPV1_Format = 35841;
+	THREE.RGBA_PVRTC_4BPPV1_Format = 35842;
+	THREE.RGBA_PVRTC_2BPPV1_Format = 35843;
+
+	// ######## PI_END - 压缩纹理
 
 	// ETC compressed texture formats
 
-	THREE.RGB_ETC1_Format = 2151;
+	// ######## PI_BEGIN - 压缩纹理
+
+	// THREE.RGB_ETC1_Format = 2151;
+	THREE.RGB_ETC1_Format = 36196;
+
+	// ######## PI_END - 压缩纹理
 
 	// Loop styles for AnimationAction
 
@@ -4365,6 +4378,39 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		},
 
+		setFromBufferAttribute: function (attribute) {
+
+			var minX = +Infinity;
+			var minY = +Infinity;
+			var minZ = +Infinity;
+
+			var maxX = -Infinity;
+			var maxY = -Infinity;
+			var maxZ = -Infinity;
+
+			for (var i = 0, l = attribute.count; i < l; i++) {
+
+				var x = attribute.getX(i);
+				var y = attribute.getY(i);
+				var z = attribute.getZ(i);
+
+				if (x < minX) minX = x;
+				if (y < minY) minY = y;
+				if (z < minZ) minZ = z;
+
+				if (x > maxX) maxX = x;
+				if (y > maxY) maxY = y;
+				if (z > maxZ) maxZ = z;
+
+			}
+
+			this.min.set(minX, minY, minZ);
+			this.max.set(maxX, maxY, maxZ);
+
+			return this;
+
+		},
+
 		setFromCenterAndSize: function () {
 
 			var v1 = new THREE.Vector3();
@@ -4477,6 +4523,13 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			var result = optionalTarget || new THREE.Vector3();
 			return result.addVectors(this.min, this.max).multiplyScalar(0.5);
+
+		},
+
+		getCenter: function (optionalTarget) {
+
+			var result = optionalTarget || new THREE.Vector3();
+			return this.isEmpty() ? result.set(0, 0, 0) : result.addVectors(this.min, this.max).multiplyScalar(0.5);
 
 		},
 
@@ -5702,28 +5755,32 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			//( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
 			return (
-				n41 * (+n14 * n23 * n32 -
+				n41 * (
+					+n14 * n23 * n32 -
 					n13 * n24 * n32 -
 					n14 * n22 * n33 +
 					n12 * n24 * n33 +
 					n13 * n22 * n34 -
 					n12 * n23 * n34
 				) +
-				n42 * (+n11 * n23 * n34 -
+				n42 * (
+					+n11 * n23 * n34 -
 					n11 * n24 * n33 +
 					n14 * n21 * n33 -
 					n13 * n21 * n34 +
 					n13 * n24 * n31 -
 					n14 * n23 * n31
 				) +
-				n43 * (+n11 * n24 * n32 -
+				n43 * (
+					+n11 * n24 * n32 -
 					n11 * n22 * n34 -
 					n14 * n21 * n32 +
 					n12 * n21 * n34 +
 					n14 * n22 * n31 -
 					n12 * n24 * n31
 				) +
-				n44 * (-n13 * n22 * n31 -
+				n44 * (
+					-n13 * n22 * n31 -
 					n11 * n23 * n32 +
 					n11 * n22 * n33 +
 					n13 * n21 * n32 -
@@ -5949,7 +6006,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			this.set(
 
 				c, 0, s, 0,
-				0, 1, 0, 0, -s, 0, c, 0,
+				0, 1, 0, 0,
+				-s, 0, c, 0,
 				0, 0, 0, 1
 
 			);
@@ -8907,9 +8965,27 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			value: THREE.Object3DIdCount++
 		});
 
-		this.uuid = THREE.Math.generateUUID();
+		// PI_BEGIN
+		Object.defineProperty(this, '__skeleton', {
+			set: function (newValue) {
+				if (newValue && newValue instanceof THREE.Skeleton && newValue.root.scene) {
+					this.skeleton = newValue;
+					newValue.root.scene.skeletonList.push(newValue.root);
+				}
+			}
+		});
 
+		Object.defineProperty(this, '__visible', {
+			set: function (newValue) {
+				this.cSetVisible(this, newValue);
+			}
+		});
+		// PI_END
+
+		this.uuid = THREE.Math.generateUUID();
+		this.g2dSrc = ''; //2d 合并  g2dSrc 图片字符串
 		this.name = '';
+		this.heBing2D = false
 		this.type = 'Object3D';
 		this.needResCount = 0;
 
@@ -8918,6 +8994,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.mode = 1; //1表示普通的mesh， 2表示公告板
 
 		this.skeleton = undefined;
+		this.__skeleton = undefined;
 		this.implBones = undefined;
 
 		this.aniControl = undefined;
@@ -8928,10 +9005,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		this.playWait = undefined;
 		this.ready = true; //自身是否已经就绪（不包含子节点）
-		this.childrenReady = false; //子节点是否已经就绪
+		this.childrenReady = true; //子节点是否已经就绪
 		this.childrenReadyCount = 0;
 		this.childrenCount = 0;
-
+		// PI_BEGIN Static object
+		this.needProjectObj = true; // 发生改变，需要刷新透明和不透明列表
+		// PI_END
 		this.scene = undefined;
 
 		this.play = undefined;
@@ -8949,7 +9028,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		}
 
 		function onQuaternionChange() {
-			rotation._update === true;
+			// 原来写的(rotation._update === true)不对，猜测应该是这个意思
+			rotation._update = true;
 			scope.tranformChange();
 		}
 
@@ -9004,6 +9084,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.matrixWorldNeedsUpdate = false;
 
 		this.layers = new THREE.Layers();
+		this.__visible = true;
 		this.visible = true;
 
 		this.castShadow = false;
@@ -9204,6 +9285,98 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}(),
 
+		cSetVisible: function (object, newValue) {
+			var _func = function (object, newValue) {
+				object.visible = newValue;
+				if (object.children && object.children.length) {
+					for (var i = 0; i < object.children.length; i++) {
+						if (object.children[i].visible !== newValue) _func(object.children[i], newValue);
+					}
+				}
+			}
+			_func(object, newValue);
+		},
+
+		addTypeList: function (object) {
+
+			var match = function (object) {
+				if (object instanceof THREE.Light) {
+					if (object.scene.lightList.indexOf(object) == -1)
+						object.scene.lightList.push(object);
+				} else if (object instanceof THREE.Sprite) {
+					if (object.scene.spriteList.indexOf(object) == -1)
+						object.scene.spriteList.push(object);
+					// }else if (object instanceof THREE.LensFlare) {
+					// 	if(object.scene.lensFlaresList.indexOf(object) == -1)
+					// 		object.scene.lensFlaresList.push(object);
+					// }else if (object instanceof THREE.ImmediateRenderObject) {
+					// 	if(object.scene.ImmediateList.indexOf(object) == -1)
+					// 		object.scene.ImmediateList.push(object);
+				} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+					if (object.scene.meshList.indexOf(object) == -1)
+						object.scene.meshList.push(object);
+				}
+			}
+
+			//children
+			var childrenFun = function (object) {
+				match(object);
+				if (object.children && object.children.length) {
+					for (var i = 0; i < object.children.length; i++) {
+						childrenFun(object.children[i]);
+					}
+				}
+				return
+			}
+
+			//parent
+			var parentFun = function (object) {
+				match(object);
+				if (object.parent && !(object.parent instanceof THREE.Scene)) {
+					parentFun(object.parent);
+				}
+				return
+			}
+
+			parentFun(object);
+			childrenFun(object);
+		},
+
+		findListObj: function (object) {
+
+			var match = function (object) {
+				if (object instanceof THREE.Light) {
+					if (object.scene.lightList.indexOf(object) == -1)
+						object.scene.lightList.push(object);
+				} else if (object instanceof THREE.Sprite) {
+					if (object.scene.spriteList.indexOf(object) == -1)
+						object.scene.spriteList.push(object);
+					// }else if (object instanceof THREE.LensFlare) {
+					// 	if(object.scene.lensFlaresList.indexOf(object) == -1)
+					// 		object.scene.lensFlaresList.push(object);
+					// }else if (object instanceof THREE.ImmediateRenderObject) {
+					// 	if(object.scene.ImmediateList.indexOf(object) == -1)
+					// 		object.scene.ImmediateList.push(object);
+				} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+					if (object.scene.meshList.indexOf(object) == -1)
+						object.scene.meshList.push(object);
+				}
+			}
+
+			//children
+			var childrenFun = function (object) {
+				match(object);
+				if (object.children && object.children.length) {
+					for (var i = 0; i < object.children.length; i++) {
+						childrenFun(object.children[i]);
+					}
+				}
+				return
+			}
+
+			childrenFun(object);
+		},
+
 		add: function (object) {
 
 			if (arguments.length > 1) {
@@ -9237,12 +9410,26 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				object.dispatchEvent({
 					type: 'added'
 				});
+				// PI_BEGIN Static object
+				this.childrenCount++;
+				if (object.ready) {
+					this.childrenReadyCount++;
+				} else {
+					this.childrenReady = false;
+				}
+				// PI_END
 
 				this.children.push(object);
 				this.addChildScene(object);
-				if (this.scene && !this.dirt) {
-					this.dirt = true;
-					this.scene.dirts.push(this);
+				//
+				if (this.scene) {
+					if (!this.dirt) {
+						this.dirt = true;
+						this.scene.dirts.push(this);
+					}
+
+					this.addTypeList(object);
+
 				}
 			} else {
 
@@ -9267,7 +9454,13 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			}
 
 			var index = this.children.indexOf(object);
+			if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+				var i = object.scene.meshList.indexOf(object);
 
+				if (i !== -1) {
+					object.scene.meshList.splice(i, 1);
+				}
+			}
 			if (index !== -1) {
 
 				object.parent = null;
@@ -9799,13 +9992,15 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 				} else {
 					this.add(implBones[b]);
-					this.childReadyOk();
+					// PI_BEGIN Static object
+					this.checkReady();
+					// PI_END
 				}
 			}
 			this.implBones = implBones;
 
 			this.updateMatrixWorld(true);
-			this.skeleton = new THREE.Skeleton(this, implBones, undefined, false);
+			this.__skeleton = new THREE.Skeleton(this, implBones, undefined, false);
 			// this.setBoneVisible(true);
 			return this.skeleton;
 		},
@@ -9820,11 +10015,46 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			if (this.skeleton) {
 				this.skeleton.dispose();
+				if (this.scene) {
+					var _i = this.scene.skeletonList.indexOf(this);
+					if (_i > -1) this.scene.skeletonList.splice(_i, 1);
+				}
 			}
 
 			if (this.scene) {
+				// PI_BEGIN Static object
+				this.scene.needProjectObj = true;
+				// PI_END
 				if (this.scene.animObjectMap.get(this.uuid))
 					this.scene.animObjectMap.delete(this.uuid);
+
+				if (this instanceof THREE.Light) {
+
+					var _i = this.scene.lightList.indexOf(this);
+					if (_i > -1) this.scene.lightList.splice(_i, 1);
+
+				} else if (this instanceof THREE.Sprite) {
+
+					var _i = this.scene.spriteList.indexOf(this);
+					if (_i > -1) this.scene.spriteList.splice(_i, 1);
+
+				} else if (this instanceof THREE.LensFlare) {
+
+					var _i = this.scene.lensFlaresList.indexOf(this);
+					if (_i > -1) this.scene.lensFlaresList.splice(_i, 1);
+
+				} else if (this instanceof THREE.ImmediateRenderObject) {
+
+					var _i = this.scene.ImmediateList.indexOf(this);
+					if (_i > -1) this.scene.ImmediateList.splice(_i, 1);
+
+				} else if (this instanceof THREE.Mesh || this instanceof THREE.Line || this instanceof THREE.Points) {
+
+					var _i = this.scene.meshList.indexOf(this);
+					if (_i > -1) this.scene.meshList.splice(_i, 1);
+
+				}
+
 				for (var i = 0; i < this.scene.dirts.length; i++) {
 					if (this.scene.dirts[i] === this) {
 						for (; i < this.scene.dirts.length - 1; i++) {
@@ -9836,6 +10066,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				}
 			}
 		},
+
 
 		setBoneVisible: function (isVisible) {
 			if (this.skHelper) {
@@ -9857,7 +10088,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		},
 
 		readyOk: function () {
-			this.parent && this.parent.childReadyOk && this.parent.childReadyOk();
+			this.parent && this.parent.checkReady && this.parent.checkReady();
 			if (this.playWait) {
 				for (var i = 0; i < this.playWait.length; i++) {
 					this.playAnim(this.playWait[i][0], this.playWait[i][1], this.playWait[i][2], this.playWait[i][3]);
@@ -9866,21 +10097,17 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			}
 		},
 
+		// PI_BEGIN Static object
 		checkReady: function () {
+			if (this.childrenCount === 0 || ++this.childrenReadyCount >= this.childrenCount) {
+				this.childrenReady = true;
+			}
 			if (this.childrenReady) {
+				this.needProjectObj = true;
 				this.readyOk();
 			}
 		},
-
-		childReadyOk: function () {
-			this.childrenReadyCount++;
-			if (this.childrenCount <= this.childrenReadyCount) {
-				this.childrenReady = true;
-				this.checkReady();
-				delete this.childrenCount;
-				delete this.childrenReadyCount;
-			}
-		},
+		// PI_END
 		tranformChange: function () {
 			if (this.scene && !this.dirt) {
 				this.dirt = true;
@@ -11468,25 +11695,25 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			/*
 			// Handle primitives
-
+	
 			var parameters = this.parameters;
-
+	
 			if ( parameters !== undefined ) {
-
+	
 				var values = [];
-
+	
 				for ( var key in parameters ) {
-
+	
 					values.push( parameters[ key ] );
-
+	
 				}
-
+	
 				var geometry = Object.create( this.constructor.prototype );
 				this.constructor.apply( geometry, values );
 				return geometry;
-
+	
 			}
-
+	
 			return new this.constructor().copy( this );
 			*/
 
@@ -12458,45 +12685,67 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			return function () {
 
+				// 	if (this.boundingSphere === null) {
+
+				// 		this.boundingSphere = new THREE.Sphere();
+
+				// 	}
+
+				// 	var positions = this.attributes.position.array;
+
+				// 	if (positions) {
+
+				// 		var center = this.boundingSphere.center;
+
+				// 		box.setFromArray(positions);
+				// 		box.center(center);
+
+				// 		// hoping to find a boundingSphere with a radius smaller than the
+				// 		// boundingSphere of the boundingBox: sqrt(3) smaller in the best case
+
+				// 		var maxRadiusSq = 0;
+
+				// 		for (var i = 0, il = positions.length; i < il; i += 3) {
+
+				// 			vector.fromArray(positions, i);
+				// 			maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(vector));
+
+				// 		}
+
+				// 		this.boundingSphere.radius = Math.sqrt(maxRadiusSq);
+
+				// 		if (isNaN(this.boundingSphere.radius)) {
+
+				// 			console.error('THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values.', this);
+
+				// 		}
+
+				// 	}
 				if (this.boundingSphere === null) {
 
 					this.boundingSphere = new THREE.Sphere();
 
 				}
 
-				var positions;
-				if (this.attributes.position instanceof THREE.InterleavedBufferAttribute) {
-					const attr 	= this.attributes.position;
-					const data 	= this.attributes.position.data;
-					const start	= data.updateRange.offset;
-					const count	= data.updateRange.count;
+				var position = this.attributes.position;
 
-					positions 	= [];
-					for (let i = 0; i < count; i++) {
-						positions.push(attr.getX(start + i));
-						positions.push(attr.getY(start + i));
-						positions.push(attr.getZ(start + i));
-					} 
-				} else {
-					positions = this.attributes.position.array;
-				}
-
-
-				if (positions) {
+				if (position) {
 
 					var center = this.boundingSphere.center;
 
-					box.setFromArray(positions);
-					box.center(center);
+					box.setFromBufferAttribute(position);
+					box.getCenter(center);
 
 					// hoping to find a boundingSphere with a radius smaller than the
 					// boundingSphere of the boundingBox: sqrt(3) smaller in the best case
 
 					var maxRadiusSq = 0;
 
-					for (var i = 0, il = positions.length; i < il; i += 3) {
+					for (var i = 0, il = position.count; i < il; i++) {
 
-						vector.fromArray(positions, i);
+						vector.x = position.getX(i);
+						vector.y = position.getY(i);
+						vector.z = position.getZ(i);
 						maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(vector));
 
 					}
@@ -12510,6 +12759,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 					}
 
 				}
+
 
 			};
 
@@ -12845,25 +13095,25 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			/*
 			// Handle primitives
-
+	
 			var parameters = this.parameters;
-
+	
 			if ( parameters !== undefined ) {
-
+	
 				var values = [];
-
+	
 				for ( var key in parameters ) {
-
+	
 					values.push( parameters[ key ] );
-
+	
 				}
-
+	
 				var geometry = Object.create( this.constructor.prototype );
 				this.constructor.apply( geometry, values );
 				return geometry;
-
+	
 			}
-
+	
 			return new this.constructor().copy( this );
 			*/
 
@@ -17664,6 +17914,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	};
 
+	// PI_BEGIN Static object
+	THREE.PerspectiveCamera.prototype.tranformChange = function () {
+		this.scene.needProjectObj = true;
+		THREE.Object3D.prototype.tranformChange.call(this);
+	}
+	// PI_END
 	// File:../dev/three/lights/Light.js
 
 	/**
@@ -18040,11 +18296,13 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.name = '';
 		this.layer = 0;
 		this.type = 'Material';
+		// PI_BEGIN material sort
+		this.sortType = 'Material';
+		// PI_END
 
 		this.side = THREE.BackSide;
 
 		this.mapst = new THREE.Vector4(1, 1, 0, 0);
-		this.lightmapst = new THREE.Vector4(1, 1, 0, 0);
 
 		// PI_BEGIN 灰色
 		this.enableGray = false;
@@ -18091,6 +18349,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this._needsUpdate = true;
 
 	};
+	// PI_BEGIN material sort
+	THREE.MaterialKeysMap = new Map();
+	THREE.MaterialId = 0;
+	// PI_END
 
 	THREE.Material.prototype = {
 
@@ -18109,6 +18371,31 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			this._needsUpdate = value;
 
 		},
+
+		// PI_BEGIN material sort
+		// 现在仅对 MeshBasicMaterial 合并排序
+		setSortId: function () {
+			var key, sortId;
+			if (this.sortType === "Text2D" || this.sortType === "ImageText" || this.sortType === "GUI") {
+				sortId = THREE.MaterialId++;
+			} else if (this.type === "MeshLightMapMaterial") {
+				sortId = THREE.MaterialId++;
+			} else if (this.type === "MeshBasicMaterial") {
+
+				key = "MeshBasicMaterial_" + this.map.image.name;
+
+				if (THREE.MaterialKeysMap.has(key)) {
+					sortId = THREE.MaterialKeysMap.get(key)
+				} else {
+					sortId = THREE.MaterialId++;
+					THREE.MaterialKeysMap.set(key, sortId);
+				}
+			} else {
+				sortId = THREE.MaterialId++;
+			}
+			this.sortId = sortId;
+		},
+		// PI_END
 
 		setValues: function (values) {
 
@@ -18131,8 +18418,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				var currentValue = this[key];
 
 				if (currentValue === undefined) {
-
-					console.warn("THREE." + this.type + ": '" + key + "' is not a property of this material.");
+					// PI_BEGIN
+					// console.warn( "THREE." + this.type + ": '" + key + "' is not a property of this material." );
+					// PI_END
 					continue;
 
 				}
@@ -18207,7 +18495,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			if (this.map instanceof THREE.Texture) data.map = this.map.toJSON(meta).uuid;
 			if (this.alphaMap instanceof THREE.Texture) data.alphaMap = this.alphaMap.toJSON(meta).uuid;
-			if (this.lightMap instanceof THREE.Texture) data.lightMap = this.lightMap.toJSON(meta).uuid;
 			if (this.bumpMap instanceof THREE.Texture) {
 
 				data.bumpMap = this.bumpMap.toJSON(meta).uuid;
@@ -18328,7 +18615,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			this.premultipliedAlpha = source.premultipliedAlpha;
 
 			this.mapst.copy(source.mapst);
-			this.lightmapst.copy(source.lightmapst);
 
 			this.overdraw = source.overdraw;
 
@@ -18414,6 +18700,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.vertexColors = THREE.NoColors;
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 
 	};
 
@@ -18447,9 +18736,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 *  opacity: <float>,
 	 *
 	 *  map: new THREE.Texture( <Image> ),
-	 *
-	 *  lightMap: new THREE.Texture( <Image> ),
-	 *  lightMapIntensity: <float>
 	 *
 	 *  aoMap: new THREE.Texture( <Image> ),
 	 *  aoMapIntensity: <float>
@@ -18494,9 +18780,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		this.map = null;
 
-		this.lightMap = null;
-		this.lightMapIntensity = 1.0;
-
 		this.aoMap = null;
 		this.aoMapIntensity = 1.0;
 
@@ -18529,7 +18812,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.morphNormals = false;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshLambertMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -18542,9 +18827,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.color.copy(source.color);
 
 		this.map = source.map;
-
-		this.lightMap = source.lightMap;
-		this.lightMapIntensity = source.lightMapIntensity;
 
 		this.aoMap = source.aoMap;
 		this.aoMapIntensity = source.aoMapIntensity;
@@ -18607,9 +18889,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 *  enableConvertColor: <bool>,
 	 *  hsvValue: THREE.Vector3,
 	 * 
-	 *  lightMap: new THREE.Texture( <Image> ),
-	 *  lightMapIntensity: number,
-	 * 
 	 * }
 	 */
 
@@ -18642,11 +18921,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.enableConvertColor = false;
 		this.hsvValue = new THREE.Vector3(0.0, 0.0, 0.0);
 
-		this.lightMap = null;
-		this.lightMapIntensity = 1.0;
 		// PI_END
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshBasicMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -18669,9 +18949,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.wireframeLinejoin = source.wireframeLinejoin;
 
 		// PI_BEGIN
-		this.lightMap = source.lightMap;
-		this.lightMapIntensity = source.lightMapIntensity;
-
 		this.enableConvertColor = source.enableConvertColor;
 		this.hsvValue.copy(source.hsvValue);
 		// PI_END
@@ -18682,6 +18959,29 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		return this;
 	};
+	// File:../dev/three/materials/MeshLightMapMaterial.js
+
+	/**
+	 * 光照图
+	 */
+
+	THREE.MeshLightMapMaterial = function (parameters) {
+
+		THREE.Material.call(this);
+		this.type = 'MeshLightMapMaterial';
+		this.lightMapIntensity = 1.0;
+		this.lightmapst = new THREE.Vector4(1, 1, 0, 0);
+		this.lightMap = null;
+
+		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
+	};
+
+	THREE.MeshLightMapMaterial.prototype = Object.create(THREE.Material.prototype);
+	THREE.MeshLightMapMaterial.prototype.constructor = THREE.MeshLightMapMaterial;
+
 	// File:../dev/three/materials/LineDashedMaterial.js
 
 	/**
@@ -18728,7 +19028,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.fog = true;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.LineDashedMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -18802,7 +19104,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.wireframeLinewidth = 1;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshDepthMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -18857,7 +19161,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.morphTargets = false;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshNormalMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -18887,9 +19193,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 *  opacity: <float>,
 	 *
 	 *  map: new THREE.Texture( <Image> ),
-	 *
-	 *  lightMap: new THREE.Texture( <Image> ),
-	 *  lightMapIntensity: <float>
 	 *
 	 *  aoMap: new THREE.Texture( <Image> ),
 	 *  aoMapIntensity: <float>
@@ -18947,9 +19250,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		this.map = null;
 
-		this.lightMap = null;
-		this.lightMapIntensity = 1.0;
-
 		this.aoMap = null;
 		this.aoMapIntensity = 1.0;
 
@@ -18993,7 +19293,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.morphNormals = false;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshPhongMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -19008,9 +19310,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.shininess = source.shininess;
 
 		this.map = source.map;
-
-		this.lightMap = source.lightMap;
-		this.lightMapIntensity = source.lightMapIntensity;
 
 		this.aoMap = source.aoMap;
 		this.aoMapIntensity = source.aoMapIntensity;
@@ -19073,9 +19372,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 * 	enableConvertColor: <boolean>,
 	 * 	hsvValue: new THREE.Vector3(),
 	 *
-	 *  lightMap: new THREE.Texture( <Image> ),
-	 *  lightMapIntensity: <float>
-	 *
 	 *  aoMap: new THREE.Texture( <Image> ),
 	 *  aoMapIntensity: <float>
 	 *
@@ -19137,8 +19433,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.metalness = 0.5;
 
 		this.map = null;
-		this.lightMap = null;
-		this.lightMapIntensity = 1.0;
 
 		this.enableConvertColor = false;
 		this.hsvValue = new THREE.Vector3();
@@ -19188,7 +19482,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.morphNormals = false;
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshStandardMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -19207,8 +19503,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.metalness = source.metalness;
 
 		this.map = source.map;
-		this.lightMap = source.lightMap;
-		this.lightMapIntensity = source.lightMapIntensity;
 
 		this.enableConvertColor = source.enableConvertColor;
 		this.hsvValue.copy(source.hsvValue);
@@ -19283,7 +19577,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.reflectivity = 0.5; // maps to F0 = 0.04
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshPhysicalMaterial.prototype = Object.create(THREE.MeshStandardMaterial.prototype);
@@ -19409,7 +19705,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.useBillboard = false;
 		this.map = null;
 
-		this.fog = true;
+		// PI_BEGIN
+		this.fog = false;
+		// PI_END
 		this.transparent = true;
 		this.shading = THREE.SmoothShading;
 		this.blending = THREE.NormalBlending;
@@ -19429,6 +19727,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.mSpecular = [1.0, 1.0, 1.0];
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshParticlesMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -19514,6 +19815,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.tintOpacity = 1;
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshT4M3Material.prototype = Object.create(THREE.Material.prototype);
@@ -19529,14 +19833,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this._Control = null;
 		this._Splat0 = null;
 		this._Splat1 = null;
-		this.lightMap = null;
 
 		this._controlst = new THREE.Vector4(1, 1, 0, 0);
 		this._splat0st = new THREE.Vector4(1, 1, 0, 0);
 		this._splat1st = new THREE.Vector4(1, 1, 0, 0);
-		this.lightmapst = new THREE.Vector4(1, 1, 0, 0);
-
-		this.lightMapIntensity = 1.0;
 
 		this.fog = true;
 
@@ -19560,6 +19860,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.tintOpacity = 1;
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.MeshT4M2Material.prototype = Object.create(THREE.Material.prototype);
@@ -19604,6 +19907,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.vertexColors = THREE.NoColors;
 
 		this.setValues(parameters);
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 
 	};
 
@@ -19702,7 +20008,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			this.setValues(parameters);
 
 		}
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.ShaderMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -19794,7 +20102,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		// set parameters
 
 		this.setValues(parameters);
-
+		// PI_BEGIN material sort
+		this.setSortId();
+		// PI_END
 	};
 
 	THREE.SpriteMaterial.prototype = Object.create(THREE.Material.prototype);
@@ -19826,7 +20136,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		Object.defineProperty(this, 'id', {
 			value: THREE.TextureIdCount++
 		});
-		TextureCounter++;
 
 		this.uuid = THREE.Math.generateUUID();
 
@@ -20007,7 +20316,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		},
 
 		dispose: function () {
-			TextureCounter--;
+
 			this.dispatchEvent({
 				type: 'dispose'
 			});
@@ -20599,7 +20908,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 * @author jonobr1 / http://jonobr1.com/
 	 */
 
-	THREE.Mesh = function (geometry, material) {
+	THREE.Mesh = function (geometry, material, lightMap) {
 
 		THREE.Object3D.call(this);
 
@@ -20609,6 +20918,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		this.geometry = geometry;
 		this.material = material;
+
+		// PI_BEGIN lightMap
+		this.lightMap = lightMap;
+		// PI_END
 
 		this.drawMode = THREE.TrianglesDrawMode;
 
@@ -20637,6 +20950,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			return new THREE.MeshT4M2Material(m);
 		else if (m.type == "MeshStandardMaterial")
 			return new THREE.MeshStandardMaterial(m);
+		else if (m.type === "MeshLightMapMaterial")
+			return new THREE.MeshLightMapMaterial(m);
 		else
 			return new THREE.MeshBasicMaterial(m);
 	};
@@ -20657,6 +20972,22 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.checkTextureReady();
 	};
 
+	THREE.Mesh.prototype.setLightMap = function (lightMap, index) {
+		if (this._isDestroy || !lightMap) return;
+		if (Array.isArray(lightMap)) {
+			this.lightMap = [];
+			for (var i = 0; i < lightMap.length; i++)
+				this.lightMap = this.createMaterial(lightMap[i]);
+		} else if (index != undefined) {
+			if (!Array.isArray(this.lightMap))
+				this.lightMap = [];
+			this.lightMap[index] = this.createMaterial(lightMap);
+		} else
+			this.lightMap = this.createMaterial(lightMap);
+
+		this.checkTextureReady();
+	};
+
 	THREE.Mesh.prototype.setBoundVisible = function () {
 		if (!this.geometry.boundingBox) {
 			this.geometry.computeBoundingBox();
@@ -20670,15 +21001,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	}
 
 
-	THREE.Mesh.prototype.setTexture = function (texture, key, index) {
-		var target;
+	THREE.Mesh.prototype.setTexture = function (target, texture, key, index) {
 
 		if (this._isDestroy) return;
 
 		if (index >= 0)
-			target = this.material[index];
-		else
-			target = this.material;
+			target = target[index];
 
 		target[key] = texture;
 		target.needsUpdate = true;
@@ -20696,10 +21024,13 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			return false;
 
 		var materials = [];
+		var lightMaps = [];
 		if (!Array.isArray(this.material)) {
 			materials[0] = this.material;
+			lightMaps[0] = this.lightMap;
 		} else {
 			materials = this.material;
+			lightMaps = this.lightMap;
 		}
 
 		var mapReady = function (map) {
@@ -20711,11 +21042,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		for (var i = 0; i < materials.length; i++) {
 			var material = materials[i];
+			var lightMap = lightMaps && lightMaps[i] && lightMaps[i].lightMap;
 			if (material instanceof THREE.MeshBasicMaterial) {
-				if (mapReady(material.map) && mapReady(material.lightMap))
+				if (mapReady(material.map) && mapReady(lightMap))
 					continue;
 			} else if (material instanceof THREE.MeshT4M2Material) {
-				if (mapReady(material._Control) && mapReady(material._Splat0) && mapReady(material._Splat1) && mapReady(material.lightMap))
+				if (mapReady(material._Control) && mapReady(material._Splat0) && mapReady(material._Splat1) && mapReady(lightMap))
 					continue;
 			} else if (material instanceof THREE.MeshT4M3Material) {
 				if (mapReady(material._Control) && mapReady(material._Splat0) && mapReady(material._Splat1) && mapReady(material._Splat2))
@@ -20724,7 +21056,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				if (mapReady(material.map))
 					continue;
 			} else if (material instanceof THREE.MeshStandardMaterial) {
-				if (mapReady(material.AMSMap) && mapReady(material.NAHMap) && mapReady(material.EmissionMap) && mapReady(material.lightMap))
+				if (mapReady(material.AMSMap) && mapReady(material.NAHMap) && mapReady(material.EmissionMap) && mapReady(lightMap))
 					continue;
 			} else {
 				throw "暂不支持材质类型！";
@@ -20843,7 +21175,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			var material = object.material;
 
 			// PI_BEGIN
-			if (!object.geometry instanceof THREE.PlaneBufferGeometry && material.side === THREE.BackSide) {
+			if (!(object.geometry instanceof THREE.PlaneBufferGeometry) && material.side === THREE.BackSide) {
 				// PI_END
 
 				intersect = ray.intersectTriangle(pC, pB, pA, true, point);
@@ -20986,9 +21318,11 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 				}
 
+				// PI_BEGIN
 				if (intersects.length === 0) {
 					THREE.Object3D.prototype.raycast.call(this, raycaster, intersects);
 				}
+				// PI_END
 			} else if (geometry instanceof THREE.Geometry) {
 
 				var fvA, fvB, fvC;
@@ -21844,6 +22178,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.ready = true;
 		this.textureReady = true;
 		this.geoReady = true;
+		// PI_BEGIN Static object
+		THREE.Object3D.prototype.checkReady.call(this);
+		// PI_END
 	};
 
 	THREE.Text2D.prototype = Object.create(THREE.Object3D.prototype);
@@ -21928,7 +22265,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		if (!this._material) {
 			this._material = new THREE.MeshBasicMaterial({
-				map: this._texture
+				map: this._texture,
+				sortType: "Text2D"
 			});
 
 			this._material.transparent = true;
@@ -21963,14 +22301,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				this.tranformChange(this);
 			}
 		}
+		this._sprite.renderOrder = textCon.layer || 0;
 	};
 
 	THREE.Text2D.prototype.dispose = function () {
-		
-		if ( this._mesh ){
-			this._mesh.dispose();
-		}
-
 		if (this._material) {
 			this._material.dispose();
 			delete this._material;
@@ -21979,7 +22313,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		if (this._texture) {
 			delete this._texture;
 		}
-		if(this._sprite){
+		if (this._sprite) {
 			this._sprite.dispose();
 			this.remove(this._sprite);
 			delete this._sprite;
@@ -22002,7 +22336,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		var scope = this;
 		THREE.Object3D.call(scope);
 
-		scope._material = new THREE.MeshBasicMaterial();
+		scope._material = new THREE.MeshBasicMaterial({
+			sortType: "ImageText"
+		});
 		scope._material.transparent = true;
 		scope.type = "ImageText";
 		//scope._material.needsUpdate = true;
@@ -22039,9 +22375,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			delete this._rayMesh;
 		}
 
-		if(this._geometry){
-			this._geometry.dispose();//没有缓存在resTab中，需要dispose
-		}
+		// if(this._geometry){
+		// 	this._geometry.dispose();//没有缓存在resTab中，需要dispose
+		// }
 	};
 
 	THREE.ImageText.prototype.raycast = (function () {
@@ -22065,7 +22401,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	THREE.ImageText.prototype.setGeometry = function (geometry) {
 
-		this.dispose();	
+		//this.dispose();	
+		this.remove(this._mesh);
 		this._geometry = geometry;
 
 		this._geometry.computeBoundingBox();
@@ -22122,15 +22459,15 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		//几何体高度
 		height += coords[0].v2 - coords[0].v1
-		for (var i = 0; i < coords.length; i++) {
-			textUv = coords[i];
-			textW = textUv.u2 - textUv.u1; //
-			if (tempW + textW > width) {
-				tempW = 0;
-				height += textUv.v2 - textUv.v1;
-			}
-			tempW += textW;
-		}
+		// for(var i = 0; i < coords.length; i++){
+		// 	textUv = coords[i];
+		// 	textW = textUv.u2 - textUv.u1;//
+		// 	if(tempW + textW > width){
+		// 		tempW = 0;
+		// 		height += textUv.v2 - textUv.v1;
+		// 	}
+		// 	tempW += textW;
+		// }
 
 
 		var resetxOffset = function () {
@@ -22152,7 +22489,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			textW = textUv.u2 - textUv.u1;
 			textH = textUv.v2 - textUv.v1;
 
-			if (tempW + textW > width) {
+			if (tempW > width) {
 				tempW = 0;
 				yOffset += -textH;
 				resetxOffset();
@@ -22506,6 +22843,33 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.dirts = [];
 		this.animObjectMap = new Map();
 		this.BulletinBoards = [];
+
+		// PI_BEGIN materail sort
+		this.needProjectObj = true; // 发生改变，需要刷新透明和不透明列表
+		this.mergeMaterail = false; // 是否启用
+		this.transObjects = [];
+		this.opaqueObjects = [];
+		this.orderSort = false;
+		// PI_END
+
+		// PI_BEGIN
+		//merge
+		this.transPlanes = {};
+		this.opaquePlanes = {};
+		//mesh
+		this.meshList = [];
+		//skl
+		this.skeletonList = [];
+		//light
+		this.lightList = [];
+		//spine
+		this.spriteList = [];
+		//lensFlares
+		this.lensFlaresList = [];
+		//Immediates
+		this.ImmediateList = [];
+		this.__sceneImpl = null;
+		// PI_END
 		this.scene = this;
 	};
 
@@ -22523,6 +22887,317 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	};
 
+	// PI_BEGIN
+
+	THREE.Scene.prototype.resetBufferGm2D = function () {
+		for (var e in this.transPlanes) {
+			for (var i in this.transPlanes[e]) {
+				this.transPlanes[e][i]._offset = 0;
+			}
+		}
+
+		for (var e in this.opaquePlanes) {
+			for (var i in this.opaquePlanes[e]) {
+				this.opaquePlanes[e][i]._offset = 0;
+			}
+		}
+	}
+
+	THREE.Scene.prototype.checkBufferGm2D = function (objects) {
+
+		//objects  scene.__meshList
+		if (!objects.length) return;
+
+		var tempList = {};
+
+		//每次传进来的列表 分类后 判断有没有合并入 mesh
+		var _check = function (lists, _this) {
+			//判断有没有 g2dSrc 
+			var g2dSrc;
+			var planes = lists[0].material.transparent ? _this.transPlanes : _this.opaquePlanes;
+			for (var i = 0; i < lists.length; i++) {
+				if (lists[i].g2dSrc) {
+					g2dSrc = lists[i].g2dSrc;
+					break
+				}
+			}
+			if (g2dSrc) {
+				for (var e in planes[g2dSrc]) {
+					planes[g2dSrc][e].visible = false;
+				}
+
+				var times = parseInt(lists.length / 30) + 1;
+
+				for (var t = 0; t < times; t++) {
+
+					var start = 30 * t;
+					var end = 30 * (t + 1);
+
+					for (var i = start; i < end; i++) {
+						if (lists[i]) {
+							lists[i].g2dSrc = g2dSrc;
+							lists[i].planeId = t;
+							_this.addBufferGm2D(lists[i], planes, lists);
+						}
+					}
+				}
+			} else {
+				g2dSrc = _this.createBufferGm2D(lists, planes);
+			}
+
+			var targetPlanes = planes[g2dSrc];
+
+			for (var e in targetPlanes) {
+				targetPlanes[e].geometry.attributes.position.needsUpdate = true;
+				targetPlanes[e].geometry.attributes.uv.needsUpdate = true;
+			}
+
+		}
+
+		//每次传进来的列表 分类后 判断有没有合并入 mesh
+		var _clear = function (lists) {
+			for (var i = 0; i < lists.length; i++) {
+				lists[i].g2dSrc = '';
+				lists[i].g2dUpdate = false;
+			}
+		}
+
+		for (var i = 0; i < objects.length; i++) {
+
+			if (!objects[i].visible)
+				continue;
+
+			if (objects[i].rayID)
+				continue;
+
+			if (!objects[i].combine)
+				continue;
+
+			if (!objects[i].material)
+				continue;
+
+			if (!objects[i].geometry)
+				continue;
+
+			if (!(objects[i].material.map instanceof THREE.Texture))
+				continue;
+
+			var img = objects[i].material.map.image;
+
+			if (img) {
+				tempList[img.src] = tempList[img.src] || [];
+				tempList[img.src].push(objects[i]);
+			}
+		}
+
+		//保存
+		var keep = {};
+
+		for (var e in tempList) {
+			keep[e] = true;
+			if (tempList[e].length > 1) {
+				var _this = this;
+				_check(tempList[e], _this);
+			} else {
+				_clear(tempList[e]);
+			}
+		}
+
+		//遍历已经存在的mesh 对比如果没有 清除
+		for (var e in this.opaquePlanes) {
+			if (!keep[e]) {
+				for (var i in this.opaquePlanes[e]) {
+					this.opaquePlanes[e][i].dispose();
+					delete this.opaquePlanes[e][i];
+				}
+				delete this.opaquePlanes[e]
+			}
+		}
+
+		for (var e in this.transPlanes) {
+			if (!keep[e]) {
+				for (var i in this.transPlanes[e]) {
+					this.transPlanes[e][i].dispose();
+					delete this.transPlanes[e][i];
+				}
+				delete this.transPlanes[e]
+			}
+		}
+
+	}
+
+
+
+	var _g2dV3 = new THREE.Vector3();
+	var _g2dV4 = new THREE.Vector4();
+
+	//zzzzzzzz
+	THREE.Scene.prototype.addBufferGm2D = function (object, planes, objects) {
+		// for(let i in planes){
+		// 	for(let j in planes[i]){
+		// 		planes[i][j].rotation.x = 5.89048624038696
+		// 		planes[i][j].rotation.y = 5.48033380508423
+		// 		planes[i][j].rotation.z =  0.0279249511659145
+		// 	}
+		// }
+		//找到对应的mesh
+		var targetMesh = planes[object.g2dSrc][object.planeId];
+
+		if (!targetMesh && objects) {
+
+			this.createBufferGm2D(objects, planes);
+
+			return;
+
+		}
+
+		//绑上索引
+		object.plane2dOffset = targetMesh._offset;
+		targetMesh._offset++;
+
+		//物体的顶点坐标数组
+		var arr = object.geometry.attributes.position.array;
+		var positions = [];
+
+		for (var i = 0; i < arr.length; i += 3) {
+			_g2dV3.set(arr[i], arr[i + 1], arr[i + 2]);
+			_g2dV3.applyMatrix4(object.matrixWorld);
+			positions.push(_g2dV3.x, _g2dV3.y, _g2dV3.z);
+		}
+
+		var positionArray = targetMesh.geometry.attributes.position.array;
+		var normalsArray = targetMesh.geometry.attributes.normal.array;
+		var uvsArray = targetMesh.geometry.attributes.uv.array;
+		var indexs = targetMesh.geometry.index.array;
+
+		//一个四边形四个点 共12个xyz
+		for (var i = 0; i < positions.length; i += 3) {
+
+			positionArray[object.plane2dOffset * 12 + i + 0] = positions[i];
+			positionArray[object.plane2dOffset * 12 + i + 1] = positions[i + 1];
+			positionArray[object.plane2dOffset * 12 + i + 2] = positions[i + 2];
+
+			normalsArray[object.plane2dOffset * 12 + i + 0] = 0;
+			normalsArray[object.plane2dOffset * 12 + i + 1] = 0;
+			normalsArray[object.plane2dOffset * 12 + i + 2] = 1;
+
+		}
+		// uv 坐标
+		var scaleX = object.material.mapst.x;
+		var scaleY = object.material.mapst.y;
+		var __offsetX = object.material.mapst.z;
+		var __offsetY = object.material.mapst.w;
+
+		var planeUV = [0, 1, 1, 1, 0, 0, 1, 0];
+
+		for (var i = 0; i < planeUV.length; i += 2) {
+			uvsArray[object.plane2dOffset * 8 + i + 0] = planeUV[i] * scaleX + __offsetX;
+			uvsArray[object.plane2dOffset * 8 + i + 1] = planeUV[i + 1] * scaleY + __offsetY;
+		}
+
+		//每个四边形被分为两个三角形，因此每个6个索引
+
+		var a = object.plane2dOffset * 4;
+		var b = object.plane2dOffset * 4 + 1;
+		var c = object.plane2dOffset * 4 + 2;
+		var d = object.plane2dOffset * 4 + 3;
+		//0 1  3 0  3 2
+		indexs[object.plane2dOffset * 6 + 0] = a;
+		indexs[object.plane2dOffset * 6 + 1] = b;
+		indexs[object.plane2dOffset * 6 + 2] = d;
+
+		indexs[object.plane2dOffset * 6 + 3] = a;
+		indexs[object.plane2dOffset * 6 + 4] = d;
+		indexs[object.plane2dOffset * 6 + 5] = c;
+
+		object.g2dUpdate = true;
+
+		targetMesh.geometry.index.forceCount = targetMesh._offset * 6;
+
+		targetMesh.visible = true;
+
+	}
+
+
+	//zzzzzzzz
+	THREE.Scene.prototype.createBufferGm2D = function (objects, planes, index) {
+
+		var material = objects[0].material.clone();
+		var str = material.map.image.src;
+
+		if (index !== undefined) {
+			this.createPlanes(objects, planes, index, material, str, count);
+			return str;
+		}
+
+		//拆分
+		var count = 30;
+		var times = parseInt(objects.length / count) + 1;
+
+		for (var i = 0; i < times; i++) {
+			this.createPlanes(objects, planes, i, material, str, count);
+		}
+
+
+		return str;
+	}
+
+	THREE.Scene.prototype.createPlanes = function (objects, planes, index, material, str, count) {
+		var targetGeo = new THREE.BufferGeometry();
+		var widthSegments = 1;
+		var heightSegments = 1;
+		targetGeo.parameters = {
+			width: 900, //impl3D.domElement.width,
+			height: 640, //impl3D.domElement.height,
+			widthSegments: widthSegments,
+			heightSegments: heightSegments
+		};
+		// 30个四边形 30 X 4 X 3
+		var vertices = new Float32Array(count * 4 * 3);
+		var normals = new Float32Array(count * 4 * 3);
+		var uvs = new Float32Array(count * 4 * 2);
+		var indices = new((vertices.length / 3) > 65535 ? Uint32Array : Uint16Array)(count * 6);
+
+		targetGeo.setIndex(new THREE.BufferAttribute(indices, 1));
+		targetGeo.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		targetGeo.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+		targetGeo.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+		material.mapst = new THREE.Vector4(1, 1, 0, 0);
+		//
+		var mesh = new THREE.Mesh(targetGeo, material);
+		mesh._offset = 0;
+		mesh.rayID = 0;
+		mesh.parent = this;
+		mesh.scene = this;
+
+		//四边形索引  
+		mesh.planeId = index;
+		// "xxx.png" : mesh
+		if (!planes[str]) planes[str] = {};
+
+		planes[str][index] = mesh;
+
+		var start = 30 * index;
+		var end = 30 * (index + 1);
+
+		for (var i = start; i < end; i++) {
+			if (objects[i]) {
+				objects[i].g2dSrc = str;
+				objects[i].planeId = index;
+				this.addBufferGm2D(objects[i], planes);
+			}
+		}
+
+		// 
+		if (this.__sceneImpl) {
+			// this.__sceneImpl.attachmentArray.push(mesh);
+			// mesh.__piAttachment = objects[0].__piAttachment;
+		}
+
+	}
+
+	// PI_END
 	// File:../dev/three/scenes/FogExp2.js
 
 	/**
@@ -22738,7 +23413,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	// File:../dev/three/renderers/shaders/ShaderChunk/fog_fragment.glsl
 
-	THREE.ShaderChunk['fog_fragment'] = "#ifdef USE_FOG\n	#ifdef USE_LOGDEPTHBUF_EXT\n		float depth = gl_FragDepthEXT / gl_FragCoord.w;\n	#else\n		float depth = gl_FragCoord.z / gl_FragCoord.w;\n	#endif\n	#ifdef FOG_EXP2\n		float fogFactor = whiteCompliment( exp2( - fogDensity * fogDensity * depth * depth * LOG2 ) );\n	#else\n		float fogFactor = smoothstep( fogNear, fogFar, depth );\n	#endif\n	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );\n#endif\n";
+	THREE.ShaderChunk['fog_fragment'] = "#ifdef USE_FOG\n	#ifdef USE_LOGDEPTHBUF_EXT\n		float depth = gl_FragDepthEXT / gl_FragCoord.w;\n	#else\n		float depth = gl_FragCoord.z / gl_FragCoord.w;\n	#endif\n	#ifdef FOG_EXP2\n		float fogFactor = whiteCompliment( exp2( - fogDensity * fogDensity * depth * depth * LOG2 ) );\n	#else\n		float fogFactor = (depth - fogNear) / (fogFar - fogNear);\n		fogFactor = clamp(fogFactor, 0.0, 1.0);\n	#endif\n	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );\n#endif";
 
 	// File:../dev/three/renderers/shaders/ShaderChunk/fog_pars_fragment.glsl
 
@@ -23483,7 +24158,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	// File:../dev/three/renderers/shaders/ShaderLib/meshbasic_frag.glsl
 
-	THREE.ShaderChunk['meshbasic_frag'] = "uniform vec3 diffuse;\nuniform float opacity;\n#ifndef FLAT_SHADED\n	varying vec3 vNormal;\n#endif\n#include <common>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <map_pars_fragment>\n#include <fog_pars_fragment>\n#include <convert_color_pars_fragment>\nvoid main() {\n	vec4 diffuseColor = vec4( diffuse, opacity );\n	#include <map_fragment>\n	#include <color_fragment>\n	#include <alphatest_fragment>\n#if defined(USE_LIGHTMAP)\n	diffuseColor.rgb *= 2.0 * texture2D( lightMap, vUv2 ).xyz * lightMapIntensity;\n#endif\n#include <convert_color_fragment>\n#ifdef USE_GRAY\n	if (isGray == 1) {\n		float g = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));\n		diffuseColor = vec4(g, g, g, diffuseColor.a);\n	}\n#endif\n	gl_FragColor = diffuseColor;\n	#include <fog_fragment>\n}";
+	THREE.ShaderChunk['meshbasic_frag'] = "uniform vec3 diffuse;\nuniform float opacity;\n#ifndef FLAT_SHADED\n	varying vec3 vNormal;\n#endif\n#include <common>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <map_pars_fragment>\n#include <fog_pars_fragment>\n#include <convert_color_pars_fragment>\nvoid main() {\n	vec4 diffuseColor = vec4( diffuse, opacity );\n	#include <map_fragment>\n	#include <color_fragment>\n	#include <alphatest_fragment>\n#if defined(USE_LIGHTMAP)\n	diffuseColor.rgb *= 4.0 * texture2D( lightMap, vUv2 ).xyz * lightMapIntensity;\n#endif\n#include <convert_color_fragment>\n#ifdef USE_GRAY\n	if (isGray == 1) {\n		float g = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));\n		diffuseColor = vec4(g, g, g, diffuseColor.a);\n	}\n#endif\n	gl_FragColor = diffuseColor;\n	#include <fog_fragment>\n}";
 
 	// File:../dev/three/renderers/shaders/ShaderLib/meshbasic_vert.glsl
 
@@ -23549,7 +24224,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				THREE.UniformsLib['common'],
 				THREE.UniformsLib['fog'],
 				THREE.UniformsLib['lights'],
-				THREE.UniformsLib['lightmap'],
 				THREE.UniformsLib['convertcolor']
 			]),
 
@@ -23877,11 +24551,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		var lights = [];
 
-		var opaqueObjects = [];
-		var opaqueObjectsLastIndex = -1;
-		var transparentObjects = [];
-		var transparentObjectsLastIndex = -1;
-
 		var morphInfluences = new Float32Array(8);
 
 		var sprites = [];
@@ -23958,7 +24627,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			//
 
 			_clearColor = new THREE.Color(0x000000),
-			_clearAlpha = 0,
+			// PI_BEGIN GUI
+			_clearAlpha = 1,
+			// PI_END
 
 			_width = _canvas.width,
 			_height = _canvas.height,
@@ -24053,7 +24724,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		// initialize
 
 		var _gl;
-
 		try {
 
 			var attributes = {
@@ -24122,11 +24792,17 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
+		// PI_BEGIN VAO
+		var _piVAOExtension = extensions.get("OES_vertex_array_object");
+		// PI_END
 		var capabilities = new THREE.WebGLCapabilities(_gl, extensions, parameters);
-
-		var state = new THREE.WebGLState(_gl, extensions, paramThreeToGL);
+		// PI_BEGIN VAO
+		var state = new THREE.WebGLState(_gl, extensions, paramThreeToGL, _piVAOExtension);
+		// PI_END
 		var properties = new THREE.WebGLProperties();
-		var objects = new THREE.WebGLObjects(_gl, properties, this.info);
+		// PI_BEGIN VAO
+		var objects = new THREE.WebGLObjects(_gl, properties, this.info, _piVAOExtension);
+		// PI_END
 		var programCache = new THREE.WebGLPrograms(this, capabilities);
 		var lightCache = new THREE.WebGLLights();
 
@@ -24164,8 +24840,15 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			state.scissor(_currentScissor.copy(_scissor).multiplyScalar(_pixelRatio));
 			state.viewport(_currentViewport.copy(_viewport).multiplyScalar(_pixelRatio));
 
-			glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha);
+			// PI_BEGIN GUI
+			_gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
+			// _gl.useProgram(null);
 
+			// _clearColor = new THREE.Color(0x000000),
+			// _clearAlpha = 0;
+			// PI_END GUI
+
+			glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearAlpha);
 		}
 
 		function resetGLState() {
@@ -24176,7 +24859,16 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			_currentGeometryProgram = '';
 			_currentMaterialId = -1;
 
-			state.reset();
+			// PI_BEGIN GUI
+			_currentRenderTarget = null,
+				_currentFramebuffer = null,
+				_currentScissor = new THREE.Vector4(),
+				_currentScissorTest = null,
+
+				_currentViewport = new THREE.Vector4(),
+				// PI_END 
+
+				state.reset();
 
 		}
 
@@ -24322,7 +25014,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		this.updateGeometry = function (mesh) {
 			objects.update(mesh);
 		}
-
 		// PI_END
 
 		// Clearing
@@ -24638,14 +25329,41 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		};
 
-		this.renderBufferDirect = function (camera, fog, geometry, material, object, group) {
+		this.renderBufferDirect = function (camera, fog, geometry, material, lightMap, object, group) {
 
-			setMaterial(material);
+			// PI_BEGIN material sort
+			// setMaterial( material );
 
-			var program = setProgram(camera, fog, material, object);
+			// var program = setProgram( camera, fog, material, lightMap, object );
+
+			var program = setPiProgram(camera, fog, material, lightMap, object);
+			var isProgramChange = program.id !== _currentProgram;
+			if (isProgramChange) {
+				_gl.useProgram(program.program);
+				_currentProgram = program.id;
+			}
+			setObjectUniforms(program, camera, material, lightMap, object, isProgramChange);
+			var isMaterialChange = _currentMaterialId !== material.sortId || isProgramChange;
+			if (isMaterialChange) {
+				setMaterial(material);
+				setMaterialUniforms(camera, fog, material, isProgramChange, isMaterialChange);
+
+				_currentMaterialId = material.sortId;
+			}
+			// PI_END
 
 			var updateBuffers = false;
-			var geometryProgram = geometry.id + '_' + program.id + '_' + material.wireframe;
+
+			// PI_BEGIN VAO
+			// var geometryProgram = geometry.id + '_' + program.id + '_' + material.wireframe;
+			var geometryProgram;
+			if (material.wireframe) {
+				geometryProgram = geometry.id + '_' + program.id + '_' + material.wireframe;
+			} else {
+				// 切换shader，不需要更新
+				geometryProgram = geometry.id + '_' + material.wireframe;
+			}
+			// PI_END
 
 			if (geometryProgram !== _currentGeometryProgram) {
 
@@ -24654,60 +25372,62 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
+			// PI_BEGIN VAO，为了减少bug，屏蔽掉 morph目标
+			/**
 			// morph targets
-
+	
 			var morphTargetInfluences = object.morphTargetInfluences;
-
-			if (morphTargetInfluences !== undefined) {
-
+	
+			if ( morphTargetInfluences !== undefined ) {
+	
 				var activeInfluences = [];
-
-				for (var i = 0, l = morphTargetInfluences.length; i < l; i++) {
-
-					var influence = morphTargetInfluences[i];
-					activeInfluences.push([influence, i]);
-
+	
+				for ( var i = 0, l = morphTargetInfluences.length; i < l; i ++ ) {
+	
+					var influence = morphTargetInfluences[ i ];
+					activeInfluences.push( [ influence, i ] );
+	
 				}
-
-				activeInfluences.sort(absNumericalSort);
-
-				if (activeInfluences.length > 8) {
-
+	
+				activeInfluences.sort( absNumericalSort );
+	
+				if ( activeInfluences.length > 8 ) {
+	
 					activeInfluences.length = 8;
-
+	
 				}
-
+	
 				var morphAttributes = geometry.morphAttributes;
-
-				for (var i = 0, l = activeInfluences.length; i < l; i++) {
-
-					var influence = activeInfluences[i];
-					morphInfluences[i] = influence[0];
-
-					if (influence[0] !== 0) {
-
-						var index = influence[1];
-
-						if (material.morphTargets === true && morphAttributes.position) geometry.addAttribute('morphTarget' + i, morphAttributes.position[index]);
-						if (material.morphNormals === true && morphAttributes.normal) geometry.addAttribute('morphNormal' + i, morphAttributes.normal[index]);
-
+	
+				for ( var i = 0, l = activeInfluences.length; i < l; i ++ ) {
+	
+					var influence = activeInfluences[ i ];
+					morphInfluences[ i ] = influence[ 0 ];
+	
+					if ( influence[ 0 ] !== 0 ) {
+	
+						var index = influence[ 1 ];
+	
+						if ( material.morphTargets === true && morphAttributes.position ) geometry.addAttribute( 'morphTarget' + i, morphAttributes.position[ index ] );
+						if ( material.morphNormals === true && morphAttributes.normal ) geometry.addAttribute( 'morphNormal' + i, morphAttributes.normal[ index ] );
+	
 					} else {
-
-						if (material.morphTargets === true) geometry.removeAttribute('morphTarget' + i);
-						if (material.morphNormals === true) geometry.removeAttribute('morphNormal' + i);
-
+	
+						if ( material.morphTargets === true ) geometry.removeAttribute( 'morphTarget' + i );
+						if ( material.morphNormals === true ) geometry.removeAttribute( 'morphNormal' + i );
+	
 					}
-
+	
 				}
-
+	
 				program.getUniforms().setValue(
-					_gl, 'morphTargetInfluences', morphInfluences);
-
+						_gl, 'morphTargetInfluences', morphInfluences );
+	
 				updateBuffers = true;
-
+	
 			}
-
-			//
+			*/
+			// PI_END
 
 			var index = geometry.index;
 			var position = geometry.attributes.position;
@@ -24733,14 +25453,24 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			if (updateBuffers) {
 
-				setupVertexAttributes(material, program, geometry);
-
-				if (index !== null) {
-
-					_gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, objects.getAttributeBuffer(index));
-
+				// PI_BEGIN VAO
+				var geometryProperty = properties.get(geometry);
+				if (geometryProperty._piVAO) {
+					_piVAOExtension.bindVertexArrayOES(geometryProperty._piVAO);
 				}
+				if (!geometryProperty._piVAO || (geometryProperty._piVAO && geometryProperty._piVAODirty)) {
+					// PI_END 
+					// PI_BEGIN VAO
+					setupVertexAttributes(material, program, geometry, undefined, geometryProperty);
+					// PI_END 
+					if (index !== null) {
 
+						_gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, objects.getAttributeBuffer(index));
+
+					}
+					// PI_BEGIN VAO
+				}
+				// PI_END
 			}
 
 			//
@@ -24750,7 +25480,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			if (index !== null) {
 
-				dataCount = index.count;
+				dataCount = index.forceCount || index.count;
 
 			} else if (position !== undefined) {
 
@@ -24839,8 +25569,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		};
 
-		function setupVertexAttributes(material, program, geometry, startIndex) {
-
+		// PI_BEGIN VAO
+		function setupVertexAttributes(material, program, geometry, startIndex, geometryProperty) {
+			// PI_END
 			var extension;
 
 			if (geometry instanceof THREE.InstancedBufferGeometry) {
@@ -24866,6 +25597,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			var materialDefaultAttributeValues = material.defaultAttributeValues;
 
+			// PI_BEGIN VAO
+			var needUpdateVaoDirty = 0;
+			// PI_END
 			for (var name in programAttributes) {
 
 				var programAttribute = programAttributes[name];
@@ -24918,13 +25652,14 @@ _$define("pi/render3d/three", function (require, exports, module) {
 						var buffer = objects.getAttributeBuffer(geometryAttribute);
 
 						if (geometryAttribute instanceof THREE.InterleavedBufferAttribute) {
-
 							var data = geometryAttribute.data;
 							var stride = data.stride;
 							var offset = geometryAttribute.offset;
 
 							if (data instanceof THREE.InstancedInterleavedBuffer) {
-
+								// PI_BEGIN VAO
+								++needUpdateVaoDirty;
+								// PI_END
 								state.enableAttributeAndDivisor(programAttribute, data.meshPerAttribute, extension);
 
 								if (geometry.maxInstancedCount === undefined) {
@@ -24934,7 +25669,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 								}
 
 							} else {
-
 								state.enableAttribute(programAttribute);
 
 							}
@@ -24945,7 +25679,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 						} else {
 
 							if (geometryAttribute instanceof THREE.InstancedBufferAttribute) {
-
+								// PI_BEGIN VAO
+								++needUpdateVaoDirty;
+								// PI_END
 								state.enableAttributeAndDivisor(programAttribute, geometryAttribute.meshPerAttribute, extension);
 
 								if (geometry.maxInstancedCount === undefined) {
@@ -24955,7 +25691,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 								}
 
 							} else {
-
 								state.enableAttribute(programAttribute);
 
 							}
@@ -24966,7 +25701,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 						}
 
 					} else if (materialDefaultAttributeValues !== undefined) {
-
+						// PI_BEGIN VAO
+						++needUpdateVaoDirty;
+						// PI_END
 						var value = materialDefaultAttributeValues[name];
 
 						if (value !== undefined) {
@@ -24998,8 +25735,14 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
-			state.disableUnusedAttributes();
 
+			// PI_BEGIN VAO
+			if (needUpdateVaoDirty === 0) {
+				if (geometryProperty)
+					geometryProperty._piVAODirty = false;
+			}
+			// state.disableUnusedAttributes();
+			// PI_END
 		}
 
 		// Sorting
@@ -25010,9 +25753,68 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
+		function painterSort(a, b) {
+			if (a.material.sortId !== b.material.sortId) {
+
+				return a.material.sortId - b.material.sortId;
+
+			} else if (a.geometry.id !== b.geometry.id) {
+
+				return a.geometry.id - b.geometry.id;
+
+			} else if (a.object.renderOrder !== b.object.renderOrder) {
+
+				return a.object.renderOrder - b.object.renderOrder;
+
+			} else if (a.z !== b.z) {
+
+				return a.z - b.z;
+
+			} else {
+
+				return a.id - b.id;
+
+			}
+		}
+
+		function orderPainterSort(a, b) {
+			if (a.object.renderOrder !== b.object.renderOrder) {
+
+				return a.object.renderOrder - b.object.renderOrder;
+
+			} else if (a.material.sortId !== b.material.sortId) {
+
+				return a.material.sortId - b.material.sortId;
+
+			} else if (a.geometry.id !== b.geometry.id) {
+
+				return a.geometry.id - b.geometry.id;
+
+			} else if (a.z !== b.z) {
+
+				return a.z - b.z;
+
+			} else {
+
+				return a.id - b.id;
+
+			}
+		}
+
 		function painterSortStable(a, b) {
 
-			if (a.object.renderOrder !== b.object.renderOrder) {
+			var aGroupID = a.group ? a.group.start * 1000000 + a.group.count : -1;
+			var bGroupID = b.group ? b.group.start * 1000000 + b.group.count : -1;
+
+			if (a.geometry.id !== b.geometry.id) {
+
+				return a.geometry.id - b.geometry.id;
+
+			} else if (aGroupID !== bGroupID) {
+
+				return aGroupID - bGroupID;
+
+			} else if (a.object.renderOrder !== b.object.renderOrder) {
 
 				return a.object.renderOrder - b.object.renderOrder;
 
@@ -25101,6 +25903,15 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		}
 		// PI_END
 
+		// PI_BEGIN GUI
+		this.resetThreeStore = function () {
+
+			resetGLState();
+			setDefaultGLState();
+			state.setDepthWrite(true);
+		}
+		// PI_END
+
 		// Rendering
 
 		this.render = function (scene, camera, deltaTime, renderTarget, forceClear) {
@@ -25148,9 +25959,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			lights.length = 0;
 
-			opaqueObjectsLastIndex = -1;
-			transparentObjectsLastIndex = -1;
-
 			sprites.length = 0;
 			lensFlares.length = 0;
 
@@ -25158,18 +25966,14 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			projectObject(scene, camera);
 
-
-			opaqueObjects.length = opaqueObjectsLastIndex + 1;
-			transparentObjects.length = transparentObjectsLastIndex + 1;
-
+			// PI_BEGIN Static object
 			if (_this.sortObjects === true) {
-
-				opaqueObjects.sort(painterSortStable);
-				transparentObjects.sort(reversePainterSortStable);
-
+				// Todo 在放入时排序，这里不排序
+				var sortFunc = scene.orderSort ? orderPainterSort : painterSort;
+				scene.opaqueObjects.sort(sortFunc);
+				scene.transObjects.sort(sortFunc);
 			}
-
-			//
+			// PI_END
 
 			if (_clippingEnabled) {
 
@@ -25204,27 +26008,34 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
-
+			// PI_BEGIN ?
+			// scene.checkBufferGm2D(transObjects);
+			// scene.checkBufferGm2D(opaqueObjects);
+			// PI_END
 			if (scene.overrideMaterial) {
 
 				var overrideMaterial = scene.overrideMaterial;
 
-				renderObjects(opaqueObjects, camera, fog, overrideMaterial);
-				renderObjects(transparentObjects, camera, fog, overrideMaterial);
+				// PI_BEGIN Static object
+				renderObjects(scene, scene.opaqueObjects, camera, fog, overrideMaterial);
+				renderObjects(scene, scene.transObjects, camera, fog, overrideMaterial);
+				// PI_END
 
 			} else {
 
 				// opaque pass (front-to-back order)
 
 				state.setBlending(THREE.NoBlending);
-				renderObjects(opaqueObjects, camera, fog);
-				opaqueObjects.length = 0;
+
+				// renderGem2d(scene.bufferGm2D, camera, fog);
+
+				renderObjects(scene, scene.opaqueObjects, camera, fog);
+				// renderMergePlanes(scene.opaquePlanes, camera, fog);
 
 				// transparent pass (back-to-front order)
 
-				renderObjects(transparentObjects, camera, fog);
-				transparentObjects.length = 0;
-
+				renderObjects(scene, scene.transObjects, camera, fog);
+				// renderMergePlanes(scene.transPlanes, camera, fog);
 			}
 
 			// custom render plugins (post pass)
@@ -25254,62 +26065,158 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			state.setDepthWrite(true);
 			state.setColorWrite(true);
 
-			// _gl.finish();
+			// PI_BEGIN VAO
+			if (_piVAOExtension) {
+				_piVAOExtension.bindVertexArrayOES(null);
+			}
+			// PI_END
 
+			// _gl.finish();
+			scene.needProjectObj = false;
+			_this.sortObjects = true;
 		};
 
-		function pushRenderItem(object, geometry, material, z, group) {
-
-			var array, index;
-
-			// allocate the next position in the appropriate array
-
+		function pushRenderItem(scene, object, geometry, material, lightMap, z, group) {
+			// PI_BEGIN Static object
 			if (material.transparent) {
-
-				array = transparentObjects;
-				index = ++transparentObjectsLastIndex;
-
-			} else {
-
-				array = opaqueObjects;
-				index = ++opaqueObjectsLastIndex;
-
-			}
-
-			// recycle existing render item or grow the array
-
-			var renderItem = array[index];
-
-			if (renderItem !== undefined) {
-
-				renderItem.id = object.id;
-				renderItem.object = object;
-				renderItem.geometry = geometry;
-				renderItem.material = material;
-				renderItem.z = _vector3.z;
-				renderItem.group = group;
-
-			} else {
-
-				renderItem = {
+				scene.transObjects.push({
 					id: object.id,
 					object: object,
 					geometry: geometry,
 					material: material,
-					z: _vector3.z,
+					lightMap: lightMap,
+					z: z,
 					group: group
-				};
-
-				// assert( index === array.length );
-				array.push(renderItem);
-
+				})
+			} else {
+				scene.opaqueObjects.push({
+					id: object.id,
+					object: object,
+					geometry: geometry,
+					material: material,
+					lightMap: lightMap,
+					z: z,
+					group: group
+				})
 			}
-
+			// PI_END
 		}
 
-		function isObjectViewable(object) {
+		function isObjectViewable(object, camera) {
 
+			if (object.isLess) return object.isShowLess == true
+
+			if (object.showLv > window.sceShowLv) return;
+
+			var getPos = function (data, pos) {
+				var pos = pos || [0, 0, 0];
+
+
+				pos[0] += data.position._x;
+				pos[1] += data.position._y;
+				pos[2] += data.position._z;
+
+				// if (data.geometry) {
+				// 	var max = data.geometry.boundingBox.max;
+				// 	var min = data.geometry.boundingBox.min;
+
+				// 	var center = [(max._x + min._x) / 2, (max._y + min._y) / 2, (max._z + min._z) / 2]
+
+				// 	pos[0] += center[0] * data.scale._x;
+				// 	pos[1] += center[1] * data.scale._y;
+				// 	pos[2] += center[2] * data.scale._z;
+				// }
+
+				if (data.parent && data.parent.type !== "Scene") {
+					getPos(data.parent, pos);
+				}
+				return pos
+			}
+
+			var getSize = function () {
+				var max = object.geometry.boundingBox.max;
+				var min = object.geometry.boundingBox.min;
+
+				return [(max._x - min._x) * object.scale._x, (max._y - min._y) * object.scale._y, (max._z - min._z * object.scale._z)];
+			}
+
+			var getD = function (p0, p1) {
+				var x = p0[0] - p1[0],
+					y = p0[1] - p1[1],
+					z = p0[2] - p1[2];
+				return Math.abs(z) //Math.sqrt(y * y + z * z)
+			}
+
+			var inOut = function (pos, size, c, d) {
+				var p0 = [pos[0] + size[0] / 2, pos[1] + size[2] / 2, pos[2] - size[1] / 2], // 左前
+					p1 = [pos[0] - size[0] / 2, pos[1] + size[2] / 2, pos[2] - size[1] / 2], // 右前
+					p2 = [pos[0] + size[0] / 2, pos[1] + size[2] / 2, pos[2] + size[1] / 2], // 左后
+					p3 = [pos[0] - size[0] / 2, pos[1] + size[2] / 2, pos[2] + size[1] / 2] // 右后
+				// 相机在建筑前面
+				if (c[2] < p0[2]) return false
+
+				else if (getD(p0, c) < d) return true
+				else if (getD(p1, c) < d) return true
+				else if (getD(p2, c) < d) return true
+				else if (getD(p3, c) < d) return true
+
+				return false
+			}
 			var geometry = object.geometry;
+
+			var pos, size, dir
+
+			// 找到2d节点的3d坐标位置
+			var parent3d
+			if (object.parent.attachment === "2D" || object.parent.type === "Text2D" || object.parent.type === "ImageText") {
+				var o = object;
+				while (!parent3d && o.parent) {
+					o = o.parent;
+					parent3d = o.__piAttachment;
+				}
+			}
+
+			// parent3d.scene.name === "city" 可以改为一个scene的一个参数
+			if (parent3d && parent3d.scene.name === "city") {
+				var m = parent3d.scene.children;
+				for (var i = 0; i < m.length; i++) {
+					if (m[i].type === "PerspectiveCamera") {
+						camera = m[i];
+						break;
+					}
+				}
+				pos = getPos(parent3d); // [横向x，垂直y，远近z]
+				// size = [1, 1, 1];
+				dir = parent3d.scene.fog.far + 1; // 2d节点判断距离+1
+			} else if (object.scene.name === "city" && geometry.boundingBox !== null && object.name && object.name.indexOf("filterOut") === -1) {
+				pos = getPos(object); // [横向x，垂直y，远近z]
+				// size = getSize(); // [横向x长，远近y宽，垂直z高]
+				dir = object.scene.fog.far;
+			}
+
+			if (object.isLess) {
+				pos = getPos(object.modulePos)
+			}
+
+			if (pos) {
+				var cameraPos = [camera.position._x, camera.position._y, camera.position._z];
+				let d = getD(pos, cameraPos);
+				// if (!inOut(pos, size, cameraPos, dir)) {
+				if (d > dir) {
+					if (object.lessModule) {
+						object.lessModule.isShowLess = true
+					}
+					return false
+				}
+				// 锤子太近也隐藏
+				if (d < 60 && object.name && object.name.indexOf("cuizi") !== -1) {
+					return false
+				}
+
+			}
+			if (object.lessModule) {
+				object.lessModule.isShowLess = false
+			}
 
 			if (geometry.boundingSphere === null)
 				geometry.computeBoundingSphere();
@@ -25338,120 +26245,290 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
-		function projectObject(object, camera) {
-
-			if (!object.visible) return;
-
-			if (object.layers.test(camera.layers)) {
-
-				if (object instanceof THREE.Light) {
-
-					lights.push(object);
-
-				} else if (object instanceof THREE.Sprite) {
-
-					if (object.frustumCulled === false || isObjectViewable(object) === true) {
-
-						sprites.push(object);
-
-					}
-				} else if (object instanceof THREE.LensFlare) {
-
-					lensFlares.push(object);
-				} else if (object instanceof THREE.ImmediateRenderObject) {
-
-					if (_this.sortObjects === true) {
-
-						_vector3.setFromMatrixPosition(object.matrixWorld);
-						_vector3.applyProjection(_projScreenMatrix);
-
-					}
-
-					pushRenderItem(object, null, object.material, _vector3.z, null);
-
-				} else if (object.skeleton && object.skeleton instanceof THREE.Skeleton) {
-					// PI_BEGIN
-					object.skeleton.update();
-					// PI_END
-
-				} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
-					// PI_BEGIN
-					if (!object.ready) return;
-
-					if (object.geometry instanceof THREE.BufferGeometry) {
-						if (!object.geometry.attributes.position) return;
-					}
-
-					// PI_END
-					if (object.frustumCulled === false || isObjectViewable(object) === true) {
-
-
-						if (_this.sortObjects === true) {
-							if (object.geometry.boundingBox) {
-								object.geometry.boundingBox.center(_vector3);
-								_vector3.applyMatrix4(object.matrixWorld);
-							} else {
-								_vector3.setFromMatrixPosition(object.matrixWorld);
-							}
-							_vector3.applyProjection(_projScreenMatrix);
-
-						}
-
-						var geometry = objects.update(object);
-
-						var material = object.material;
-						if (Array.isArray(material)) {
-							var groups = geometry.groups;
-
-							for (var i = 0, l = groups.length; i < l; i++) {
-
-								var group = groups[i];
-								var groupMaterial = material[group.materialIndex];
-
-								if (groupMaterial && groupMaterial.visible) {
-
-									pushRenderItem(object, geometry, groupMaterial, _vector3.z, group);
-
-								}
-
-							}
-
-						} else {
-
-							pushRenderItem(object, geometry, material, _vector3.z, null);
-
-
-						}
-
-					}
-
-				}
-
+		function projectObject(scene, camera) {
+			// PI_BEGIN Static object
+			if (!scene.needProjectObj && scene.mergeMaterail) {
+				_this.sortObjects = false;
+				return;
 			}
 
-			var children = object.children;
+			scene.transObjects.length = 0;
+			scene.opaqueObjects.length = 0;
+			// PI_END
 
-			for (var i = 0, l = children.length; i < l; i++) {
+			var __lightList = scene.lightList;
+			var __spriteList = scene.spriteList;
+			var __lensFlaresList = scene.lensFlaresList;
+			var __ImmediateList = scene.ImmediateList;
+			var __skeletonList = scene.skeletonList;
+			var __meshList = scene.meshList;
 
-				projectObject(children[i], camera);
+			// scene.resetBufferGm2D();
+			// scene.checkBufferGm2D(__meshList);
+
+			for (var i = 0; i < __lightList.length; i++) {
+				if (!__lightList[i].visible) continue;
+				if (__lightList[i].layers.test(camera.layers)) {
+					lights.push(__lightList[i]);
+				}
+			}
+
+			//sprite
+			for (var i = 0; i < __spriteList.length; i++) {
+				if (!__spriteList[i].visible) continue;
+				if (__spriteList[i].layers.test(camera.layers)) {
+					if (__spriteList[i].frustumCulled === false || isObjectViewable(__spriteList[i], camera) === true) {
+						sprites.push(__spriteList[i]);
+					}
+				}
+			}
+
+			//lensFlares
+			for (var i = 0; i < __lensFlaresList.length; i++) {
+				if (!__lensFlaresList[i].visible) continue;
+				if (__lensFlaresList[i].layers.test(camera.layers)) {
+					lensFlares.push(__lensFlaresList[i]);
+				}
+			}
+
+			//ImmediateRenderObject
+			for (var i = 0; i < __ImmediateList.length; i++) {
+				if (!__ImmediateList[i].visible) continue;
+				if (__ImmediateList[i].layers.test(camera.layers)) {
+					if (_this.sortObjects === true) {
+						_vector3.setFromMatrixPosition(__ImmediateList[i].matrixWorld);
+						_vector3.applyProjection(_projScreenMatrix);
+					}
+					pushRenderItem(scene, __ImmediateList[i], null, __ImmediateList[i].material, __ImmediateList[i].lightMap, _vector3.z, null);
+				}
+			}
+
+			//Skeleton			
+			for (var i = 0; i < __skeletonList.length; i++) {
+				if (!__skeletonList[i].visible) continue;
+				if (__skeletonList[i].layers.test(camera.layers)) {
+					__skeletonList[i].skeleton.update();
+				}
+			}
+
+			var __fun = function (object) {
+				// PI_BEGIN
+				if (!object.ready) return;
+				if (object.geometry instanceof THREE.BufferGeometry) {
+					if (!object.geometry.attributes.position) return;
+				}
+				// PI_END
+				if (object.frustumCulled === false || isObjectViewable(object, camera) === true) {
+					if (_this.sortObjects === true) {
+						if (object.geometry.boundingBox) {
+							object.geometry.boundingBox.center(_vector3);
+							_vector3.applyMatrix4(object.matrixWorld);
+						} else {
+							_vector3.setFromMatrixPosition(object.matrixWorld);
+						}
+						_vector3.applyProjection(_projScreenMatrix);
+					}
+					var geometry = objects.update(object);
+					var material = object.material;
+					var lightMap = object.lightMap;
+					if (Array.isArray(material)) {
+						var groups = geometry.groups;
+						for (var i = 0, l = groups.length; i < l; i++) {
+							var group = groups[i];
+							var groupMaterial = material[group.materialIndex];
+							var groupLightMap = lightMap ? lightMap[group.materialIndex] : null;
+							if (groupMaterial && groupMaterial.visible) {
+								pushRenderItem(scene, object, geometry, groupMaterial, groupLightMap, _vector3.z, group);
+							}
+						}
+					} else {
+						pushRenderItem(scene, object, geometry, material, lightMap, _vector3.z, null);
+					}
+				}
+			}
+
+			//THREE.Mesh THREE.Line THREE.Points			
+			for (var i = 0; i < __meshList.length; i++) {
+				// g2dUpdate 2d图片合并更新
+				//|| __meshList[i].g2dUpdate
+				if (!__meshList[i].visible) {
+					continue;
+				}
+				if (__meshList[i].layers.test(camera.layers)) {
+					__fun(__meshList[i]);
+				}
+			}
+
+
+
+			// if (!scene.visible) return;
+
+			// if (object.layers.test(camera.layers)) {
+
+			// 	if (object instanceof THREE.Light) {
+
+			// 		lights.push(object);
+
+			// 	} else if (object instanceof THREE.Sprite) {
+
+			// 		if (object.frustumCulled === false || isObjectViewable(object) === true) {
+
+			// 			sprites.push(object);
+
+			// 		}
+			// 	} else if (object instanceof THREE.LensFlare) {
+
+			// 		lensFlares.push(object);
+			// 	} else if (object instanceof THREE.ImmediateRenderObject) {
+
+			// 		if (_this.sortObjects === true) {
+
+			// 			_vector3.setFromMatrixPosition(object.matrixWorld);
+			// 			_vector3.applyProjection(_projScreenMatrix);
+
+			// 		}
+
+			// 		pushRenderItem(object, null, object.material, _vector3.z, null);
+
+			// 	} else if (object.skeleton && object.skeleton instanceof THREE.Skeleton) {
+			// 		// PI_BEGIN
+			// 		object.skeleton.update();
+			// 		// PI_END
+
+			// 	} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+			// 		// PI_BEGIN
+			// 		if (!object.ready) return;
+
+			// 		if (object.geometry instanceof THREE.BufferGeometry) {
+			// 			if (!object.geometry.attributes.position) return;
+			// 		}
+
+			// 		// PI_END
+			// 		if (object.frustumCulled === false || isObjectViewable(object) === true) {
+
+
+			// 			if (_this.sortObjects === true) {
+			// 				if (object.geometry.boundingBox) {
+			// 					object.geometry.boundingBox.center(_vector3);
+			// 					_vector3.applyMatrix4(object.matrixWorld);
+			// 				} else {
+			// 					_vector3.setFromMatrixPosition(object.matrixWorld);
+			// 				}
+			// 				_vector3.applyProjection(_projScreenMatrix);
+
+			// 			}
+
+			// 			var geometry = objects.update(object);
+
+			// 			var material = object.material;
+			// 			if (Array.isArray(material)) {
+			// 				var groups = geometry.groups;
+
+			// 				for (var i = 0, l = groups.length; i < l; i++) {
+
+			// 					var group = groups[i];
+			// 					var groupMaterial = material[group.materialIndex];
+
+			// 					if (groupMaterial && groupMaterial.visible) {
+
+			// 						pushRenderItem(object, geometry, groupMaterial, _vector3.z, group);
+
+			// 					}
+
+			// 				}
+
+			// 			} else {
+
+			// 				pushRenderItem(object, geometry, material, _vector3.z, null);
+
+
+			// 			}
+
+			// 		}
+
+			// 	}
+
+			// }
+
+			// var children = object.children;
+
+			// for (var i = 0, l = children.length; i < l; i++) {
+
+			// 	projectObject(children[i], camera);
+
+			// }
+
+		}
+
+
+		function renderGem2d(renderList, camera, fog) {
+
+			for (var i in renderList) {
+
+				var renderItem = renderList[i];
+				if (renderItem._isDestroy || !renderItem.material) continue;
+				var object = renderItem;
+
+				var geometry = objects.update(renderItem);
+
+				//var geometry = renderItem.geometry;
+
+				var material = renderItem.material;
+
+				var group = null;
+
+				object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
+				object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
+
+				_this.renderBufferDirect(camera, fog, geometry, material, object, group);
 
 			}
 
 		}
 
-		function renderObjects(renderList, camera, fog, overrideMaterial) {
+		function renderMergePlanes(renderList, camera, fog) {
+
+			for (var i in renderList) {
+				for (var e in renderList[i]) {
+					var renderItem = renderList[i][e];
+					if (renderItem._isDestroy || !renderItem.material || renderItem.visible === false) continue;
+					var object = renderItem;
+
+					var geometry = objects.update(renderItem);
+
+					//var geometry = renderItem.geometry;
+
+					var material = renderItem.material;
+
+					var group = null;
+
+					object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
+					object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
+
+					_this.renderBufferDirect(camera, fog, geometry, material, object, group);
+				}
+			}
+
+		}
+
+		function renderObjects(scene, renderList, camera, fog, overrideMaterial) {
 
 			for (var i = 0, l = renderList.length; i < l; i++) {
 
 				var renderItem = renderList[i];
-
 				var object = renderItem.object;
+				// PI_BEGIN
+				if (object.g2dSrc) continue;
+				// PI_END
 				var geometry = renderItem.geometry;
 				var material = overrideMaterial === undefined ? renderItem.material : overrideMaterial;
+				var lightMap = renderItem.lightMap;
 				var group = renderItem.group;
 
-				object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
-				object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
+				if (!scene.mergeMaterail || scene.needProjectObj) {
+					object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
+					object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
+				}
 
 				if (object instanceof THREE.ImmediateRenderObject) {
 
@@ -25469,7 +26546,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 				} else {
 
-					_this.renderBufferDirect(camera, fog, geometry, material, object, group);
+					_this.renderBufferDirect(camera, fog, geometry, material, lightMap, object, group);
 
 				}
 
@@ -25477,12 +26554,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
-		function initMaterial(material, fog, object) {
+		function initMaterial(material, lightMap, fog, object) {
 
 			var materialProperties = properties.get(material);
 
 			var parameters = programCache.getParameters(
-				material, _lights, fog, _numClippingPlanes, object);
+				material, lightMap, _lights, fog, object);
 
 			var code = programCache.getProgramCode(material, parameters);
 
@@ -25656,7 +26733,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		var _mat = new THREE.Matrix4();
 
-		function setProgram(camera, fog, material, object) {
+		function setProgram(camera, fog, material, lightMap, object) {
 
 			_usedTextureUnits = 0;
 
@@ -25703,7 +26780,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			if (material.needsUpdate) {
 
-				initMaterial(material, fog, object);
+				initMaterial(material, lightMap, fog, object);
 				material.needsUpdate = false;
 
 			}
@@ -25817,8 +26894,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 					for (var i = 0; i < object.boneIndexs.length; ++i) {
 						var m = skeleton.boneMatrices[object.boneIndexs[i]];
-						_mat.multiplyMatrices(m, object.matrix);
-						_mat.toArray(object.boneMatrices, i * 16);
+						if (m) {
+							_mat.multiplyMatrices(m, object.matrix);
+							_mat.toArray(object.boneMatrices, i * 16);
+						}
 					}
 
 					if (capabilities.floatVertexTextures && object.useVertexTexture) {
@@ -25867,7 +26946,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 					material instanceof THREE.MeshPhongMaterial ||
 					material instanceof THREE.MeshStandardMaterial ||
 					material instanceof THREE.MeshDepthMaterial) {
-
+					// refreshUniformsLightmap(m_uniforms, material);
 					refreshUniformsCommon(m_uniforms, material);
 
 				}
@@ -25929,6 +27008,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
+			if (lightMap) {
+
+				p_uniforms.set(_gl, lightMap, 'lightMap');
+				p_uniforms.set(_gl, lightMap, 'lightmapst');
+				p_uniforms.set(_gl, lightMap, 'lightMapIntensity');
+			}
 
 			// common matrices
 
@@ -25953,6 +27038,294 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			return program;
 
 		}
+		// PI_BEGIN material sort
+		function setObjectUniforms(program, camera, material, lightMap, object, isProgramChange) {
+			var p_uniforms = program.getUniforms();
+
+			if (isProgramChange || camera !== _currentCamera) {
+
+				p_uniforms.set(_gl, camera, 'projectionMatrix');
+
+				if (capabilities.logarithmicDepthBuffer) {
+
+					p_uniforms.setValue(_gl, 'logDepthBufFC',
+						2.0 / (Math.log(camera.far + 1.0) / Math.LN2));
+
+				}
+
+				// load material specific uniforms
+				// (shader material also gets them for the sake of genericity)
+
+				if (material instanceof THREE.ShaderMaterial ||
+					material instanceof THREE.MeshPhongMaterial ||
+					material instanceof THREE.MeshStandardMaterial ||
+					material.envMap) {
+
+					var uCamPos = p_uniforms.map.cameraPosition;
+
+					if (uCamPos !== undefined) {
+
+						uCamPos.setValue(_gl,
+							_vector3.setFromMatrixPosition(camera.matrixWorld));
+
+					}
+				}
+
+				if (material instanceof THREE.MeshPhongMaterial ||
+					material instanceof THREE.MeshLambertMaterial ||
+					material instanceof THREE.MeshBasicMaterial ||
+					material instanceof THREE.MeshStandardMaterial ||
+					material instanceof THREE.ShaderMaterial ||
+					material.skinning) {
+
+					p_uniforms.setValue(_gl, 'viewMatrix', camera.matrixWorldInverse);
+
+				}
+
+				p_uniforms.set(_gl, _this, 'toneMappingExposure');
+				p_uniforms.set(_gl, _this, 'toneMappingWhitePoint');
+
+			}
+
+			// PI_BEGIN
+			if (material.enableGray) {
+
+				p_uniforms.setOptional(_gl, object, 'isGray');
+
+			}
+			// PI_END
+
+			// skinning uniforms must be set even if material didn't change
+			// auto-setting of texture unit for bone texture must go before other textures
+			// not sure why, but otherwise weird things happen
+
+			if (material.skinning) {
+
+
+				var skeleton = object.skeletonRef;
+
+				if (skeleton) {
+
+					for (var i = 0; i < object.boneIndexs.length; ++i) {
+						var m = skeleton.boneMatrices[object.boneIndexs[i]];
+						if (m) {
+							_mat.multiplyMatrices(m, object.matrix);
+							_mat.toArray(object.boneMatrices, i * 16);
+						}
+					}
+
+					if (capabilities.floatVertexTextures && object.useVertexTexture) {
+						object.boneTexture.needsUpdate = true;
+						p_uniforms.set(_gl, object, 'boneTexture');
+						p_uniforms.set(_gl, object, 'boneTextureWidth');
+						p_uniforms.set(_gl, object, 'boneTextureHeight');
+					} else {
+						p_uniforms.setOptional(_gl, object, 'boneMatrices');
+					}
+
+				}
+
+			}
+
+			if (lightMap) {
+
+				p_uniforms.set(_gl, lightMap, 'lightMap');
+				p_uniforms.set(_gl, lightMap, 'lightmapst');
+				p_uniforms.set(_gl, lightMap, 'lightMapIntensity');
+			}
+
+			// common matrices
+
+			p_uniforms.set(_gl, object, 'modelViewMatrix');
+			p_uniforms.set(_gl, object, 'normalMatrix');
+			p_uniforms.setValue(_gl, 'modelMatrix', object.matrixWorld);
+
+
+			// dynamic uniforms
+			var materialProperties = properties.get(material);
+			var dynUniforms = materialProperties.dynamicUniforms;
+
+			if (dynUniforms !== null) {
+
+				THREE.WebGLUniforms.evalDynamic(
+					dynUniforms, m_uniforms, object, camera);
+
+				THREE.WebGLUniforms.upload(_gl, dynUniforms, m_uniforms, _this);
+
+			}
+
+		}
+
+		function setMaterialUniforms(camera, fog, material, isProgramChange, isMaterialChange) {
+			var materialProperties = properties.get(material);
+			var m_uniforms = materialProperties.__webglShader.uniforms;
+
+			var refreshMaterial = isProgramChange || isMaterialChange;
+			var refreshLights = isProgramChange;
+			if (camera !== _currentCamera) {
+
+				_currentCamera = camera;
+
+				// lighting uniforms depend on the camera so enforce an update
+				// now, in case this material supports lights - or later, when
+				// the next material that does gets activated:
+
+				refreshMaterial = true; // set to true on material change
+				refreshLights = true; // remains set until update done
+
+			}
+
+			if (refreshMaterial) {
+
+				if (material instanceof THREE.MeshPhongMaterial ||
+					material instanceof THREE.MeshLambertMaterial ||
+					material instanceof THREE.MeshStandardMaterial ||
+					material.lights) {
+
+					// the current material requires lighting info
+
+					// note: all lighting uniforms are always set correctly
+					// they simply reference the renderer's state for their
+					// values
+					//
+					// use the current material's .needsUpdate flags to set
+					// the GL state when required
+
+					markUniformsLightsNeedsUpdate(m_uniforms, refreshLights);
+
+				}
+
+				// refresh uniforms common to several materials
+
+				if (fog && material.fog) {
+
+					refreshUniformsFog(m_uniforms, fog);
+
+				}
+
+				if (material instanceof THREE.MeshBasicMaterial ||
+					material instanceof THREE.MeshLambertMaterial ||
+					material instanceof THREE.MeshPhongMaterial ||
+					material instanceof THREE.MeshStandardMaterial ||
+					material instanceof THREE.MeshDepthMaterial) {
+					// refreshUniformsLightmap(m_uniforms, material);
+					refreshUniformsCommon(m_uniforms, material);
+
+				}
+
+				// refresh single material specific uniforms
+
+				if (material instanceof THREE.LineBasicMaterial) {
+
+					refreshUniformsLine(m_uniforms, material);
+
+				} else if (material instanceof THREE.LineDashedMaterial) {
+
+					refreshUniformsLine(m_uniforms, material);
+					refreshUniformsDash(m_uniforms, material);
+
+				} else if (material instanceof THREE.PointsMaterial) {
+
+					refreshUniformsPoints(m_uniforms, material);
+
+				} else if (material instanceof THREE.MeshLambertMaterial) {
+
+					refreshUniformsLambert(m_uniforms, material);
+
+				} else if (material instanceof THREE.MeshPhongMaterial) {
+
+					refreshUniformsPhong(m_uniforms, material);
+
+				} else if (material instanceof THREE.MeshPhysicalMaterial) {
+
+					refreshUniformsPhysical(m_uniforms, material);
+
+				} else if (material instanceof THREE.MeshStandardMaterial) {
+
+					refreshUniformsStandard(m_uniforms, material);
+
+				} else if (material instanceof THREE.MeshDepthMaterial) {
+
+					if (material.displacementMap) {
+
+						m_uniforms.displacementMap.value = material.displacementMap;
+						m_uniforms.displacementScale.value = material.displacementScale;
+						m_uniforms.displacementBias.value = material.displacementBias;
+
+					}
+
+				} else if (material instanceof THREE.MeshNormalMaterial) {
+
+					m_uniforms.opacity.value = material.opacity;
+
+				} else if (material instanceof THREE.MeshParticlesMaterial) {
+					refreshUniformsCommon(m_uniforms, material);
+					refreshUniformsExtra(m_uniforms, material);
+				} else if (material instanceof THREE.MeshT4M3Material || material instanceof THREE.MeshT4M2Material) {
+					refreshUniformsTerraint(m_uniforms, material);
+				}
+
+				THREE.WebGLUniforms.upload(
+					_gl, materialProperties.uniformsList, m_uniforms, _this);
+
+			}
+		}
+
+		function setPiProgram(camera, fog, material, lightMap, object) {
+
+			_usedTextureUnits = 0;
+
+			var materialProperties = properties.get(material);
+			if (_clippingEnabled) {
+
+				if (_localClippingEnabled || camera !== _currentCamera) {
+
+					var useCache =
+						camera === _currentCamera &&
+						material.sortId === _currentMaterialId;
+
+					// we might want to call this function with some ClippingGroup
+					// object instead of the material, once it becomes feasible
+					// (#8465, #8379)
+					setClippingState(
+						material.clippingPlanes, material.clipShadows,
+						camera, materialProperties, useCache);
+
+				}
+
+				if (materialProperties.numClippingPlanes !== undefined &&
+					materialProperties.numClippingPlanes !== _numClippingPlanes) {
+
+					material.needsUpdate = true;
+
+				}
+
+			}
+
+			if (materialProperties.program === undefined) {
+
+				material.needsUpdate = true;
+
+			}
+
+			if (materialProperties.lightsHash !== undefined &&
+				materialProperties.lightsHash !== _lights.hash) {
+
+				material.needsUpdate = true;
+
+			}
+
+			if (material.needsUpdate) {
+
+				initMaterial(material, lightMap, fog, object);
+				material.needsUpdate = false;
+
+			}
+
+			var program = materialProperties.program;
+			return program;
+		}
+		// PI_END
 
 		function refreshUniformsTerraint(uniforms, material) {
 			uniforms._splat0.value = material._Splat0;
@@ -25967,12 +27340,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			uniforms._splat0st.value = material._splat0st;
 			uniforms._controlst.value = material._controlst;
 
-			if (material.lightMap)
-				uniforms.lightMap.value = material.lightMap;
-			if (material.lightmapst)
-				uniforms.lightmapst.value = material.lightmapst;
-			if (material.lightMapIntensity != undefined)
-				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+			// if(material.lightMap)
+			// 	uniforms.lightMap.value = material.lightMap;
+			// if(material.lightmapst)
+			// 	uniforms.lightmapst.value = material.lightmapst;
+			// if(material.lightMapIntensity != undefined)
+			// 	uniforms.lightMapIntensity.value = material.lightMapIntensity;
 		}
 
 		function refreshUniformsExtra(uniforms, material) {
@@ -26132,14 +27505,14 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
-		function refreshUniformsLightmap(uniforms, material) {
+		function refreshUniformsLightmap(uniforms, lightMap) {
 
-			if (material.lightMap) {
+			if (lightMap) {
 
-				uniforms.lightmapst.value.copy(material.lightmapst);
+				uniforms.lightmapst.value.copy(lightMap.mapst);
 
-				uniforms.lightMap.value = material.lightMap;
-				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+				uniforms.lightMap.value = lightMap.map;
+				uniforms.lightMapIntensity.value = lightMap.lightMapIntensity;
 
 			}
 
@@ -26147,12 +27520,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		function refreshUniformsLambert(uniforms, material) {
 
-			if (material.lightMap) {
+			// if ( material.lightMap ) {
 
-				uniforms.lightMap.value = material.lightMap;
-				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+			// 	uniforms.lightMap.value = material.lightMap;
+			// 	uniforms.lightMapIntensity.value = material.lightMapIntensity;
 
-			}
+			// }
 
 			if (material.emissiveMap) {
 
@@ -26167,12 +27540,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			uniforms.specular.value = material.specular;
 			uniforms.shininess.value = Math.max(material.shininess, 1e-4); // to prevent pow( 0.0, 0.0 )
 
-			if (material.lightMap) {
+			// if ( material.lightMap ) {
 
-				uniforms.lightMap.value = material.lightMap;
-				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+			// 	uniforms.lightMap.value = material.lightMap;
+			// 	uniforms.lightMapIntensity.value = material.lightMapIntensity;
 
-			}
+			// }
 
 			if (material.emissiveMap) {
 
@@ -26221,12 +27594,12 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
-			if (material.lightMap) {
+			// if ( material.lightMap ) {
 
-				uniforms.lightMap.value = material.lightMap;
-				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+			// 	uniforms.lightMap.value = material.lightMap;
+			// 	uniforms.lightMapIntensity.value = material.lightMapIntensity;
 
-			}
+			// }
 
 			if (material.emissiveMap) {
 
@@ -26645,18 +28018,36 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				_gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S, paramThreeToGL(texture.wrapS));
 				_gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T, paramThreeToGL(texture.wrapT));
 
+				// ######## PI_BEGIN - 压缩纹理
+				// if (texture.generateMipmaps) {
+				// 	switch(texture.minFilter) {
+				// 		case THREE.NearestFilter:
+				// 			texture.minFilter = THREE.NearestMipMapLinearFilter;
+				// 			break;
+				// 		case THREE.LinearFilter: 
+				// 			texture.minFilter = THREE.LinearMipMapLinearFilter;
+				// 			break;
+				// 	}
+				// }
 				// PI_BEGIN
-				if (texture.generateMipmaps) {
-					switch (texture.minFilter) {
-						case THREE.NearestFilter:
-							texture.minFilter = THREE.NearestMipMapLinearFilter;
-							break;
-						case THREE.LinearFilter:
-							texture.minFilter = THREE.LinearMipMapLinearFilter;
-							break;
+				if (texture instanceof THREE.CompressedTexture) {
+					texture.generateMipmaps = false;
+					texture.minFilter = !texture.minFilter ? 1006 : texture.minFilter < 1006 ? 1003 : 1006;
+					texture.magFilter = !texture.magFilter ? 1006 : texture.magFilter < 1006 ? 1003 : 1006;
+				} else {
+					if (texture.generateMipmaps) {
+						switch (texture.minFilter) {
+							case THREE.NearestFilter:
+								texture.minFilter = THREE.NearestMipMapLinearFilter;
+								break;
+							case THREE.LinearFilter:
+								texture.minFilter = THREE.LinearMipMapLinearFilter;
+								break;
+						}
 					}
 				}
 				// PI_END
+				// ######## PI_END - 压缩纹理
 
 				_gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER, paramThreeToGL(texture.magFilter));
 				_gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER, paramThreeToGL(texture.minFilter));
@@ -26718,9 +28109,17 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			state.activeTexture(_gl.TEXTURE0 + slot);
 			state.bindTexture(_gl.TEXTURE_2D, textureProperties.__webglTexture);
 
-			_gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
-			_gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
-			_gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+			// ######## PI_BEGIN - 压缩纹理
+			// _gl.pixelStorei( _gl.UNPACK_FLIP_Y_WEBGL, texture.flipY );
+			// _gl.pixelStorei( _gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha );
+			// _gl.pixelStorei( _gl.UNPACK_ALIGNMENT, texture.unpackAlignment );
+
+			if (!(texture instanceof THREE.CompressedTexture)) {
+				_gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
+				_gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
+				_gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+			}
+			// ######## PI_END - 压缩纹理
 
 			var image = clampToMaxSize(texture.image, capabilities.maxTextureSize);
 
@@ -27239,6 +28638,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 				renderTargetProperties.__webglFramebuffer = _gl.createFramebuffer();
 
+				//PI_BEGIN GUI
+				renderTarget.__webglFramebuffer = renderTargetProperties.__webglFramebuffer;
+				//PI_END GUI
 			}
 
 			// Setup color buffer
@@ -27520,24 +28922,54 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			}
 
-			extension = extensions.get('WEBGL_compressed_texture_pvrtc');
+			// ######## PI_BEGIN - 压缩纹理
+			// extension = extensions.get( 'WEBGL_compressed_texture_pvrtc' );
 
-			if (extension !== null) {
+			// if ( extension !== null ) {
 
-				if (p === THREE.RGB_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-				if (p === THREE.RGB_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
-				if (p === THREE.RGBA_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
-				if (p === THREE.RGBA_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+			// 	if ( p === THREE.RGB_PVRTC_4BPPV1_Format ) return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+			// 	if ( p === THREE.RGB_PVRTC_2BPPV1_Format ) return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+			// 	if ( p === THREE.RGBA_PVRTC_4BPPV1_Format ) return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+			// 	if ( p === THREE.RGBA_PVRTC_2BPPV1_Format ) return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+
+			// }
+
+			if (p === THREE.RGB_PVRTC_4BPPV1_Format || p === THREE.RGB_PVRTC_2BPPV1_Format ||
+				p === THREE.RGBA_PVRTC_4BPPV1_Format || p === THREE.RGBA_PVRTC_2BPPV1_Format) {
+
+				extension = extensions.get('WEBGL_compressed_texture_pvrtc');
+
+				if (extension !== null) {
+
+					if (p === THREE.RGB_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+					if (p === THREE.RGB_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+					if (p === THREE.RGBA_PVRTC_4BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+					if (p === THREE.RGBA_PVRTC_2BPPV1_Format) return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+
+				}
+			}
+			// ######## PI_END - 压缩纹理
+
+			// ######## PI_BEGIN - 压缩纹理
+
+			// extension = extensions.get( 'WEBGL_compressed_texture_etc1' );
+
+			// if ( extension !== null ) {
+
+			// 	if ( p === THREE.RGB_ETC1_Format ) return extension.COMPRESSED_RGB_ETC1_WEBGL;
+
+			// }
+
+			if (p === THREE.RGB_ETC1_Format) {
+
+				extension = extensions.get('WEBGL_compressed_texture_etc1');
+
+				if (extension !== null) {
+					return extension.COMPRESSED_RGB_ETC1_WEBGL;
+				}
 
 			}
-
-			extension = extensions.get('WEBGL_compressed_texture_etc1');
-
-			if (extension !== null) {
-
-				if (p === THREE.RGB_ETC1_Format) return extension.COMPRESSED_RGB_ETC1_WEBGL;
-
-			}
+			// ######## PI_END - 压缩纹理
 
 			extension = extensions.get('EXT_blend_minmax');
 
@@ -27639,7 +29071,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			this.dispatchEvent({
 				type: 'dispose'
 			});
-			this.texture.dispose();
 
 		}
 
@@ -27936,9 +29367,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	/**
 	 * @author mrdoob / http://mrdoob.com/
 	 */
-
-	THREE.WebGLGeometries = function (gl, properties, info) {
-
+	// PI_BEGIN VAO
+	THREE.WebGLGeometries = function (gl, properties, info, vaoExtension) {
+		// PI_END
 		var geometries = {};
 
 		function get(object) {
@@ -27948,8 +29379,8 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			if (geometries[geometry.id] === geometry) {
 				// PI_END
 				return geometries[geometry.id];
-
 			}
+
 
 			geometry.addEventListener('dispose', onGeometryDispose);
 
@@ -27982,6 +29413,17 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		function onGeometryDispose(event) {
 
 			var geometry = event.target;
+
+			// PI_BEGIN VAO
+			if (vaoExtension) {
+				var p = properties.get(geometry);
+				if (p && p._piVAO) {
+					vaoExtension.deleteVertexArrayOES(p._piVAO);
+				}
+				properties.delete(geometry);
+			}
+			// PI_END
+
 			var buffergeometry = geometries[geometry.id];
 
 			if (buffergeometry.index !== null) {
@@ -28166,17 +29608,27 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 * @author mrdoob / http://mrdoob.com/
 	 */
 
-	THREE.WebGLObjects = function (gl, properties, info) {
+	// PI_BEGIN VAO
+	THREE.WebGLObjects = function (gl, properties, info, vaoExtension) {
+		// PI_END
+		var geometries = new THREE.WebGLGeometries(gl, properties, info, vaoExtension);
 
-		var geometries = new THREE.WebGLGeometries(gl, properties, info);
-
-		//
+		// 
 
 		function update(object) {
 
 			// TODO: Avoid updating twice (when using shadowMap). Maybe add frame counter.
 
 			var geometry = geometries.get(object);
+
+			// PI_BEGIN VAO
+			if (vaoExtension) {
+				var p = properties.get(object.geometry);
+				if (p && !p._piVAO) {
+					p._piVAO = vaoExtension.createVertexArrayOES();
+				}
+			}
+			// PI_END
 
 			if (object.geometry instanceof THREE.Geometry) {
 
@@ -28188,15 +29640,16 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			var attributes = geometry.attributes;
 
 			if (index !== null) {
-
-				updateAttribute(index, gl.ELEMENT_ARRAY_BUFFER);
+				// PI_BEGIN VAO
+				updateAttribute(index, gl.ELEMENT_ARRAY_BUFFER, object);
+				// PI_END
 
 			}
 
 			for (var name in attributes) {
-
-				updateAttribute(attributes[name], gl.ARRAY_BUFFER);
-
+				// PI_BEGIN VAO
+				updateAttribute(attributes[name], gl.ARRAY_BUFFER, object);
+				// PI_END
 			}
 
 			// morph targets
@@ -28208,9 +29661,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				var array = morphAttributes[name];
 
 				for (var i = 0, l = array.length; i < l; i++) {
-
-					updateAttribute(array[i], gl.ARRAY_BUFFER);
-
+					// PI_BEGIN VAO
+					updateAttribute(array[i], gl.ARRAY_BUFFER, object);
+					// PI_END
 				}
 
 			}
@@ -28219,25 +29672,43 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
-		function updateAttribute(attribute, bufferType) {
-
+		// PI_BEGIN VAO
+		function updateAttribute(attribute, bufferType, object) {
+			// PI_END
 			var data = (attribute instanceof THREE.InterleavedBufferAttribute) ? attribute.data : attribute;
 
 			var attributeProperties = properties.get(data);
 
 			if (attributeProperties.__webglBuffer === undefined) {
-
-				createBuffer(attributeProperties, data, bufferType);
-
+				// PI_BEGIN VAO
+				if (vaoExtension) {
+					vaoExtension.bindVertexArrayOES(null);
+				}
+				createBuffer(attributeProperties, data, bufferType, object);
+				// PI_END	
 			} else if (attributeProperties.version !== data.version) {
-
+				// PI_BEGIN VAO
+				if (vaoExtension) {
+					vaoExtension.bindVertexArrayOES(null);
+				}
+				// PI_END
 				updateBuffer(attributeProperties, data, bufferType);
-
 			}
 
 		}
 
-		function createBuffer(attributeProperties, data, bufferType) {
+		// PI_BEGIN VAO
+		function createBuffer(attributeProperties, data, bufferType, object) {
+			// PI_END
+
+			// PI_BEGIN VAO
+			if (vaoExtension) {
+				var p = properties.get(object.geometry);
+				if (p && p._piVAO) {
+					p._piVAODirty = true;
+				}
+			}
+			// PI_END
 
 			attributeProperties.__webglBuffer = gl.createBuffer();
 			gl.bindBuffer(bufferType, attributeProperties.__webglBuffer);
@@ -28269,7 +29740,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				gl.bufferSubData(bufferType, data.updateRange.offset * data.array.BYTES_PER_ELEMENT,
 					data.array.subarray(data.updateRange.offset, data.updateRange.offset + data.updateRange.count));
 
-				data.updateRange.count = -1; // reset range
+				data.updateRange.count = 0; // reset range
 
 			}
 
@@ -29270,59 +30741,59 @@ _$define("pi/render3d/three", function (require, exports, module) {
 			}
 
 			gl.linkProgram(program);
+			//console.log(program);
+			// var programLog = gl.getProgramInfoLog( program );
+			// var vertexLog = gl.getShaderInfoLog( glVertexShader );
+			// var fragmentLog = gl.getShaderInfoLog( glFragmentShader );
 
-			var programLog = gl.getProgramInfoLog(program);
-			var vertexLog = gl.getShaderInfoLog(glVertexShader);
-			var fragmentLog = gl.getShaderInfoLog(glFragmentShader);
+			// var runnable = true;
+			// var haveDiagnostics = true;
 
-			var runnable = true;
-			var haveDiagnostics = true;
+			// // console.log( '**VERTEX**', gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( glVertexShader ) );
+			// // console.log( '**FRAGMENT**', gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( glFragmentShader ) );
 
-			// console.log( '**VERTEX**', gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( glVertexShader ) );
-			// console.log( '**FRAGMENT**', gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( glFragmentShader ) );
+			// if ( gl.getProgramParameter( program, gl.LINK_STATUS ) === false ) {
 
-			if (gl.getProgramParameter(program, gl.LINK_STATUS) === false) {
+			// 	runnable = false;
 
-				runnable = false;
+			// 	console.error( 'THREE.WebGLProgram: shader error: ', gl.getError(), 'gl.VALIDATE_STATUS', gl.getProgramParameter( program, gl.VALIDATE_STATUS ), 'gl.getProgramInfoLog', programLog, vertexLog, fragmentLog );
 
-				console.error('THREE.WebGLProgram: shader error: ', gl.getError(), 'gl.VALIDATE_STATUS', gl.getProgramParameter(program, gl.VALIDATE_STATUS), 'gl.getProgramInfoLog', programLog, vertexLog, fragmentLog);
+			// } else if ( programLog !== '' ) {
 
-			} else if (programLog !== '') {
+			// 	console.warn( 'THREE.WebGLProgram: gl.getProgramInfoLog()', programLog );
 
-				console.warn('THREE.WebGLProgram: gl.getProgramInfoLog()', programLog);
+			// } else if ( vertexLog === '' || fragmentLog === '' ) {
 
-			} else if (vertexLog === '' || fragmentLog === '') {
+			// 	haveDiagnostics = false;
 
-				haveDiagnostics = false;
+			// }
 
-			}
+			// if ( haveDiagnostics ) {
 
-			if (haveDiagnostics) {
+			// 	this.diagnostics = {
 
-				this.diagnostics = {
+			// 		runnable: runnable,
+			// 		material: material,
 
-					runnable: runnable,
-					material: material,
+			// 		programLog: programLog,
 
-					programLog: programLog,
+			// 		vertexShader: {
 
-					vertexShader: {
+			// 			log: vertexLog,
+			// 			prefix: prefixVertex
 
-						log: vertexLog,
-						prefix: prefixVertex
+			// 		},
 
-					},
+			// 		fragmentShader: {
 
-					fragmentShader: {
+			// 			log: fragmentLog,
+			// 			prefix: prefixFragment
 
-						log: fragmentLog,
-						prefix: prefixFragment
+			// 		}
 
-					}
+			// 	};
 
-				};
-
-			}
+			// }
 
 			// clean up
 
@@ -29465,8 +30936,10 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				// PI_BEGIN
 				var nVertexMatrices = Math.floor((nVertexUniforms - 60) / 4);
 				var maxBones = nVertexMatrices;
+				// PI_BEGIN boneIndexs
 				if (object && object.skeletonRef) {
-					if (maxBones < object.skeletonRef.boneIndexs.length) {
+					// PI_END boneIndexs
+					if (maxBones < object.boneIndexs.length) {
 						var info = 'Error, WebGLRenderer: too many bones - ' + object.skeletonRef.boneIndexs.length + ', this GPU supports just ' + maxBones;
 						alert(info);
 						console.log(info);
@@ -29510,7 +30983,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 		}
 
-		this.getParameters = function (material, lights, fog, object) {
+		this.getParameters = function (material, lightMap, lights, fog, object) {
 
 			var shaderID = shaderIDs[material.type];
 
@@ -29546,7 +31019,7 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				envMapMode: material.envMap && material.envMap.mapping,
 				envMapEncoding: getTextureEncodingFromMap(material.envMap, renderer.gammaInput),
 				envMapCubeUV: (!!material.envMap) && ((material.envMap.mapping === THREE.CubeUVReflectionMapping) || (material.envMap.mapping === THREE.CubeUVRefractionMapping)),
-				lightMap: !!material.lightMap,
+				lightMap: !!lightMap,
 				aoMap: !!material.aoMap,
 				emissiveMap: !!material.emissiveMap,
 				emissiveMapEncoding: getTextureEncodingFromMap(material.emissiveMap, renderer.gammaInput),
@@ -29575,7 +31048,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 				enableGray: material.enableGray,
 				// PI_END
 
-				lightMap: !!material.lightMap,
 				skinning: material.skinning,
 				maxBones: maxBones,
 				useVertexTexture: capabilities.floatVertexTextures && object && object.skeletonRef && object.useVertexTexture,
@@ -29751,29 +31223,30 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		}
 
 		return function WebGLShader(gl, type, string) {
-
+			var name = gl.canvas.getAttribute("canvasName");
+			if (!shaderCache[name]) shaderCache[name] = {};
 			// PI_BEGIN 加缓冲
-			var shader = shaderCache[string];
-			if (shader) return shader;
+			var shader = shaderCache[name][string];
+			if (shader && name == "main") return shader;
 
 			shader = gl.createShader(type);
-			shaderCache[string] = shader;
+			shaderCache[name][string] = shader;
 			// PI_END
 
 			gl.shaderSource(shader, string);
 			gl.compileShader(shader);
 
-			if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) === false) {
+			// if (gl.getShaderParameter(shader, gl.COMPILE_STATUS) === false) {
 
-				console.error('THREE.WebGLShader: Shader couldn\'t compile.');
+			// 	console.error('THREE.WebGLShader: Shader couldn\'t compile.');
 
-			}
+			// }
 
-			if (gl.getShaderInfoLog(shader) !== '') {
+			// if (gl.getShaderInfoLog(shader) !== '') {
 
-				console.warn('THREE.WebGLShader: gl.getShaderInfoLog()', type === gl.VERTEX_SHADER ? 'vertex' : 'fragment', gl.getShaderInfoLog(shader), addLineNumbers(string));
+			// 	console.warn('THREE.WebGLShader: gl.getShaderInfoLog()', type === gl.VERTEX_SHADER ? 'vertex' : 'fragment', gl.getShaderInfoLog(shader), addLineNumbers(string));
 
-			}
+			// }
 
 			// --enable-privileged-webgl-extension
 			// console.log( type, gl.getExtension( 'WEBGL_debug_shaders' ).getTranslatedShaderSource( shader ) );
@@ -29790,8 +31263,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	 * @author mrdoob / http://mrdoob.com/
 	 */
 
-	THREE.WebGLState = function (gl, extensions, paramThreeToGL) {
-
+	// PI_BEGIN VAO
+	THREE.WebGLState = function (gl, extensions, paramThreeToGL, vaoExtension) {
+		// PI_END
 		var _this = this;
 
 		var color = new THREE.Vector4();
@@ -29881,7 +31355,9 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			newAttributes[attribute] = 1;
 
-			if (enabledAttributes[attribute] === 0) {
+			// PI_BEGIN VAO
+			if (vaoExtension || enabledAttributes[attribute] === 0) {
+				// PI_END
 
 				gl.enableVertexAttribArray(attribute);
 				enabledAttributes[attribute] = 1;
@@ -29920,18 +31396,20 @@ _$define("pi/render3d/three", function (require, exports, module) {
 		};
 
 		this.disableUnusedAttributes = function () {
+			// PI_BEGIN VAO	
+			if (!vaoExtension) {
+				// PI_END
+				for (var i = 0, l = enabledAttributes.length; i < l; i++) {
 
-			for (var i = 0, l = enabledAttributes.length; i < l; i++) {
+					if (enabledAttributes[i] !== newAttributes[i]) {
 
-				if (enabledAttributes[i] !== newAttributes[i]) {
+						gl.disableVertexAttribArray(i);
+						enabledAttributes[i] = 0;
 
-					gl.disableVertexAttribArray(i);
-					enabledAttributes[i] = 0;
+					}
 
 				}
-
 			}
-
 		};
 
 		this.enable = function (id) {
@@ -29962,20 +31440,22 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 				compressedTextureFormats = [];
 
-				if (extensions.get('WEBGL_compressed_texture_pvrtc') ||
-					extensions.get('WEBGL_compressed_texture_s3tc') ||
-					extensions.get('WEBGL_compressed_texture_etc1')) {
+				var e = extensions.get('WEBGL_compressed_texture_pvrtc');
+				if (e) {
+					compressedTextureFormats.push(e.COMPRESSED_RGB_PVRTC_4BPPV1_IMG, e.COMPRESSED_RGB_PVRTC_2BPPV1_IMG, e.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, e.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG);
+				}
+				e = extensions.get('WEBGL_compressed_texture_etc1');
+				if (e) {
+					compressedTextureFormats.push(e.COMPRESSED_RGB_ETC1_WEBGL);
+				}
 
+				if (extensions.get('WEBGL_compressed_texture_s3tc')) {
 					var formats = gl.getParameter(gl.COMPRESSED_TEXTURE_FORMATS);
 
 					for (var i = 0; i < formats.length; i++) {
-
 						compressedTextureFormats.push(formats[i]);
-
 					}
-
 				}
-
 			}
 
 			return compressedTextureFormats;
@@ -30505,10 +31985,51 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			currentFlipSided = null;
 
+			// PI_BEGIN GUI
+			currentBlending = null;
+			currentBlendEquation = null;
+			currentBlendSrc = null;
+			currentBlendDst = null;
+			currentBlendEquationAlpha = null;
+			currentBlendSrcAlpha = null;
+			currentBlendDstAlpha = null;
+			currentPremultipledAlpha = false;
+
+			currentDepthFunc = null;
+			currentDepthWrite = null;
+
+			currentColorWrite = null;
+
+			currentStencilWrite = null;
+			currentStencilFunc = null;
+			currentStencilRef = null;
+			currentStencilMask = null;
+			currentStencilFail = null;
+			currentStencilZFail = null;
+			currentStencilZPass = null;
+
+			currentFlipSided = null;
+
+			currentLineWidth = null;
+
+			currentPolygonOffsetFactor = null;
+			currentPolygonOffsetUnits = null;
+
+			currentScissorTest = null;
+
+			currentTextureSlot = undefined;
+			currentBoundTextures = {};
+
+			currentClearColor = new THREE.Vector4(-999999, -999999, -999999, -999999);
+			currentClearDepth = null;
+			currentClearStencil = null;
+
+			currentScissor = new THREE.Vector4(-999999, -999999, -999999, -999999);
+			currentViewport = new THREE.Vector4(-999999, -999999, -999999, -999999);
+
+			// PI_END
 		};
-
 	};
-
 	// File:../dev/three/renderers/webgl/WebGLUniforms.js
 
 	/**
@@ -30655,39 +32176,96 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			// Single scalar
 
+			// PI_BEGIN 为1/2/3/4f-i加缓冲
 			setValue1f = function (gl, v) {
-				gl.uniform1f(this.addr, v);
+				if (this._piV1 === undefined) {
+					this._piV1 = Number.NaN;
+				}
+				if (this._piV1 != v) {
+					gl.uniform1f(this.addr, v);
+					this._piV1 = v;
+				}
 			},
+
 			setValue1i = function (gl, v) {
-				gl.uniform1i(this.addr, v);
+				if (this._piV1 === undefined) {
+					this._piV1 = Number.NaN;
+				}
+				if (this._piV1 !== v) {
+					gl.uniform1i(this.addr, v);
+					this._piV1 = v;
+				}
 			},
 
 			// Single float vector (from flat array or THREE.VectorN)
 
 			setValue2fv = function (gl, v) {
 
-				if (v.x === undefined) gl.uniform2fv(this.addr, v);
-				else gl.uniform2f(this.addr, v.x, v.y);
-
+				if (v.x === undefined) {
+					gl.uniform2fv(this.addr, v);
+				} else {
+					if (this._piV1 === undefined) {
+						this._piV1 = Number.NaN;
+						this._piV2 = Number.NaN;
+					}
+					if (this._piV1 !== v.x || this._piV2 !== v.y) {
+						gl.uniform2f(this.addr, v.x, v.y);
+						this._piV1 = v.x;
+						this._piV2 = v.y;
+					}
+				}
 			},
 
 			setValue3fv = function (gl, v) {
-
-				if (v.x !== undefined)
-					gl.uniform3f(this.addr, v.x, v.y, v.z);
-				else if (v.r !== undefined)
-					gl.uniform3f(this.addr, v.r, v.g, v.b);
-				else
+				if (v.x !== undefined) {
+					if (this._piV1 === undefined) {
+						this._piV1 = Number.NaN;
+						this._piV2 = Number.NaN;
+						this._piV3 = Number.NaN;
+					}
+					if (this._piV1 !== v.x || this._piV2 !== v.y || this._piV3 !== v.z) {
+						this._piV1 = v.x;
+						this._piV2 = v.y;
+						this._piV3 = v.z;
+						gl.uniform3f(this.addr, v.x, v.y, v.z);
+					}
+				} else if (v.r !== undefined) {
+					if (this._piV1 === undefined) {
+						this._piV1 = Number.NaN;
+						this._piV2 = Number.NaN;
+						this._piV3 = Number.NaN;
+					}
+					if (this._piV1 !== v.r || this._piV2 !== v.g || this._piV3 !== v.b) {
+						this._piV1 = v.r;
+						this._piV2 = v.g;
+						this._piV3 = v.b;
+						gl.uniform3f(this.addr, v.r, v.g, v.b);
+					}
+				} else {
 					gl.uniform3fv(this.addr, v);
-
+				}
 			},
 
 			setValue4fv = function (gl, v) {
-
-				if (v.x === undefined) gl.uniform4fv(this.addr, v);
-				else gl.uniform4f(this.addr, v.x, v.y, v.z, v.w);
-
+				if (v.x === undefined) {
+					gl.uniform4fv(this.addr, v);
+				} else {
+					if (this._piV1 === undefined) {
+						this._piV1 = Number.NaN;
+						this._piV2 = Number.NaN;
+						this._piV3 = Number.NaN;
+						this._piV4 = Number.NaN;
+					}
+					if (this._piV1 !== v.x || this._piV2 !== v.y || this._piV3 !== v.z || this._piV4 !== v.w) {
+						this._piV1 = v.x;
+						this._piV2 = v.y;
+						this._piV3 = v.z;
+						this._piV4 = v.w;
+						gl.uniform4f(this.addr, v.x, v.y, v.z, v.w);
+					}
+				}
 			},
+			// PI_END
 
 			// Single matrix (from flat array or MatrixN)
 
@@ -30711,21 +32289,32 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 			// Single texture (2D / Cube)
 
+			// PI_BEGIN 为纹理加缓冲
 			setValueT1 = function (gl, v, renderer) {
-
+				if (this._piV1 === undefined) {
+					this._piV1 = Number.NaN;
+				}
 				var unit = renderer.allocTextureUnit();
-				gl.uniform1i(this.addr, unit);
+				if (this._piV1 !== unit) {
+					this._piV1 = unit;
+					gl.uniform1i(this.addr, unit);
+				}
 				if (v) renderer.setTexture2D(v, unit);
-
 			},
 
 			setValueT6 = function (gl, v, renderer) {
-
+				if (this._piV1 === undefined) {
+					this._piV1 = Number.NaN;
+				}
 				var unit = renderer.allocTextureUnit();
-				gl.uniform1i(this.addr, unit);
+				if (this._piV1 !== unit) {
+					this._piV1 = unit;
+					gl.uniform1i(this.addr, unit);
+				}
 				if (v) renderer.setTextureCube(v, unit);
 
 			},
+			// PI_END
 
 			// Integer / Boolean vectors or arrays thereof (always flat arrays)
 
@@ -32755,6 +34344,49 @@ _$define("pi/render3d/three", function (require, exports, module) {
 	THREE.PlaneBufferGeometry.prototype = Object.create(THREE.BufferGeometry.prototype);
 	THREE.PlaneBufferGeometry.prototype.constructor = THREE.PlaneBufferGeometry;
 
+	// File:../dev/utils/geometries/CustomGeometry.js
+
+
+	// PI_BEGIN
+
+	THREE.CustomGeometry = function (vertices, uvs, indexs) {
+
+		THREE.BufferGeometry.call(this);
+
+		this.type = 'CustomGeometry';
+
+		this.parameters = {
+			vertices: vertices,
+			uvs: uvs,
+			indexs: indexs
+		}
+
+		var indexs = indexs ? indexs : [0, 1, 2, 0, 2, 3]
+		var indices = new Uint16Array(indexs.length)
+		for (var i = 0; i < indexs.length; i++) {
+			indices[i] = indexs[i]
+		}
+
+		var vertices = new Float32Array(this.parameters.vertices.length);
+		for (var i = 0; i < this.parameters.vertices.length; i++) {
+			vertices[i] = this.parameters.vertices[i]
+		}
+
+		var uvs = new Float32Array(this.parameters.uvs.length);
+		for (var i = 0; i < this.parameters.uvs.length; i++) {
+			uvs[i] = this.parameters.uvs[i]
+		}
+
+		this.setIndex(new THREE.BufferAttribute(indices, 1));
+		this.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+		this.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+	};
+
+	THREE.CustomGeometry.prototype = Object.create(THREE.BufferGeometry.prototype);
+	THREE.CustomGeometry.prototype.constructor = THREE.CustomGeometry;
+
+	// PI_END
 	// File:../dev/utils/geometries/CircleBufferGeometry.js
 
 	/**
@@ -33058,1022 +34690,6 @@ _$define("pi/render3d/three", function (require, exports, module) {
 
 	THREE.ImmediateRenderObject.prototype = Object.create(THREE.Object3D.prototype);
 	THREE.ImmediateRenderObject.prototype.constructor = THREE.ImmediateRenderObject;
-
-	// File:../dev/app/App.js
-
-	var APP = {};
-	// File:../dev/app/ByteBuffer.js
-
-	APP.ByteBuffer = function (arraybuffer, isLittleOrder) {
-		this.readIndex = 0;
-		this.isLittleOrder = isLittleOrder || true;
-		this.view = new DataView(arraybuffer);
-	};
-
-	APP.ByteBuffer.prototype = {
-
-		INT8_LEN: 1,
-		INT16_LEN: 2,
-		INT32_LEN: 4,
-		INT64_LEN: 8,
-
-		UINT8_LEN: 1,
-		UINT16_LEN: 2,
-		UINT32_LEN: 4,
-		UINT64_LEN: 8,
-
-		FLOAT32_LEN: 4,
-		FLOAT64_LEN: 8,
-
-		constructor: APP.ByteBuffer,
-
-		getReadIndex: function () {
-			return this.readIndex;
-		},
-
-		readInt8: function () {
-			var v = this.view.getInt8(this.readIndex);
-			this.readIndex += this.INT8_LEN;
-			return v;
-		},
-
-		readInt16: function () {
-			var v = this.view.getInt16(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.INT16_LEN;
-			return v;
-		},
-
-		readInt32: function () {
-			var v = this.view.getInt32(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.INT32_LEN;
-			return v;
-		},
-
-		readInt64: function () {
-			var v = this.view.getInt64(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.INT64_LEN;
-			return v;
-		},
-
-		readUint8: function () {
-			var v = this.view.getUint8(this.readIndex);
-			this.readIndex += this.UINT8_LEN;
-			return v;
-		},
-
-		readUint16: function () {
-			var v = this.view.getUint16(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.UINT16_LEN;
-			return v;
-		},
-
-		readUint32: function () {
-			var v = this.view.getUint32(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.UINT32_LEN;
-			return v;
-		},
-
-		readUint64: function () {
-			var v = this.view.getUint64(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.UINT64_LEN;
-			return v;
-		},
-
-		readFloat32: function () {
-			var v = this.view.getFloat32(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.FLOAT32_LEN;
-			return v;
-		},
-
-		readFloat64: function () {
-			var v = this.view.getFloat64(this.readIndex, this.isLittleOrder);
-			this.readIndex += this.FLOAT64_LEN;
-			return v;
-		},
-
-		readAsciiStr: function () {
-			var i, arr = [];
-			var size = this.readUint32();
-
-			for (i = 0; i < size; ++i) {
-				var c = this.readUint8();
-				if (c !== 0) {
-					c = String.fromCharCode(c);
-					arr.push(c);
-				}
-			}
-			return arr.join("");
-		},
-	};
-	// File:../dev/app/Detector.js
-
-
-	APP.Detector = {
-
-		canvas: !!window.CanvasRenderingContext2D,
-
-		webgl: (function () {
-
-			try {
-
-				var canvas = document.createElement('canvas');
-				return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-
-			} catch (e) {
-
-				return false;
-
-			}
-
-		})(),
-
-		workers: !!window.Worker,
-
-		fileapi: window.File && window.FileReader && window.FileList && window.Blob,
-
-		getWebGLErrorMessage: function () {
-
-			var element = document.createElement('div');
-			element.id = 'webgl-error-message';
-			element.style.fontFamily = 'monospace';
-			element.style.fontSize = '13px';
-			element.style.fontWeight = 'normal';
-			element.style.textAlign = 'center';
-			element.style.background = '#fff';
-			element.style.color = '#000';
-			element.style.padding = '1.5em';
-			element.style.width = '400px';
-			element.style.margin = '5em auto 0';
-
-			if (!this.webgl) {
-
-				element.innerHTML = window.WebGLRenderingContext ? [
-					'Your graphics card does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>.<br />',
-					'Find out how to get it <a href="http://get.webgl.org/" style="color:#000">here</a>.'
-				].join('\n') : [
-					'Your browser does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>.<br/>',
-					'Find out how to get it <a href="http://get.webgl.org/" style="color:#000">here</a>.'
-				].join('\n');
-
-			}
-
-			return element;
-
-		},
-
-		addGetWebGLMessage: function (parameters) {
-
-			var parent, id, element;
-
-			parameters = parameters || {};
-
-			parent = parameters.parent !== undefined ? parameters.parent : document.body;
-			id = parameters.id !== undefined ? parameters.id : 'oldie';
-
-			element = APP.Detector.getWebGLErrorMessage();
-			element.id = id;
-
-			parent.appendChild(element);
-
-		}
-
-	};
-	// File:../dev/app/Renderer.js
-
-	APP.Renderer = function () {
-
-	};
-
-	APP.Renderer.prototype = {
-
-		constructor: APP.Renderer,
-
-		init: function (width, height, ratio) {
-
-			height = height || 1;
-
-			if (!APP.Detector.webgl) {
-				APP.Detector.addGetWebGLMessage();
-				return false;
-			}
-
-			this._meshes = [];
-
-			this._scene = new THREE.Scene();
-
-			this._scene.add(new THREE.AmbientLight(new THREE.Color(1.0, 1.0, 1.0), 1.0));
-
-			this._container = document.getElementById('container');
-
-			this._stats = new window.Stats();
-			this._container.appendChild(this._stats.dom);
-
-			this._renderer = new THREE.WebGLRenderer({
-				antialias: true,
-				alpha: false
-			});
-
-			this._renderer.setSize(width, height);
-			this._renderer.setClearColor(0x7F7F7F);
-			this._renderer.setPixelRatio(ratio);
-			this._renderer.autoClear = true;
-			this._container.appendChild(this._renderer.domElement);
-
-			this._camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
-
-			this._axisHelper = new THREE.AxisHelper(300);
-			this._scene.add(this._axisHelper);
-
-			return true;
-		},
-
-		setSize: function (width, height) {
-			height = height || 1;
-
-			this._camera.aspect = width / height;
-			this._camera.updateProjectionMatrix();
-
-			this._renderer.setSize(width, height);
-		},
-
-		addScene: function (obj) {
-			if (obj instanceof THREE.PiMesh) {
-				this._meshes.push(obj);
-			}
-			this._scene.add(obj);
-		},
-
-		addUpdate: function (obj) {
-			if (obj instanceof THREE.PiMesh) {
-				this._meshes.push(obj);
-			}
-		},
-
-		removeScene: function (obj) {
-			var i, length = this._meshes.length;
-
-			this._scene.remove(obj);
-
-			if (obj instanceof THREE.PiMesh) {
-				for (i = 0; i < length; ++i) {
-					if (this._meshes[i] === obj) {
-						break;
-					}
-				}
-				if (i < length) {
-					this._meshes.splice(i, 1);
-				}
-			}
-		},
-
-		getDomElement: function () {
-			return this._renderer.domElement;
-		},
-
-		getCamera: function () {
-			return this._camera;
-		},
-
-		getScene: function () {
-			return this._scene;
-		},
-
-		getRenderer: function () {
-			return this._renderer;
-		},
-
-		update: function (deltaMS) {
-
-			for (var i = 0; i < this._meshes.length; ++i) {
-				this._meshes[i].update(deltaMS);
-			}
-
-			this._renderer.render(this._scene, this._camera);
-
-			this._stats.update();
-
-		}
-	};
-	// File:../dev/app/Demo.js
-
-
-	APP.Demo = function () {
-
-		// 检查webgl的可用性
-		if (!APP.Detector.webgl) {
-			APP.Detector.addGetWebGLMessage();
-			return false;
-		}
-
-		var w = 640;
-		var h = 960;
-
-		// var w = window.innerWidth;
-		// var h = window.innerHeight;
-
-		var camera3D = {
-			type: "Camera",
-			position: [0, 80, 80],
-			rotate: [-Math.PI / 4, 0, 0],
-			perspective: [45, w / h, 0.5, 10000]
-		};
-
-		var camera2D = {
-			type: "Camera",
-			ortho: [-w / 2, w / 2, h / 2, -h / 2, -10000, 10000]
-		};
-
-		var weapon = {
-			type: "Mesh",
-			config: "weapon/sword1.json",
-			parentBone: "R Weapon"
-		};
-
-		var wing = {
-			type: "Mesh",
-			config: "wing/chibang1.json",
-			parentBone: "WingBack"
-		};
-
-		var text = {
-			attachment: "2D",
-			type: "Text",
-			text: "主角",
-			position: [0, 60, 0],
-			material: {
-				fillStyle: "#000000",
-				strokeStyle: "#FF0000",
-				lineWidth: 3,
-				shadowColor: "gray",
-				shadowOffsetX: 3,
-				shadowOffsetY: 3,
-				shadowBlur: 10
-			}
-		};
-
-		var textBackGround = {
-			attachment: "2D",
-			type: "Mesh",
-			shape: "Quad",
-			rayID: 100,
-			width: 180,
-			height: 30,
-			position: [-90, 60, -1]
-		};
-
-		var bloodBack = {
-			attachment: "2D",
-			type: "Mesh",
-			shape: "Quad",
-			width: 130,
-			height: 10,
-			position: [-65, 20, 0], // 界面描述
-			texture: "res/blood.png"
-		};
-
-		var bloodFront = {
-			attachment: "2D",
-			type: "Mesh",
-			shape: "Quad",
-			width: 124,
-			height: 4,
-			scale: [1, 1, 1],
-			position: [-62, 18, 0.01],
-			color: 0xFFFF0000
-		};
-
-		var shadow = {
-			type: "Mesh",
-			shape: "Circle",
-			radius: 4,
-			position: [0, 0.05, 10],
-			rotate: [-Math.PI / 2, 0, 0],
-			color: 0x7f777777
-		};
-
-		var nodePlayerHead = {
-			type: "Node",
-			position: [0, 20, 0],
-			children: [text, textBackGround, bloodFront, bloodBack]
-		};
-
-		var player = {
-			config: "player/ay.json",
-			type: "Mesh",
-			position: [0, 0, 0],
-			rotate: [0, 0, 0],
-			scale: [0.1, 0.1, 0.1],
-			animationSpeed: 1.0,
-			animationLoop: "run",
-			children: [weapon, wing],
-			rayID: 1
-		};
-
-		var nodePlayer = {
-			type: "Node",
-			position: [0, 0, 0],
-			children: [player, nodePlayerHead]
-		};
-
-		var node = {
-			type: "Node",
-			position: [0, 0, 0],
-			children: [nodePlayer, shadow]
-			// children: []
-		};
-
-		var node2 = JSON.parse(JSON.stringify(node));
-		// node2.position[0] -= 20;
-		// node2.position[2] += 300;
-		// node2.children[0].children[0].rayID = 2;
-
-		var node3 = JSON.parse(JSON.stringify(node));
-		// node3.position[0] -= 20;
-		// node3.position[2] -= 300;
-		// node3.children[0].children[0].rayID = 3;
-
-		node.children.push(camera3D);
-
-		var pointLight = {
-			type: "PointLight",
-			position: [0, 40, 40],
-			startAtten: 1.0,
-			endAtten: 1000.0,
-			diffuse: [1.0, 1.0, 1.0],
-			specular: [0.0, 0.0, 0.0]
-		};
-
-		// nodePlayer.children.push(pointLight);
-
-		var spotLight = {
-
-			type: "SpotLight",
-			position: [0, 0, 40],
-
-			spotDirection: [0, -1, 0],
-			spotCosCutoff: 1.0,
-			spotExponent: 1.0,
-
-			startAtten: 1.0,
-			endAtten: 1000.0,
-
-			diffuse: [1.0, 1.0, 1.0],
-			specular: [0.0, 0.0, 0.0]
-		};
-
-		// nodePlayer.children.push(spotLight);
-
-		var container = document.getElementById('container');
-
-		var renderer = new THREE.PiRenderer(w, h, 1);
-		renderer.setClearColor(0xFFFFFFFF);
-		container.appendChild(renderer.getCanvas());
-
-		var sceneData = {
-
-			// terrain: {
-			// 	type: "Noise",   
-			// 	path: "1.json"   // 相对路径 res/terrain
-			// },
-
-			// skybox: [
-			// 		'res/skybox/px.jpg', // right
-			// 		'res/skybox/nx.jpg', // left
-			// 		'res/skybox/py.jpg', // top
-			// 		'res/skybox/ny.jpg', // bottom
-			// 		'res/skybox/pz.jpg', // back
-			// 		'res/skybox/nz.jpg'  // front
-			// ],
-
-			lights: [{
-				type: "Ambient",
-				color: 0xFFFFFF,
-				intensity: 1.0
-			}] // ,
-
-			// fog: {
-			// 	type: "Linear", // "Linear" or "Exp" -- exp对应density
-			// 	color: 0x7F7F7F,
-			// 	near: 5,
-			// 	far: 1000,
-			// 	density: 0.0001
-			// } 
-		};
-
-		var scene = renderer.createScene(sceneData);
-
-		scene.insert(node);
-		scene.insert(camera2D);
-		// scene.insert(node2);
-		// scene.insert(node3);
-		// scene.insert(camera3D);
-
-
-		// var dir = 1, originX = node.position[0], originZ = node.position[2];
-		// setInterval(function () {
-		// 	var isChangeDir;
-		// 	if (!node) return;
-		// 	if (node.position[0] < 0 || node.position[2] < 0) {
-		// 		isChangeDir = true;
-		// 	} else if (node.position[0] > originX + 400 || node.position[2] > originZ + 400) {
-		// 		isChangeDir = true;
-		// 	}
-
-		// 	if (isChangeDir) {
-		// 		isChangeDir = false;
-		// 		dir *= -1;
-
-		// 		player.rotate[1] += Math.PI;
-		// 		if (player.rotate[1] >= 2 * Math.PI) player.rotate[1] = 0;
-		// 		scene.modify(player, "rotate");
-		// 	}
-
-		// 	// node.position[0] += dir;
-		// 	node.position[2] += dir;
-
-		// 	scene.modify(node, "position");
-		// }, 50);
-
-		// var xDir = -1;
-		// setInterval(function () {
-
-		// 	if (!node) return;
-
-		// 	var x = bloodFront.scale[0];
-
-		// 	x -= 0.01;
-		// 	if (x < 0) {
-		// 		x = 1;
-		// 	}
-
-		// 	bloodFront.scale[0] = x;
-		// 	scene.modify(bloodFront, "scale");
-		// }, 100);
-
-		window.addEventListener('resize', onWindowResize, false);
-		window.addEventListener('keydown', onKeydown, false);
-		window.addEventListener('mousedown', onMouseDown, true);
-		window.addEventListener('contextmenu', onContextmenu, false);
-
-		var clock = new THREE.Clock();
-		render();
-
-		function render() {
-
-			requestAnimationFrame(render);
-
-			var delta = clock.getDelta();
-
-			scene.render(delta);
-		};
-
-		// 事件 处理函数
-
-		function onWindowResize() {}
-
-		function onContextmenu(event) {
-			event.preventDefault();
-		}
-
-		var nodes = [];
-		var curX = 0,
-			curZ = 0;
-
-		// setInterval(function () {
-		// 	while (nodes.length > 0) {
-		// 		var n = nodes.pop();
-		// 		scene.remove(n);
-		// 		curX--;
-		// 		curZ--;
-		// 	}
-		// 	scene.remove(node);
-		// 	scene.destroy();
-
-		// 	scene = renderer.createScene(sceneData);	
-		// 	scene.insert(node);
-		// 	scene.insert(camera2D);
-		// }, 2000)
-
-		function onKeydown(event) {
-
-			var key = String.fromCharCode(event.which);
-			if (key === "A") {
-				while (nodes.length > 0) {
-					var n = nodes.pop();
-					scene.remove(n);
-					curX--;
-					curZ--;
-				}
-				scene.remove(node);
-				scene.destroy();
-
-				scene = renderer.createScene(sceneData);
-				scene.insert(node);
-				scene.insert(camera2D);
-			} else if (key === "R") {
-				if (nodes.length > 0) {
-					var n = nodes.pop();
-					scene.remove(n);
-					curX--;
-					curZ--;
-				}
-			} else if (key === "I") {
-				var n = JSON.parse(JSON.stringify(node2));
-				n.position[0] += curX++;
-				n.position[2] += curZ++;
-				scene.insert(n);
-				nodes.push(n);
-			}
-		}
-
-		function onMouseDown(event) {
-			var x = event.clientX;
-			var y = event.clientY;
-
-			if (!node) return;
-
-			// 右键攻击
-			if (event.button === 2) {
-				// player.animationOnce = {value: "attack1"};
-				player.animationOnce = {
-					value: "fitting_b"
-				};
-				scene.modify(player, "animationOnce");
-
-				// setTimeout(function () {
-				// 	scene.remove(node);
-				// 	node = player = undefined;
-				// }, 800);
-
-				return;
-			}
-
-			var result = scene.raycast(x, y);
-
-			if (result) {
-				if (result.type === "terrain") {
-					// x = result.data[0];
-					// var z = result.data[2];
-
-					// player.lookatOnce = {
-					// 	value: [x, 0, z]
-					// };
-					// scene.modify(player, "lookatOnce");
-
-					// player.position[0] = x;
-					// player.position[2] = z;
-
-					// scene.modify(player, "position");
-				} else {
-					console.log("----------- raycast mesh = " + (result.id === player.rayID))
-				}
-			}
-		}
-	};
-	// File:../dev/app/MeshViewer.js
-
-
-
-	// 网格查看器 
-
-	APP.MeshViewer = function () {
-
-		var renderer = new APP.Renderer();
-		renderer.init(window.innerWidth, window.innerHeight, window.devicePixelRatio);
-
-		//var skHelpers = [];
-
-		var camera = renderer.getCamera();
-		var orbitControls = new THREE.OrbitControls(camera);
-
-		var clock = new THREE.Clock();
-
-		var loader = new THREE.XHRLoader();
-		loader.load("meshviewer.json", function (text) {
-			var json = JSON.parse(text);
-			loadMeshes(json);
-		});
-
-		var meshInfoDiv = document.createElement("div");
-		meshInfoDiv.style.color = '#FF0';
-		meshInfoDiv.style.position = "absolute";
-		meshInfoDiv.style.top = window.innerHeight / 2;
-		document.body.appendChild(meshInfoDiv);
-
-		render();
-
-		function render() {
-			requestAnimationFrame(render);
-
-			var delta = 1.0 * clock.getDelta();
-
-			// for (var i = 0; i < skHelpers.length; ++i) {
-			// 	skHelpers[i].update();	
-			// }
-
-			renderer.update(delta);
-		};
-
-		// 事件 处理函数
-
-		function onWindowResize() {
-
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize(window.innerWidth, window.innerHeight);
-
-		}
-
-		function getMeshInfo(mesh) {
-			var str = "";
-
-			if (mesh.skeleton) {
-				str += "骨头数：" + mesh.bones.length + "<br />";
-			}
-
-			var g = mesh.meshes[0].geometry;
-			str += "面数：" + (g.index.count / 3) + "； ";
-			var keys = Object.keys(g.attributes);
-			var k = keys[0];
-			str += "顶点数：" + g.attributes[k].count + "<br />";
-
-			return str;
-		}
-
-		function loadBind(mesh, json) {
-			var loader = new THREE.PiMeshLoader(renderer.getRenderer());
-			loader.load(json.mesh, function (m) {
-
-				mesh.bindBone(json.bone, m);
-
-				if (m.skeleton && json.animation) {
-					renderer.addUpdate(m);
-					m.play(json.animation);
-					m.setAnimSpeed(json.speed || 1.0);
-				}
-			});
-		}
-
-		function createCB(json, attachMesh) {
-			return function (m) {
-
-				m.setMaterialParams(json.material);
-
-				renderer.addScene(m);
-
-				var radius = 100;
-				camera.position.set(0.0, radius, radius * 3.5);
-				orbitControls.target.set(0, radius, 0);
-				orbitControls.update();
-
-				meshInfoDiv.innerHTML = getMeshInfo(m);
-
-				m.setAnimSpeed(json.speed || 1.0);
-
-				if (json.playUVAnim) {
-					m.playUVAnim(true);
-				}
-				if (json.playModelAnim) {
-					m.playModelAnim(true);
-				}
-				if (m.skeleton) {
-
-					if (json.animation) {
-						m.play(json.animation);
-					}
-
-					// var skHelper = new THREE.SkeletonHelper( m );
-					// skHelper.material.linewidth = 3;
-					// skHelper.visible = true;
-					// renderer.addScene( skHelper );
-					// skHelpers.push(skHelper);
-
-					if (json.binds) {
-						for (var i = 0; i < json.binds.length; ++i) {
-							loadBind(m, json.binds[i]);
-						}
-					}
-				}
-
-				if (attachMesh) {
-					m.attachSkeleton(attachMesh);
-				}
-			}
-		};
-
-		function loadMeshes(jsons) {
-
-			var meshes = [];
-			for (var i = 0; i < jsons.length; ++i) {
-				var json = jsons[i];
-
-				var mesh = new THREE.PiMesh();
-				meshes.push(mesh);
-
-				var loader = new THREE.PiMeshLoader(renderer.getRenderer(), mesh);
-				var a = json.skAttachIndex !== undefined ? meshes[json.skAttachIndex] : undefined;
-				loader.load(json.mesh, createCB(json, a));
-			}
-		}
-	};
-	// File:../dev/app/TerrainViewer.js
-
-
-	APP.TerrainGui = function (params) {
-		var scope = this;
-
-		var TERRAIN_PATH = "res/terrain/";
-
-		scope._params = params;
-
-		scope._gui = new window.dat.GUI();
-		scope._terrainFolder = scope._gui.addFolder("地形");
-		scope._blendFolder = scope._gui.addFolder("噪音");
-
-		params.blend.updateSeed1 = function () {
-			params.blend.seed[0] = 256 * Math.random();
-		};
-
-		params.blend.updateSeed2 = function () {
-			params.blend.seed[1] = 256 * Math.random();
-		};
-
-		params.blend.updateSeed3 = function () {
-			params.blend.seed[2] = 256 * Math.random();
-		};
-
-		params["保存"] = function () {
-
-			var json = JSON.parse(JSON.stringify(params));
-
-			var name = TERRAIN_PATH + json.fileName;
-			delete json.fileName;
-
-			var loader = new THREE.XHRLoader();
-			loader.post(name, json, function () {
-				alert("保存成功");
-			});
-		};
-
-		scope._terrainFolder.add(params, "保存");
-
-		scope._terrainFolder.add(params, "fileName");
-
-		scope._terrainFolder.add(params, "width");
-		scope._terrainFolder.add(params, "height");
-
-		scope._terrainFolder.add(params, "image1");
-		scope._terrainFolder.add(params, "image2");
-		scope._terrainFolder.add(params, "image3");
-
-		scope._blendFolder.add(params.blend, "width");
-		scope._blendFolder.add(params.blend, "height");
-
-		scope._blendFolder.add(params.blend, "updateSeed1").onChange(updateSeed);
-		scope._blendFolder.add(params.blend, "updateSeed2").onChange(updateSeed);
-		scope._blendFolder.add(params.blend, "updateSeed3").onChange(updateSeed);
-
-		scope._blendFolder.add(params.blend, 'frequency1', 1, 20).step(1.0).onChange(updateFrequency);
-		scope._blendFolder.add(params.blend, 'frequency2', 1, 20).step(1.0).onChange(updateFrequency);
-		scope._blendFolder.add(params.blend, 'frequency3', 1, 20).step(1.0).onChange(updateFrequency);
-
-		scope._blendFolder.add(params.blend, 'constCoff1', 0.0, 1.0).step(0.1).onChange(updateCoff);
-		scope._blendFolder.add(params.blend, 'linearCoff1', 0.0, 1.0).step(0.1).onChange(updateCoff);
-
-		scope._blendFolder.add(params.blend, 'constCoff2', 0.0, 1.0).step(0.1).onChange(updateCoff);
-		scope._blendFolder.add(params.blend, 'linearCoff2', 0.0, 1.0).step(0.1).onChange(updateCoff);
-
-		params.blend.oneClamp = params.blend.oneClamp || 0.1;
-		params.blend.zeroClamp = params.blend.zeroClamp || 0.01;
-		params.blend.middleValue = params.blend.middleValue || 0.8;
-
-		scope._blendFolder.add(params.blend, 'oneClamp', 0.0, 1.0).step(0.1).onChange(updateClamp);
-
-		scope._blendFolder.add(params.blend, 'zeroClamp', 0.0, 1.0).step(0.1).onChange(updateClamp);
-
-		scope._blendFolder.add(params.blend, 'middleValue', 0.0, 1.0).step(0.1).onChange(updateClamp);
-
-
-		scope._blendFolder.open();
-
-		function updateSeed() {
-			var data = {
-				detail: {
-					data: [params.blend.seed[0], params.blend.seed[1], params.blend.seed[2]]
-				}
-			};
-			window.dispatchEvent(new CustomEvent('update-seed', data));
-		};
-
-		function updateFrequency() {
-			var data = {
-				detail: {
-					data: [params.blend.frequency1, params.blend.frequency2, params.blend.frequency3]
-				}
-			};
-			window.dispatchEvent(new CustomEvent('update-frequency', data));
-		};
-
-		function updateCoff() {
-			var data = {
-				detail: {
-					data: [params.blend.constCoff1, params.blend.linearCoff1, params.blend.constCoff2, params.blend.linearCoff2]
-				}
-			};
-			window.dispatchEvent(new CustomEvent('update-coff', data));
-		};
-
-		function updateClamp() {
-			var data = {
-				detail: {
-					data: [params.blend.oneClamp, params.blend.zeroClamp, params.blend.middleValue]
-				}
-			};
-			window.dispatchEvent(new CustomEvent('update-clamp', data));
-		};
-	};
-
-	APP.TerrainGui.prototype = {
-
-		constructor: APP.TerrainGui
-
-	};
-
-	APP.TerrainViewer = function () {
-
-		var TERRAIN_PATH = "res/terrain/";
-
-		var renderer = new APP.Renderer();
-		renderer.init(window.innerWidth, window.innerHeight, window.devicePixelRatio);
-
-		var camera = renderer.getCamera();
-		var orbitControls = new THREE.OrbitControls(camera);
-		camera.position.set(-100, 100, 300);
-		orbitControls.target.set(0, 0, 0);
-		orbitControls.update();
-
-		// 地形
-
-		var terrain, terrainLoader = new THREE.TerrainLoader(renderer.getRenderer());
-		var fileName = "1.json";
-		terrainLoader.load(fileName, function (t) {
-			terrain = t;
-			renderer.addScene(terrain);
-		});
-
-		var gui, loader = new THREE.XHRLoader();
-		loader.load(TERRAIN_PATH + fileName, function (text) {
-			var json = JSON.parse(text);
-			json.fileName = fileName;
-			gui = APP.TerrainGui(json);
-		});
-
-		window.addEventListener('resize', onWindowResize, false);
-		window.addEventListener('update-seed', onUpdateSeed, false);
-		window.addEventListener('update-frequency', onUpdateFrequency, false);
-		window.addEventListener('update-coff', onUpdateCoff, false);
-		window.addEventListener('update-clamp', onUpdateClamp, false);
-
-		render();
-
-		function render() {
-
-			requestAnimationFrame(render);
-
-			renderer.update(0);
-		};
-
-		// 事件 处理函数
-
-		function onWindowResize() {
-			renderer.setSize(window.innerWidth, window.innerHeight);
-		}
-
-		function onUpdateSeed(event) {
-			var data = event.detail.data;
-			terrain.setBlendSeed(data[0], data[1], data[2], data[3]);
-			terrain.updateBlend(renderer.getRenderer());
-		}
-
-		function onUpdateFrequency(event) {
-			var data = event.detail.data;
-			terrain.setBlendFrequency(data[0], data[1], data[2]);
-			terrain.updateBlend(renderer.getRenderer());
-		}
-
-		function onUpdateCoff(event) {
-			var data = event.detail.data;
-			terrain.setBlendCoff(data[0], data[1], data[2], data[3]);
-			terrain.updateBlend(renderer.getRenderer());
-		}
-
-		function onUpdateClamp(event) {
-			var data = event.detail.data;
-			terrain.setBlendClamp(data[0], data[1], data[2]);
-			terrain.updateBlend(renderer.getRenderer());
-		}
-	};
 
 	exports.THREE = THREE;
 });

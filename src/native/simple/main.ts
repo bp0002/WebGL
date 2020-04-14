@@ -43,12 +43,47 @@ canvas.style.transform = 'scale(0.5)';
 
 RenderLauncher.active(canvas, null);
 
+let downFlag: boolean = true;
+let lastX: number = 0;
+let lastY: number = 0;
+let rotateX: number = 0;
+canvas.addEventListener(
+    'pointerdown',
+    (e: PointerEvent) => {
+        downFlag = true;
+
+    }
+);
+canvas.addEventListener(
+    'pointermove',
+    (e: PointerEvent) => {
+        if (downFlag) {
+
+        }
+    }
+);
+canvas.addEventListener(
+    'pointerup',
+    (e: PointerEvent) => {
+        if (downFlag) {
+
+        }
+    }
+);
+
+setInterval(() => {
+    if (RenderLauncher.mesh) {
+        RenderLauncher.mesh.rotate[0] += 0.02;
+    }
+}, 16);
+
 createButton(
     'polygon',
     (arg: string) => {
         // const reg = /edgeCount:(.+)-()/;
         // const resResult = arg.match(reg);
         if (arg && RenderLauncher.mesh) {
+            RenderLauncher.mesh.scale[0] = 0.5;
             const dataBuffer01 = RenderLauncher.mesh.dataBufferCfg;
             dataBuffer01.clearVertex();
             dataBuffer01.clearColor();

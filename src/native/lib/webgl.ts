@@ -1,9 +1,23 @@
+
+import { Vector3, Matrix } from '../../babylon_math/Maths/math';
 /**
  * WEBGL 基本处理
  */
 
 export interface WebGLInstanceOpt {
     canvas: HTMLCanvasElement;
+}
+
+export class Camera {
+    public position: Vector3 = new Vector3(0, 0, 0);
+    public target: Vector3 = new Vector3(0, 0, -1);
+    public up: Vector3 = new Vector3(0, 1, 0);
+    private _matrix: Matrix = new Matrix();
+    public getMatrix() {
+        Matrix.LookAtLHToRef(this.position, this.target, this.up, this._matrix);
+        return this._matrix;
+    }
+    public static Default: Camera = new Camera();
 }
 
 export class ShaderCfg {
@@ -13,6 +27,7 @@ export class ShaderCfg {
     public vshader: WebGLShader | undefined    ;
     public fshader: WebGLShader | undefined    ;
     public programe: WebGLProgram | undefined  ;
+    public u_view_matrix_loc: WebGLUniformLocation | undefined ;
     public u_time_loc: WebGLUniformLocation | undefined        ;
     public u_mouse_loc: WebGLUniformLocation | undefined       ;
     public u_resolution_loc: WebGLUniformLocation | undefined  ;
@@ -50,6 +65,8 @@ export class ShaderCfg {
         }
 
         gl.useProgram(<WebGLProgram>this.shader_program);
+
+        this.u_view_matrix_loc  = <WebGLUniformLocation>gl.getUniformLocation(<WebGLProgram>this.shader_program, `u_ViewMatrix`);
 
         this.u_mouse_loc        = <WebGLUniformLocation>gl.getUniformLocation(<WebGLProgram>this.shader_program, `u_mouse`);
 
@@ -375,7 +392,7 @@ export class Mesh {
     public texture: TextureInstance | null;
     public wireFrame: boolean = false;
     public pointFrame: boolean = false;
-    public triangleFrame: boolean = false;
+    public triangleFrame: boolean = true;
     public maskTexture: TextureInstance | null;
     public alphaMode: number = 0;
     public readonly dataBufferCfg: DataBufferCfg;
@@ -409,14 +426,16 @@ export class Mesh {
                 return;
             }
         } else {
-            gl.bindTexture(gl.TEXTURE0, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
         }
 
         shader.getPrograme(gl);
 
-        <WebGLUniformLocation>shader.u_mouse_loc    && gl.uniform2fv(<WebGLUniformLocation>shader.u_mouse_loc,    scene.engine.u_mouse);
-        <WebGLUniformLocation>shader.u_time_loc     && gl.uniform1f(<WebGLUniformLocation>shader.u_time_loc,      scene.engine.timestamp * 0.001);
-        <WebGLUniformLocation>shader.u_float_loc    && gl.uniform1f(<WebGLUniformLocation>shader.u_float_loc,      this.ufloat);
+        const camera = scene.camera || Camera.Default;
+        <WebGLUniformLocation>shader.u_view_matrix_loc  && gl.uniformMatrix4fv(<WebGLUniformLocation>shader.u_view_matrix_loc,  false,  <any>camera.getMatrix().m);
+        <WebGLUniformLocation>shader.u_mouse_loc        && gl.uniform2fv(<WebGLUniformLocation>shader.u_mouse_loc,    scene.engine.u_mouse);
+        <WebGLUniformLocation>shader.u_time_loc         && gl.uniform1f(<WebGLUniformLocation>shader.u_time_loc,      scene.engine.timestamp * 0.001);
+        <WebGLUniformLocation>shader.u_float_loc        && gl.uniform1f(<WebGLUniformLocation>shader.u_float_loc,      this.ufloat);
 
         <WebGLUniformLocation>shader.u_resolution_loc   && gl.uniform2f(<WebGLUniformLocation>shader.u_resolution_loc, scene.engine.width,  scene.engine.height);
         <WebGLUniformLocation>shader.u_translate_loc    && gl.uniform3f(<WebGLUniformLocation>shader.u_translate_loc,  this.translate[0],  this.translate[1],  this.translate[2]);
@@ -499,9 +518,13 @@ export class Scene {
     public readonly engine: WebGLInstance;
     public readonly viewport:   number[] = [0, 0, 0, 0];
     public readonly meshMap:    Map<string, Mesh> = new Map();
+    public camera!: Camera;
     constructor(sname: string, engine: WebGLInstance) {
         this.sname  = sname;
         this.engine = engine;
+    }
+    public setCamera(cam: Camera) {
+        this.camera = cam;
     }
     public addMesh(mesh: Mesh) {
         this.meshMap.set(mesh.id, mesh);

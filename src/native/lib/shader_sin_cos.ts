@@ -3,10 +3,11 @@ export const vs_sin_cos = `
 precision mediump float;
 #endif
 attribute   vec2    a_position;
+uniform     mat4    u_ViewMatrix;
 varying     vec2    v_surfacePosition;
 
 void main( void ){
-    gl_Position = vec4( a_position, 0., 1. );
+    gl_Position = u_ViewMatrix * vec4( a_position, 0., 1. );
     v_surfacePosition      = a_position;
 }
 `;

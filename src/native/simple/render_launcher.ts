@@ -112,7 +112,7 @@ export class RenderLauncher {
         mesh01.translate[1] = 0.0;
         mesh01.scale[0] = 1.0;
         mesh01.scale[1] = 1.0;
-        mesh01.rotate[0] = 1.57;
+        // mesh01.rotate[0] = 1.57;
         mesh01.wireFrame = true;
         mesh01.pointFrame = true;
         // mesh01.triangleFrame = true;

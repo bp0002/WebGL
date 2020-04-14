@@ -5,8 +5,10 @@ precision mediump float;
 
 attribute   vec2    a_position;
 
+uniform     mat4    u_ViewMatrix;
+
 void main( void ){
-    gl_Position = vec4( a_position, 0., 1. );
+    gl_Position = u_ViewMatrix * vec4( a_position, 0., 1. );
 }
 `;
 export const fs_progress = `
@@ -15,6 +17,7 @@ precision mediump float;
 #endif
 
 uniform  float u_float;
+
 uniform  vec2 u_resolution;
 
 void main(void){

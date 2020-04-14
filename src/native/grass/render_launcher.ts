@@ -1,4 +1,4 @@
-import { WebGLInstance, WebGLInstanceOpt, ShaderCfg, Scene, DataBufferCfg, Mesh, TextureInstance } from "../lib/webgl";
+import { WebGLInstance, WebGLInstanceOpt, ShaderCfg, Scene, DataBufferCfg, Mesh, TextureInstance, Camera } from "../lib/webgl";
 import { vs_multi_line_diff_speed, fs_multi_line_diff_speed } from "../lib/shader_multi_line_diff_speed";
 import { vs_sin_cos, fs_sin_cos } from "../lib/shader_sin_cos";
 import { vs_multi_line_cross, fs_multi_line_cross } from "../lib/shader_multi_line_cross";
@@ -138,12 +138,20 @@ export class RenderLauncher {
         meshicon.scale[1] = 1.0;
         meshicon.texture = RenderLauncher.webgldemo.createTexture('/resources/grass.jpg');
         meshicon.maskTexture = RenderLauncher.webgldemo.createTexture('/resources/grass_mark.jpg', 1);
+        meshicon.triangleFrame = true;
         scene05.addMesh(meshicon);
 
         scene05.viewport[0] = 0;
         scene05.viewport[1] = 0;
         scene05.viewport[2] = RenderLauncher.webgldemo.width;
         scene05.viewport[3] = RenderLauncher.webgldemo.height;
+
+        const camera = new Camera();
+        scene05.setCamera(camera);
+        camera.position.x = 0.25;
+        camera.position.y = 0.25;
+        camera.position.z = 0.25;
+        // camera.position.z = -1;
 
         webgldemo.renderLoop = (timestamp: number) => {
             webgldemo.clearColor();
