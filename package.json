@@ -5,6 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "lint": "tslint --fix './src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "native_progress": "webpack --config webpack.native.progress.js",
     "native_grass": "webpack --config webpack.native.grass.js",
@@ -18,10 +19,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "browserify": "^16.3.0",
     "clean-webpack-plugin": "^3.0.0",
+    "eslint": "^6.8.0",
     "gulp": "^4.0.2",
     "gulp-typescript": "^5.0.1",
     "html-webpack-plugin": "^3.2.0",
