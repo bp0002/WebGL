@@ -66,6 +66,16 @@ export interface IPolygonData {
 }
 
 export class MouseTrial {
+    /**
+     * 消失速度
+     */
+    public static UpdateSpeed: number = 1;
+    /**
+     * 正常消失过程最少关键点数 - 关键点数超过该值，则消失速度应用 UpdateSpeed
+     */
+    public static MinCount: number = 8;
+
+    // 三次插值线条
     public static cubicInterpolation(array: number[], t: number, tangentFactor?: number) {
         if (tangentFactor == null) {
             tangentFactor = 1;
@@ -90,6 +100,7 @@ export class MouseTrial {
         if (k > arr.length - 1) { k = arr.length - 1; }
         return arr[k];
     }
+    // 插值线条结果创建丝带顶点/三角形数据
     public static ribbon_from_line2(points: [number, number][], deltaAngle: number, deltaAngleFunction?: (x: number) => number, weightFunction?: (x: number) => number, widthScaleHeight: number = 1) {
 
         const result: IPolygonData = {
@@ -176,6 +187,7 @@ export class MouseTrial {
 
         return result;
     }
+    // 丝带三角形数据
     public static sphereRibbon(pointStartIndex: number, pointCount: number): [number, number, number][] {
         const faces: [number, number, number][] = [];
 
@@ -196,20 +208,54 @@ export class MouseTrial {
 
         return faces;
     }
+    /**
+     * down事件标识
+     */
+    public downFlag: boolean = false;
+    /**
+     * 当前事件点
+     */
     private currX: number = 0;
+    /**
+     * 当前事件点
+     */
     private currY: number = 0;
+    /**
+     * 插值点列表
+     */
     private points: [number, number][] = [];
-    private downFlag: boolean = false;
-    private historyX: number[] = [];
-    private historyY: number[] = [];
+    /**
+     * 事件点记录列表
+     */
+    private historyX: number[] = [0, 0, 0, 0, 0];
+    /**
+     * 事件点记录列表
+     */
+    private historyY: number[] = [0, 0, 0, 0, 0];
+    /**
+     * 插值点数量
+     */
     public ropeSize: number = 100;
-    public historySize: number = 30;
+    /**
+     * 事件点记录数量
+     */
+    public historySize: number = 20;
     public mesh: Mesh | null = null;
     public gl: WebGLRenderingContext;
+    public weight: number = 10;
     public mistake: number = 5;
-    constructor(mesh: Mesh, gl: WebGLRenderingContext) {
+    private canvasWidth: number;
+    private canvasHeight: number;
+    /**
+     * 颜色rgb
+     */
+    public color: [number, number, number];
+    constructor(mesh: Mesh, gl: WebGLRenderingContext, canvasWidth: number, canvasHeight: number) {
         this.mesh = mesh;
         this.gl = gl;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.color = [1, 0, 0];
 
         // Create rope points.
         for (let i = 0; i < this.ropeSize; i++) {
@@ -222,22 +268,37 @@ export class MouseTrial {
             this.historyY.push(0);
         }
     }
+    /**
+     * 丝带从尾部到头部宽度变化函数
+     */
     public weightFunction = (x: number) => {
-        return Math.sin(x * Math.PI) * 0.01;
+        return Math.sin(Math.PI * x) * 3 * this.weight / this.canvasWidth;
     }
-    public update = () => {
+
+    public setTexture(img: HTMLImageElement){
+
+    }
+    /**
+     * 点数据更新
+     */
+    public update = (speed: number = 1) => {
         let flag = true;
 
-        const lastX = this.historyX.pop();
-        if (lastX !== this.currX || this.downFlag) {
-            this.historyX.unshift(this.currX);
-        }
-        const lastY = this.historyY.pop();
-        if (lastY !== this.currY || this.downFlag) {
-            this.historyY.unshift(this.currY);
-        }
+        // const lastX = this.historyX.pop();
+        // if (lastX !== this.currX || this.downFlag) {
+        //     this.historyX.unshift(this.currX);
+        // }
+        // const lastY = this.historyY.pop();
+        // if (lastY !== this.currY || this.downFlag) {
+        //     this.historyY.unshift(this.currY);
+        // }
+        this.updatePoints(speed);
 
-        flag = this.historyY.length >= 4;
+        const [xArr, yArr] = this.formatHistory(this.historyX, this.historyY);
+        const count = xArr.length;
+        flag = count >= 4;
+        // const count1 = this.historyX.length;
+        // flag = this.historyX.length >= 4;
 
         if (flag) {
             // Update the points to correspond with history.
@@ -245,8 +306,10 @@ export class MouseTrial {
                 const p = this.points[i];
 
                 // Smooth the curve with cubic interpolation to prevent sharp edges.
-                const ix = MouseTrial.cubicInterpolation(this.historyX, i / this.ropeSize * this.historySize);
-                const iy = MouseTrial.cubicInterpolation(this.historyY, i / this.ropeSize * this.historySize);
+                const ix = MouseTrial.cubicInterpolation(xArr, i / this.ropeSize * count);
+                const iy = MouseTrial.cubicInterpolation(yArr, i / this.ropeSize * count);
+                // const ix = MouseTrial.cubicInterpolation(this.historyX, i / this.ropeSize * count1);
+                // const iy = MouseTrial.cubicInterpolation(this.historyY, i / this.ropeSize * count1);
 
                 p[0] = ix;
                 p[1] = iy;
@@ -261,14 +324,15 @@ export class MouseTrial {
             dataBuffer01.clearUV();
 
             if (flag) {
+
                 // const sphere = GeometryTools.ribbon_from_line(points);
-                const sphere = MouseTrial.ribbon_from_line2(this.points, 90, undefined, this.weightFunction, canvas.width / canvas.height);
+                const sphere = MouseTrial.ribbon_from_line2(this.points, 90, undefined, this.weightFunction, this.canvasWidth / this.canvasHeight);
 
                 if (sphere) {
                     if (sphere.vertexs3D) {
                         sphere.vertexs3D.forEach((vertex, index, arr) => {
                             dataBuffer01.addVertex(vertex[0], vertex[1], vertex[2]);
-                            dataBuffer01.addColor(0.8, 0, 0, 1 - (index / (arr.length / 2) - Math.floor(index / (arr.length / 2))));
+                            dataBuffer01.addColor(this.color[0], this.color[1], this.color[2], 1 - (index / (arr.length / 2) - Math.floor(index / (arr.length / 2))));
                             if (index < arr.length / 2) {
                                 dataBuffer01.addUV(0, index % 2);
                             } else {
@@ -282,36 +346,77 @@ export class MouseTrial {
                     });
                 }
             }
-
             dataBuffer01.update(<WebGLRenderingContext>this.gl);
         }
     }
-    public moveCall = (e: MouseEvent) => {
+    public moveCall = (e: TouchPoint) => {
         if (this.downFlag) {
-            this.currX = (Math.round(e.clientX / this.mistake) * this.mistake - canvas.width / 2) / canvas.width * 2;
-            this.currY = - (Math.round(e.clientY / this.mistake) * this.mistake - canvas.height / 2) / canvas.height * 2;
+            this.currX = (Math.round(e.x / this.mistake) * this.mistake - this.canvasWidth / 2) / this.canvasWidth * 2;
+            this.currY = - (Math.round(e.y / this.mistake) * this.mistake - this.canvasHeight / 2) / this.canvasHeight * 2;
         }
     }
-    public upCall = (e: MouseEvent) => {
+    public upCall = (e: TouchPoint) => {
         this.downFlag = false;
     }
-    public downCall = (e: MouseEvent) => {
+    public downCall = (e: TouchPoint) => {
         this.downFlag = true;
 
-        this.currX = (Math.round(e.clientX / this.mistake) * this.mistake - canvas.width / 2) / canvas.width * 2;
-        this.currY = - (Math.round(e.clientY / this.mistake) * this.mistake - canvas.height / 2) / canvas.height * 2;
+        this.currX = (Math.round(e.x / this.mistake) * this.mistake - this.canvasWidth / 2) / this.canvasWidth * 2;
+        this.currY = - (Math.round(e.y / this.mistake) * this.mistake - this.canvasHeight / 2) / this.canvasHeight * 2;
 
         this.historyX.length = 0;
         this.historyY.length = 0;
 
         // Create history array.
-        for (let i = 0; i < this.historySize; i++) {
-            this.historyX.push(this.currX);
-            this.historyY.push(this.currY);
+        for (let i = 0; i < 5; i++) {
+            this.historyX.push(this.currX + (i - 2) * 0.0005);
+            this.historyY.push(this.currY + (i - 2) * 0.0005);
         }
 
         this.update();
     }
+    private updatePoints(speed: number = 1) {
+        const lastX = this.historyX.pop();
+        const lastY = this.historyY.pop();
+
+        speed--;
+        if (speed > 0 && this.historyX.length > MouseTrial.MinCount) {
+            this.updatePoints(speed);
+        } else {
+            if (lastX !== this.currX || this.downFlag) {
+                this.historyX.unshift(this.currX);
+            }
+
+            if (lastY !== this.currY || this.downFlag) {
+                this.historyY.unshift(this.currY);
+            }
+        }
+    }
+    private formatHistory(xArr: number[], yArr: number[]) {
+        const newX: number[] = [];
+        const newY: number[] = [];
+
+        const count = xArr.length;
+
+        let preX: number = -1, preY: number = -1, curX: number, curY: number;
+        for (let i = 0; i < count; i++) {
+            curX = xArr[i];
+            curY = yArr[i];
+            if (preX !== curX || preY !== curY) {
+                newX.push(curX);
+                newY.push(curY);
+            }
+            preX = curX;
+            preY = curY;
+        }
+
+        return [newX, newY];
+    }
+}
+
+export interface TouchPoint {
+    x: number;
+    y: number;
 }
 
 const canvas = <HTMLCanvasElement>document.getElementById('your_canvas');
@@ -320,14 +425,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const mesh = RenderLauncher.active(canvas, null);
-const MouseTrial0 = new MouseTrial(<Mesh>mesh, <WebGLRenderingContext>RenderLauncher.webgldemo.gl);
+const MouseTrial0 = new MouseTrial(<Mesh>mesh, <WebGLRenderingContext>RenderLauncher.webgldemo.gl, canvas.width, canvas.height);
 
-setInterval(MouseTrial0.update, 16);
+setInterval(() => {
+    MouseTrial0.update(MouseTrial.UpdateSpeed);
+}, 16);
 
 canvas.addEventListener('pointerdown', MouseTrial0.downCall);
 canvas.addEventListener('pointerup', MouseTrial0.upCall);
 canvas.addEventListener('pointermove', MouseTrial0.moveCall);
-
-// setInterval(() => {
-//     // bar.onProcess('', '', 0, Math.abs(Math.sin(Date.now() / 5000) * 100), undefined);
-// }, 50);

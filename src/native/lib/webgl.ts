@@ -9,7 +9,7 @@ export interface WebGLInstanceOpt {
 }
 
 export class Camera {
-    public position: Vector3 = new Vector3(0, 0, 0);
+    public position: Vector3 = new Vector3(0, 0, 1);
     public target: Vector3 = new Vector3(0, 0, -1);
     public up: Vector3 = new Vector3(0, 1, 0);
     private _matrix: Matrix = new Matrix();
@@ -532,6 +532,7 @@ export class Scene {
     public render(isClear: boolean) {
         const gl = <WebGLRenderingContext>this.engine.gl;
 
+        gl.disable(gl.SCISSOR_TEST);    // 避免渲染范围被前一个渲染过程限制
         gl.viewport(this.viewport[0], this.viewport[1], this.viewport[2], this.viewport[3]);
         if (isClear) {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
@@ -539,7 +540,6 @@ export class Scene {
 
         gl.disable(gl.CULL_FACE);       // 不开启背面剔除
         gl.disable(gl.DEPTH_TEST);      // 不开启深度测试
-        gl.disable(gl.SCISSOR_TEST);    // 避免渲染范围被前一个渲染过程限制
 
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

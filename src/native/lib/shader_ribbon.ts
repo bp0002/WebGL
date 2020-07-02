@@ -23,7 +23,8 @@ void main( void ){
 
     pos += u_translate.xy;
 
-    gl_Position         = u_ViewMatrix * vec4( pos, 0., 1. );
+    // gl_Position         = u_ViewMatrix * vec4( pos, 0., 1. );
+    gl_Position         = vec4( pos, 0., 1. );
     gl_PointSize        = 10.0;
     v_surfacePosition   = a_position;
     v_color             = a_color;
@@ -42,8 +43,8 @@ varying  vec4   v_color;
 varying  vec2   v_UV;
 
 void main(void){
-    // gl_FragColor = v_color;
-    gl_FragColor = texture2D( u_sampler, v_UV );
+    gl_FragColor = v_color;
+    // gl_FragColor = texture2D( u_sampler, v_UV );
     // gl_FragColor = texture2D( u_sampler, v_UV );
 }
 `;

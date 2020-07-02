@@ -228,6 +228,7 @@ createButton(
             const edgeCount = (<any>arg) - 0;
 
             const sphere = GeometryTools.sphere(edgeCount, edgeCount);
+            // const sphere = GeometryTools.sphere(10, 3);
 
             if (sphere) {
                 if (sphere.vertexs3D) {

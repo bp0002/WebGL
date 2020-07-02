@@ -12,9 +12,7 @@
     "native_fragment": "webpack --config webpack.native.fragment.js",
     "native_simple": "webpack --config webpack.native.simple.js",
     "native_mouse_move_ribbon": "webpack --config webpack.native.mousemove.js",
-    "native_mouse_move_ribbon2": "webpack --config webpack.native.mousemove2.js",
-    "test0": "webpack --config webpack.native.test.js",
-    "es6_2_es5": "babel src/test/three.js -o webpack_build/test/three.js"
+    "libs": "webpack --config webpack.libs.js"
   },
   "author": "",
   "license": "ISC",

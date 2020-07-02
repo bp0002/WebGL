@@ -9,7 +9,7 @@ module.exports = {
     },
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, 'webpack_build/native/fragment')
+        path: path.resolve(__dirname, 'webpack_build/fragment')
     },
     // devtool: 'inline-source-map',                                  // 告诉 webpack 提取这些 source map，并内联到最终的 文件 中。
     module: {
@@ -32,7 +32,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HTMLWebpackPlugin({
-            template: './src/native/index.html',
+            template: './src/index.html',
         })
     ],
 }

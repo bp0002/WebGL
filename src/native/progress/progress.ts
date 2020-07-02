@@ -20,8 +20,6 @@ export class Bar {
     private calc = () => {
         setTimeout(this.calc, 100);
 
-        // this.opacity += 3;
-        // this.text.style.opacity = "" + (Math.abs(this.opacity % 80 - 40) + 10) / 50;
         if (this.last === this.loaded) {
             return;
         }
@@ -31,14 +29,11 @@ export class Bar {
     }
     // 显示文字和进度条， 文字有呼吸灯的效果
     public show(text: string, total: number, loaded: number) {
-        // this.text.innerHTML = text;
         this.total = total;
         this.old = loaded;
         if (this.timeRef) {
             return;
         }
-        // document.body.appendChild(this.text);
-        // document.body.appendChild(this.div);
 
         this.timeRef = <any>setTimeout(this.calc, 100);
     }
