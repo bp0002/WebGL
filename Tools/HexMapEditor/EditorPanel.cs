@@ -40,9 +40,10 @@ public class EditorPanel : EditorWindow
         EditorGUILayout.HelpBox(Parame.hexMapNameDesc, MessageType.Info);
         //GUILayout.Label("==============================================================", EditorStyles.boldLabel);
 
-        Parame.activeDown = EditorGUILayout.ToggleLeft("鼠标按下时响应", Parame.activeDown);
-        Parame.activeDrag = EditorGUILayout.ToggleLeft("鼠标按下拖动时响应", Parame.activeDrag);
-        Parame.activeUp = EditorGUILayout.ToggleLeft("鼠标弹起时时响应", Parame.activeUp);
+        //Parame.activeDown = EditorGUILayout.ToggleLeft("鼠标按下时响应", Parame.activeDown);
+        //Parame.activeDrag = EditorGUILayout.ToggleLeft("鼠标按下拖动时响应", Parame.activeDrag);
+        //Parame.activeUp = EditorGUILayout.ToggleLeft("鼠标弹起时时响应", Parame.activeUp);
+        Parame.activeEditor = EditorGUILayout.ToggleLeft("启用编辑", Parame.activeEditor);
 
         EditorGUILayout.HelpBox(Parame.activeDesc, MessageType.Info);
 
@@ -121,7 +122,7 @@ public class EditorPanel : EditorWindow
         int controlId = GUIUtility.GetControlID(FocusType.Passive);
         Event.current.GetTypeForControl(controlId);
 
-        if (Event.current.type == EventType.MouseDrag && Parame.activeDrag)
+        if (Event.current.type == EventType.MouseDrag && Parame.activeEditor)
         {
             if (getSelectHexCellTemplate() != null)
             {
@@ -141,7 +142,7 @@ public class EditorPanel : EditorWindow
             }
         }
 
-        if (Event.current.type == EventType.MouseDown && Parame.activeDown)
+        if (Event.current.type == EventType.MouseDown && Parame.activeEditor)
         {
             if (getSelectHexCellTemplate() != null)
             {

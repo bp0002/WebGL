@@ -11,7 +11,8 @@ namespace HexMapEditor
     [CustomEditor(typeof (HexGridDynamicComponent))]
     public class HexGridDynamicEditor : Editor
     {
-
+        private string CellListDesc = "创建 CellList 节点，编辑生成的Cell会挂在该节点下.";
+        private string TemplateDesc = "创建模板节点,模板节点的数据会应用与编辑出的Cell";
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -39,11 +40,13 @@ namespace HexMapEditor
                             cellsParent.AddComponent<CellListComponent>();
                         }
                     }
+                    EditorGUILayout.HelpBox(CellListDesc, MessageType.Info);
 
                     if (GUILayout.Button("Create Template"))
                     {
                         createTemplate();
                     }
+                    EditorGUILayout.HelpBox(TemplateDesc, MessageType.Info);
                 }
             }
         }

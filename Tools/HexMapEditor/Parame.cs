@@ -35,7 +35,8 @@ namespace HexMapEditor
         public static Boolean activeDown = true;
         public static Boolean activeDrag = true;
         public static Boolean activeUp = false;
-        public static string activeDesc = "选择 按下 和 拖动, 当场景中选中模板节点时，可进行快速编辑。";
+        public static Boolean activeEditor = true;
+        public static string activeDesc = "场景中选中模板节点时, 按下并拖动鼠标 可进行快速编辑。";
 
         /// <summary>
         /// 生成 动态大小 正方形 单元格时 锚点位置

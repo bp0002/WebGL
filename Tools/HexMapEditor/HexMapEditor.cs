@@ -97,6 +97,7 @@ namespace HexMapEditor
                 go.transform.parent = gameObject.transform;
                 go.transform.localPosition = new Vector3(0, 0, 0);
                 go.AddComponent<BackgroundGrid>();
+                go.AddComponent<LockPos>();
             }
         }
 
@@ -107,6 +108,7 @@ namespace HexMapEditor
             go.transform.name = go.name;
             go.transform.parent = gameObject.transform;
             go.AddComponent<HexGridComponent>();
+            go.AddComponent<LockPos>();
 
             GameObject cellsParent = new GameObject();
             cellsParent.name = "CellsList";
@@ -136,6 +138,7 @@ namespace HexMapEditor
             go.transform.name = go.name;
             go.transform.parent = gameObject.transform;
             go.AddComponent<HexGridDynamicComponent>();
+            go.AddComponent<LockPos>();
 
             GameObject cellsParent = new GameObject();
             cellsParent.name = "CellsList";

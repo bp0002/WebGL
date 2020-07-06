@@ -10,7 +10,7 @@ namespace HexMapEditor
     [CustomEditor(typeof(HexCellDynamicTemplate))]
     public class HexCellDynamicTemplateInspector : Editor
     {
-
+        private string desc = "修改模板数据后，将数据更新到已依赖该模板创建的Cell";
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -30,6 +30,7 @@ namespace HexMapEditor
                     }
                 }
             }
+            EditorGUILayout.HelpBox(desc, MessageType.Info);
         }
     }
 }
