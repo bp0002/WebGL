@@ -1,372 +1,101 @@
-export class HexCoordinates {
-    public hx: number = 0;
-    public hy: number = 0;
-    public hz: number = 0;
+import { Parame } from "./parame";
+import { HexMapTools } from "./hexmap_tools";
 
-    public fx: number = 0;
-    public fy: number = 0;
-    public fz: number = 0;
+export namespace HexCoordinates {
+    export const  sin45 = Math.sin(Math.PI * 0.25);
+    export const  cos45 = Math.cos(Math.PI * 0.25);
 
-    public col: number = 0;
-    public row: number = 0;
+    export const  squrt2 = 1.414213562373;
+    export const  squrt3 = Math.pow(3, 0.5);
 
-    public readonly isRotate: boolean;
-    public readonly isHex: boolean;
-
-    public static squrt2 = 1.414213562373;
-    public static squrt3 = Math.pow(3, 0.5);
-
-    constructor(isHex: boolean, isRotate: boolean) {
-        this.isHex = isHex;
-        this.isRotate = isRotate;
-    }
+    export let  TempFX: number;
+    export let  TempFY: number;
+    export let  TempFZ: number;
 
     /**
-     * 获取ID
+     * (HexCell)单元格 所属共享 (BaseCell)单元格列表
+     * * 列表数据 [ BaseCell0.iX, BaseCell0.iY, BaseCell0.iZ, ...]
+     * * 没有宽度边的单元格，所属共享 即自己
+     * * 有宽度边的单元格 - 有 块/边/点 三种单元格
+     *  + BaseCell 所属共享 即自己
+     *  + EdgeCell 所属有 2 个 BaseCell
+     *  + PointCell 所属有 4 个 BaseCell
+     *       +        +  +        +
+     *       |        |  |        |
+     *       +-----------------------+
+     *       |        |  |        |
+     *       |   c    |4 |   d    |
+     *       |        |  |        |
+     *       |        |  |        |
+     *       +-----------------------+
+     *       |   2    |o |    3   |
+     *       +------------------------+
+     *       |        |  |        |
+     *       |   a    |  |   b    |
+     *       |        |1 |        |
+     *       |        |  |        |
+     *       +--------+--+--------+---+
+     *      - BaseCell: a,b,c,d
+     *      - EdgeCell: 1,2,3,4
+     *      - PointCell: o
+     *      - 1 的 ShareOwnerBaseCell [ a, b ]
+     *      - 2 的 ShareOwnerBaseCell [ a, c ]
+     *      - o 的 ShareOwnerBaseCell [ a, b, c, d ]
+     *      - ShareOwnerBaseCell 排列顺序规则: x 由小到大, 再 z 由小到大
      */
-    public getID() {
-        return `${this.hx}_${this.hy}_${this.hz}`;
-    }
-
+    export const  TempShareOwnerList: number[] = [];
     /**
-     * 查询指定距离内的坐标信息
-     * @param distance 距离
-     * @param size 坐标尺寸
-     * @param isHex 是否为六边形
-     * @param isRotate 是否旋转- 一条边在上
+     * (HexCell)单元格 所属 (BaseCell)单元格列表
+     * * 列表数据 [ BaseCell0.iX, BaseCell0.iY, BaseCell0.iZ, ...]
+     * * 没有宽度边的单元格，所属即自己
+     * * 有宽度边的单元格 - 有 块/边/点 三种单元格
+     *  +-------+--+
+     *  |   2   |3 |
+     *  +----------+
+     *  |       |  |
+     *  |   0   |1 |
+     *  |       |  |
+     *  |       |  |
+     *  +-------+--+
+     *      + 0 - BaseCell
+     *      + 1,2 - EdgeCell
+     *      + 3 - PointCell
      */
-    public SelectByDistance(distance: number, size: number, isHex: boolean, isRotate: boolean): HexCoordinates[][]
-    {
-        if (isHex) {
-            return this.SelectByDistanceHex(distance, size, isHex, isRotate);
-        } else {
-            return this.SelectByDistanceSquare(distance, size, isHex, isRotate);
-        }
-
-    }
-
-    /**
-     * 查询指定距离内的坐标信息
-     * @param distance 距离
-     * @param size 坐标尺寸
-     * @param isHex 是否为六边形
-     * @param isRotate 是否旋转- 一条边在上
-     */
-    private SelectByDistanceHex(distance: number, size: number, isHex: boolean, isRotate: boolean): HexCoordinates[][]
-    {
-        const list = [];
-        const checkList: string[] = [];
-
-        if (distance < 1)
-        {
-        }
-        else
-        {
-            let start = 1;
-            let tempID = '';
-
-            list.push([this]);
-            checkList.push(this.getID());
-
-            for (let t = start; t <= distance; t++)
-            {
-
-                const tempList = [];
-
-                for (let i = 0; i <= t; i++)
-                {
-                    let temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + t,
-                        this.hy + (-i),
-                        this.hz + (-(t - i)),
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-
-                    temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + t * -1,
-                        this.hy + (-(t - i)) * -1,
-                        this.hz + (-i) * -1,
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-                }
-                for (let i = 0; i <= t; i++)
-                {
-                    let temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + (-i),
-                        this.hy + t,
-                        this.hz + (-(t - i)),
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-
-                    temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + (-(t - i)) * -1,
-                        this.hy + t * -1,
-                        this.hz + (-i) * -1,
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-                }
-
-                for (let i = 0; i <= t; i++)
-                {
-                    let temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + (-(t - i)),
-                        this.hy + (-i),
-                        this.hz + t,
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-
-                    temp = HexCoordinates.FromIntPostionHex(
-                        this.hx + (-i) * -1,
-                        this.hy + (-(t - i)) * -1,
-                        this.hz + t * -1,
-                        size, isRotate
-                    );
-                    tempID = temp.getID();
-
-                    if (!checkList.includes(tempID)) {
-                        checkList.push(tempID);
-                        tempList.push(temp);
-                    }
-                }
-
-                list.push(tempList);
-            }
-
-        }
-
-        return list;
-    }
-
-    /**
-     * 查询指定距离内的坐标信息
-     * @param distance 距离
-     * @param size 坐标尺寸
-     * @param isHex 是否为六边形
-     * @param isRotate 是否旋转- 一条边在上
-     */
-    private SelectByDistanceSquare(distance: number, size: number, isHex: boolean, isRotate: boolean) : HexCoordinates[][]
-    {
-        const list = [];
-        const checkList: string[] = [];
-
-        if (distance < 1)
-        {
-        }
-        else
-        {
-            let start = 1;
-            let tempID = '';
-
-            list.push([this]);
-            checkList.push(this.getID());
-
-            for (let t = start; t <= distance; t++)
-            {
-                let tempCount = t * 2 + 1;
-                let temp: HexCoordinates;
-
-                const tempList = [];
-
-                for (let i = 0; i < tempCount; i++)
-                {
-                    if (isRotate)
-                    {
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t,
-                                0,
-                                this.hz + t - i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t * -1,
-                                0,
-                                this.hz + t - i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t - i,
-                                0,
-                                this.hz + t,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t - i,
-                                0,
-                                this.hz - t,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                    } else
-                    {
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t,
-                                0,
-                                this.hz - i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t * -1,
-                                0,
-                                this.hz + i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx + t - i,
-                                0,
-                                this.hz + i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                        temp = HexCoordinates.FromIntPostionSquare(
-                                this.hx - t + i,
-                                0,
-                                this.hz - i,
-                                size,
-                                isRotate
-                        );
-                        tempID = temp.getID();
-
-                        if (!checkList.includes(tempID)) {
-                            checkList.push(tempID);
-                            tempList.push(temp);
-                        }
-
-                    }
-                }
-
-                list.push(tempList);
-            }
-        }
-
-        return list;
-    }
-
-    /**
-     * 从 Hex 坐标位置创建 坐标信息
-     * @param iX x
-     * @param iY y
-     * @param iZ z
-     * @param size 单元格尺寸
-     * @param isHex 是否六边形
-     * @param isRotate 是否旋转- 一条边在上
-     */
-    public static FromIntPosition(iX: number, iY: number, iZ: number, size: number, isHex: boolean, isRotate: boolean) {
-        if (isHex) {
-            return HexCoordinates.FromIntPostionHex(iX, iY, iZ, size, isRotate);
-        } else {
-            return HexCoordinates.FromIntPostionSquare(iX, iY, iZ, size, isRotate);
-        }
-    }
+    export const TempBaseCell: number[] = [];
 
     /**
      * 计算两 Hex 坐标间距离
      * @param a Hex 坐标信息
      * @param b Hex 坐标信息
      */
-    public static ComputeDistance(a: HexCoordinates, b: HexCoordinates) : number
+    export function  ComputeBaseCellDistance(aShareList: number[], bShareList: number[], isHex: boolean, isRotate: boolean) : number
     {
-        if (!a.isHex && !a.isRotate)
+        const ahx = aShareList[0];
+        const ahy = aShareList[1];
+        const ahz = aShareList[2];
+
+        const bhx = bShareList[0];
+        const bhy = bShareList[1];
+        const bhz = bShareList[2];
+
+        if (!isHex && !isRotate)
         {
-            if ((a.hx - b.hx) * (a.hz - b.hz) > 0)
+            if ((ahx - bhx) * (ahz - bhz) > 0)
             {
-                return Math.abs(a.hx - b.hx) + (Math.abs(a.hy - b.hy) + Math.abs(a.hz - b.hz));
+                return Math.abs(ahx - bhx) + (Math.abs(ahy - bhy) + Math.abs(ahz - bhz));
             } else
             {
-                return Math.max(Math.abs(a.hx - b.hx), Math.max(Math.abs(a.hy - b.hy), Math.abs(a.hz - b.hz)));
+                return Math.max(Math.abs(ahx - bhx), Math.max(Math.abs(ahy - bhy), Math.abs(ahz - bhz)));
             }
         }
         else
         {
-            return Math.max(Math.abs(a.hx - b.hx), Math.max(Math.abs(a.hy - b.hy), Math.abs(a.hz - b.hz)));
+            return Math.max(Math.abs(ahx - bhx), Math.max(Math.abs(ahy - bhy), Math.abs(ahz - bhz)));
         }
     }
 
     /**
-     * 从 像素 坐标位置创建 坐x标信息
+     * 从 像素 坐标位置 获取 BaseCell 信息
      * 像素坐标为单元格相对 网格层 原点坐标
      * @param x x
      * @param y y
@@ -375,98 +104,16 @@ export class HexCoordinates {
      * @param isHex 是否六边形
      * @param isRotate 是否旋转- 一条边在上
      */
-    public static FromPixelPosition(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) : HexCoordinates {
+    export function  FormatBaseCellFromPixelPosition(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) {
         if (isHex) {
-            return HexCoordinates.FromPixelPositionHex(x, y, z, size, isHex, isRotate);
+            HexCoordinates.FormatBaseCellFromPixelPositionHex(x, y, z, size, isHex, isRotate);
         } else {
-            return HexCoordinates.FromPixelPositionSquare(x, y, z, size, isHex, isRotate);
+            HexCoordinates.FormatBaseCellFromPixelPositionSquare(x, y, z, size, isHex, isRotate);
         }
     }
 
     /**
-     * 从 Hex 坐标位置创建 坐标信息
-     * @param iX x
-     * @param iY y
-     * @param iZ z
-     * @param size 单元格尺寸
-     * @param isRotate 是否旋转- 一条边在上
-     */
-    private static FromIntPostionHex(iX: number, iY: number, iZ: number, size: number, isRotate: boolean) : HexCoordinates
-    {
-        size = size / 2.0;
-
-        let res = new HexCoordinates(true, isRotate);
-
-        if (!isRotate)
-        {
-
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (HexCoordinates.squrt3 * iX + HexCoordinates.squrt3 / 2 * iZ);
-            res.fz = size * (3.0 / 2 * iZ);
-
-            res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
-            res.row = res.hz;
-        }
-        else
-        {
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (3.0 / 2 * iX);
-            res.fz = size * (HexCoordinates.squrt3 / 2 * iX + HexCoordinates.squrt3 * iZ);
-
-            res.col = res.hx;
-            res.row = res.hz + (res.hx - (res.hx % 1)) / 2;
-        }
-
-        return res;
-    }
-
-    /**
-     * 从 Hex 坐标位置创建 坐标信息
-     * @param iX x
-     * @param iY y
-     * @param iZ z
-     * @param size 单元格尺寸
-     * @param isRotate 是否旋转- 一条边在上
-     */
-    private static FromIntPostionSquare(iX: number, iY: number, iZ: number, size: number, isRotate: boolean) : HexCoordinates
-    {
-        const squrt2 = 1.414213562373;
-
-        let res = new HexCoordinates(false, isRotate);
-
-        if (!isRotate)
-        {
-
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (squrt2 * iX + squrt2 / 2 * iZ);
-            res.fz = size * (squrt2 / 2 * iZ);
-
-            res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
-            res.row = res.hz;
-        }
-        else
-        {
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (iX);
-            res.fz = size * (iZ);
-
-            res.col = res.hx;
-            res.row = res.hz;
-        }
-
-        return res;
-    }
-
-    /**
-     * 从 像素 坐标位置创建 坐x标信息
+     * 从 像素 坐标位置 获取 BaseCell 信息
      * 像素坐标为单元格相对 网格层 原点坐标
      * @param x x
      * @param y y
@@ -475,88 +122,30 @@ export class HexCoordinates {
      * @param isHex 是否六边形
      * @param isRotate 是否旋转- 一条边在上
      */
-    private static FromPixelPositionSquare(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) : HexCoordinates {
+    export function FormatBaseCellFromPixelPositionSquare(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) {
 
-        //size = size / 2.0f;
-
-        let res = new HexCoordinates(true, isRotate);
-
-        let fx, fy, fz;
-        //int hx, hy, hz;
-
-        fx = x;
-        fy = y;
-        fz = z;
+        let HX, HY, HZ;
 
         // 尖角向上
         if (!isRotate)
         {
-            let q = (HexCoordinates.squrt2 / 2 * x - HexCoordinates.squrt2 / 2 * z) / size;
-            let r = (HexCoordinates.squrt2 * z) / size;
-
-            let fhx = q;
-            let fhy = -q - r;
-            let fhz = r;
-
-            let iX = Math.round(fhx);
-            let iY = 0;
-            let iZ = Math.round(fhz);
-
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (HexCoordinates.squrt2 * iX + HexCoordinates.squrt2 / 2 * iZ);
-            res.fz = size * (HexCoordinates.squrt2 / 2 * iZ);
-
-            res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
-            res.row = res.hz;
+            HX = Math.round((HexCoordinates.cos45 * x - HexCoordinates.sin45 * z) / size);
+            HY = 0;
+            HZ = Math.round((HexCoordinates.sin45 * x + HexCoordinates.cos45 * z) / size);
         }
         else
         {
-            let q = (x) / size;
-            let r = (z) / size;
-
-            let fhx = q;
-            let fhy = -q - r;
-            let fhz = r;
-
-            let iX = Math.round(fhx);
-            let iY = 0;
-            let iZ = Math.round(fhz);
-
-            //if (iX + iY + iZ != 0)
-            //{
-            //    float dx = Math.Abs(fhx - iX);
-            //    float dy = Math.Abs(fhy - iY);
-            //    float dz = Math.Abs(-fhx - fhy - iZ);
-
-            //    if (dx > dy && dx > dz)
-            //    {
-            //        iX = -iY - iZ;
-            //    }
-            //    else
-            //    {
-            //        iZ = -iX - iY;
-            //    }
-            //}
-
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (iX);
-            res.fz = size * (iZ);
-
-            res.col = res.hx;
-            res.row = res.hz;
+            HX = Math.round((x) / size);
+            HY = 0;
+            HZ = Math.round((z) / size);
         }
 
-        res.fy = fy;
-
-        return res;
+        HexCoordinates.TempBaseCell.length = 0;
+        HexCoordinates.TempBaseCell.push(HX, HY, HZ);
     }
 
     /**
-     * 从 像素 坐标位置创建 坐x标信息
+     * 从 像素 坐标位置 获取 BaseCell 信息
      * 像素坐标为单元格相对 网格层 原点坐标
      * @param x x
      * @param y y
@@ -565,18 +154,11 @@ export class HexCoordinates {
      * @param isHex 是否六边形
      * @param isRotate 是否旋转- 一条边在上
      */
-    private static FromPixelPositionHex(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) : HexCoordinates {
+    export function FormatBaseCellFromPixelPositionHex(x: number, y: number, z: number, size: number, isHex: boolean, isRotate: boolean) {
 
         size = size / 2.0;
 
-        let res = new HexCoordinates(true, isRotate);
-
-        let fx, fy, fz;
-        //int hx, hy, hz;
-
-        fx = x;
-        fy = y;
-        fz = z;
+        let HX, HY, HZ;
 
         // 尖角向上
         if (!isRotate)
@@ -602,21 +184,20 @@ export class HexCoordinates {
                 {
                     iX = -iY - iZ;
                 }
+                else if (dy > dz) {
+                    iY = -iX - iZ;
+                }
                 else
                 {
                     iZ = -iX - iY;
                 }
             }
 
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (HexCoordinates.squrt3 * iX + HexCoordinates.squrt3 / 2 * iZ);
-            res.fz = size * (3.0 / 2 * iZ);
-
-            res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
-            res.row = res.hz;
-        } else
+            HX = iX;
+            HY = iY;
+            HZ = iZ;
+        }
+        else
         {
             let q = (2.0 / 3 * x) / size;
             let r = (-1.0 / 3 * x + HexCoordinates.squrt3 / 3 * z) / size;
@@ -639,24 +220,323 @@ export class HexCoordinates {
                 {
                     iX = -iY - iZ;
                 }
+                else if (dy > dz) {
+                    iY = -iX - iZ;
+                }
                 else
                 {
                     iZ = -iX - iY;
                 }
             }
 
-            res.hx = iX;
-            res.hy = iY;
-            res.hz = iZ;
-            res.fx = size * (3.0 / 2 * iX);
-            res.fz = size * (HexCoordinates.squrt3 / 2 * iX + HexCoordinates.squrt3 * iZ);
-
-            res.col = res.hx;
-            res.row = res.hz + (res.hx - (res.hx % 1)) / 2;
+            HX = iX;
+            HY = iY;
+            HZ = iZ;
         }
 
-        res.fy = fy;
+        HexCoordinates.TempBaseCell.length = 0;
+        HexCoordinates.TempBaseCell.push(HX, HY, HZ);
+    }
+
+    export function  FormatCellName(shareInfo: number[]) {
+        return `[${shareInfo.toString()}]`;
+    }
+
+    /**
+     * 计算 指定 BaseCell 相对坐标
+     * @param iX  网格坐标系 X 坐标
+     * @param iY  网格坐标系 Y 坐标
+     * @param iZ  网格坐标系 Z 坐标
+     * @param cellSize 单元格大小
+     * @param isHex 是否六边形
+     * @param isRotate 是否旋转
+     */
+    export function  ComputeBaseCellLocalPos(iX: number, iY: number, iZ: number, cellSize: number, isHex: boolean, isRotate: boolean) {
+        if (isHex) {
+            if (isRotate) {
+                HexCoordinates.TempFX = cellSize * (3.0 / 2 * iX);
+                HexCoordinates.TempFY = 0;
+                HexCoordinates.TempFZ = cellSize * (HexCoordinates.squrt3 / 2 * iX + HexCoordinates.squrt3 * iZ);
+            }
+            else
+            {
+                HexCoordinates.TempFX = cellSize * (HexCoordinates.squrt3 * iX + HexCoordinates.squrt3 / 2 * iZ);
+                HexCoordinates.TempFY = 0;
+                HexCoordinates.TempFZ = cellSize * (3.0 / 2 * iZ);
+            }
+        }
+        else
+        {
+            if (isRotate) {
+                HexCoordinates.TempFX = cellSize * iX;
+                HexCoordinates.TempFY = 0;
+                HexCoordinates.TempFZ = cellSize * iZ;
+            }
+            else
+            {
+                let q = cellSize * iX;
+                let r = cellSize * iY;
+
+                HexCoordinates.TempFX = HexCoordinates.cos45 * q + HexCoordinates.sin45 * r;
+                HexCoordinates.TempFY = 0;
+                HexCoordinates.TempFZ = -HexCoordinates.sin45 * q + HexCoordinates.cos45 * r;
+            }
+        }
+    }
+
+    export function  ComputeLocalPos(iX: number, iY: number, iZ: number, cellType: number, isHex: boolean, isRotate: boolean) {
+
+    }
+
+    /**
+     * 由 单元格 内部相对坐标,检查命中的单元格类型
+     * 类型为 Parame 中定义
+     * @param hitLocalPosX 单元格 内部相对坐标
+     * @param hitLocalPosY 单元格 内部相对坐标
+     * @param hitLocalPosZ 单元格 内部相对坐标
+     * @param edgeWidth 单元格边宽度
+     * @param cellSize 单元格尺寸
+     * @param isHex 是否六边形
+     * @param isRotate 是否旋转
+     */
+    export function  CheckHitCellType(hitLocalPosX: number, hitLocalPosY: number, hitLocalPosZ: number, edgeWidth: number, cellSize: number, isHex: boolean, isRotate: boolean) {
+
+        let res = 0;
+
+        if (isHex)
+        {
+            if (isRotate)
+            {
+                res = Parame.RHexType;
+            }
+            else
+            {
+                res = Parame.HexType;
+            }
+        }
+        else
+        {
+
+            if (isRotate)
+            {
+                res = Parame.RSquareType;
+
+                let tempWidth = (1 - edgeWidth) * cellSize * 0.5;
+
+                if (Math.abs(hitLocalPosZ) >= (tempWidth) && Math.abs(hitLocalPosX) >= (tempWidth))
+                {
+                    if (hitLocalPosZ > 0)
+                    {
+                        if (hitLocalPosX > 0)
+                        {
+                            res = Parame.RSquarePointType1;
+                        } else
+                        {
+                            res = Parame.RSquarePointType4;
+                        }
+                    }
+                    else
+                    {
+                        if (hitLocalPosX > 0)
+                        {
+                            res = Parame.RSquarePointType2;
+                        }
+                        else
+                        {
+                            res = Parame.RSquarePointType3;
+                        }
+                    }
+                }
+                else if (Math.abs(hitLocalPosZ) >= (tempWidth) || Math.abs(hitLocalPosX) >= (tempWidth))
+                {
+                    if (hitLocalPosX > tempWidth)
+                    {
+                        res = Parame.RSquareEdgeType1;
+                    }
+                    else if (hitLocalPosX < -tempWidth)
+                    {
+                        res = Parame.RSquareEdgeType3;
+                    }
+                    else if (hitLocalPosZ > tempWidth)
+                    {
+                        res = Parame.RSquareEdgeType4;
+                    }
+                    else if (hitLocalPosZ < -tempWidth)
+                    {
+                        res = Parame.RSquareEdgeType2;
+                    }
+                }
+            }
+            else
+            {
+                res = Parame.SquareType;
+
+                let tempPos: [number, number] = [0, 0];
+                HexMapTools.rotatePos(HexCoordinates.sin45, HexCoordinates.sin45, hitLocalPosX, hitLocalPosZ, false, tempPos);
+
+                hitLocalPosX = tempPos[0];
+                hitLocalPosZ = tempPos[1];
+
+                let tempWidth = (1 - edgeWidth) * cellSize * 0.5;
+
+                if (Math.abs(hitLocalPosZ) >= (tempWidth) && Math.abs(hitLocalPosX) >= (tempWidth))
+                {
+                    if (hitLocalPosZ > 0)
+                    {
+                        if (hitLocalPosX > 0)
+                        {
+                            res = Parame.SquarePointType1;
+                        } else
+                        {
+                            res = Parame.SquarePointType4;
+                        }
+                    }
+                    else
+                    {
+                        if (hitLocalPosX > 0)
+                        {
+                            res = Parame.SquarePointType2;
+                        }
+                        else
+                        {
+                            res = Parame.SquarePointType3;
+                        }
+                    }
+                }
+                else if (Math.abs(hitLocalPosZ) >= (tempWidth) || Math.abs(hitLocalPosX) >= (tempWidth))
+                {
+                    if (hitLocalPosX > tempWidth)
+                    {
+                        res = Parame.SquareEdgeType1;
+                    }
+                    else if (hitLocalPosX < -tempWidth)
+                    {
+                        res = Parame.SquareEdgeType3;
+                    }
+                    else if (hitLocalPosZ > tempWidth)
+                    {
+                        res = Parame.SquareEdgeType4;
+                    }
+                    else if (hitLocalPosZ < -tempWidth)
+                    {
+                        res = Parame.SquareEdgeType2;
+                    }
+                }
+            }
+        }
 
         return res;
+    }
+
+    /**
+     * 查找 (HexCell)单元格 的所属共享 (BaseCell)单元格列表
+     * @param ownX BaseCell 网格系统坐标
+     * @param ownY BaseCell 网格系统坐标
+     * @param ownZ BaseCell 网格系统坐标
+     * @param cellType HexCell 在 BaseCell 中的类型
+     * @param isHex 是否六边形
+     * @param isRotate 是否旋转
+     */
+    export function  FormatShareOwnerListWithType(ownX: number, ownY: number, ownZ: number, cellType: number, isHex: boolean, isRotate: boolean) {
+        ownY = 0;
+
+        HexCoordinates.TempShareOwnerList.length = 0;
+
+        const nearList = HexCoordinates.TempShareOwnerList;
+
+        if (isHex)
+        {
+            nearList.push(ownX, ownY, ownZ);
+        }
+        else
+        {
+            HexCoordinates.FormatShareOwnerListWithTypeS(ownX, ownY, ownZ, cellType);
+        }
+    }
+
+    /**
+     * 查找 (HexCell)单元格 的所属共享 (BaseCell)单元格列表 - (旋转正方形的网格系统)
+     * @param ownX BaseCell 网格系统坐标
+     * @param ownY BaseCell 网格系统坐标
+     * @param ownZ BaseCell 网格系统坐标
+     * @param cellType HexCell 在 BaseCell 中的类型
+     */
+    export function  FormatShareOwnerListWithTypeS(ownX: number, ownY: number, ownZ: number, cellType: number) {
+        ownY = 0;
+
+        HexCoordinates.TempShareOwnerList.length = 0;
+
+        const nearList = HexCoordinates.TempShareOwnerList;
+
+        switch (cellType)
+        {
+            case (Parame.RSquarePointType1):
+            case (Parame.SquarePointType1):
+                {
+                    nearList.push(ownX, ownY, ownZ);
+                    nearList.push(ownX + 1, ownY, ownZ);
+                    nearList.push(ownX, ownY, ownZ + 1);
+                    nearList.push(ownX + 1, ownY, ownZ + 1);
+                    break;
+                }
+            case (Parame.RSquarePointType2):
+            case (Parame.SquarePointType2):
+                {
+                    nearList.push(ownX, ownY, ownZ - 1);
+                    nearList.push(ownX + 1, ownY, ownZ - 1);
+                    nearList.push(ownX, ownY, ownZ);
+                    nearList.push(ownX + 1, ownY, ownZ);
+                    break;
+                }
+            case (Parame.RSquarePointType3):
+            case (Parame.SquarePointType3):
+                {
+                    nearList.push(ownX - 1, ownY, ownZ - 1);
+                    nearList.push(ownX, ownY, ownZ - 1);
+                    nearList.push(ownX - 1, ownY, ownZ);
+                    nearList.push(ownX, ownY, ownZ);
+                    break;
+                }
+            case (Parame.RSquarePointType4):
+            case (Parame.SquarePointType4):
+                {
+                    nearList.push(ownX - 1, ownY, ownZ);
+                    nearList.push(ownX, ownY, ownZ);
+                    nearList.push(ownX - 1, ownY, ownZ + 1);
+                    nearList.push(ownX, ownY, ownZ + 1);
+                    break;
+                }
+            case (Parame.RSquareEdgeType1):
+            case (Parame.SquareEdgeType1):
+                {
+                    nearList.push(ownX, ownY, ownZ);
+                    nearList.push(ownX + 1, ownY, ownZ);
+                    break;
+                }
+            case (Parame.RSquareEdgeType2):
+            case (Parame.SquareEdgeType2):
+                {
+                    nearList.push(ownX, ownY, ownZ - 1);
+                    nearList.push(ownX, ownY, ownZ);
+                    break;
+                }
+            case (Parame.RSquareEdgeType3):
+            case (Parame.SquareEdgeType3):
+                {
+                    nearList.push(ownX - 1, ownY, ownZ);
+                    nearList.push(ownX, ownY, ownZ);
+                    break;
+                }
+            case (Parame.RSquareEdgeType4):
+            case (Parame.SquareEdgeType4):
+                {
+                    nearList.push(ownX, ownY, ownZ);
+                    nearList.push(ownX, ownY, ownZ + 1);
+                    break;
+                }
+            default: {
+                nearList.push(ownX, ownY, ownZ);
+            }
+        }
     }
 }

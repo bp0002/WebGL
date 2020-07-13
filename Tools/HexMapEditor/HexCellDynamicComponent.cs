@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace HexMapEditor
 {
-    class HexCellDynamicComponent : MonoBehaviour
+    public class HexCellDynamicComponent : MonoBehaviour
     {
 
         private GameObject go;
@@ -15,39 +15,38 @@ namespace HexMapEditor
         public List<string> attrNames = new List<string>();
         public List<string> attrValues = new List<string>();
 
-        [SerializeField]
-        private int _x;
-        public int x
-        {
-            get { return _x; }
-        }
+        [ShowOnly]
+        public int x;
 
-        [SerializeField]
-        private int _y;
-        public int y
-        {
-            get { return _y; }
-        }
+        [ShowOnly]
+        public int y;
 
-        [SerializeField]
-        private int _z;
-        public int z
-        {
-            get { return _z; }
-        }
+        [ShowOnly]
+        public int z;
 
-        private string _name;
-        public string Name
-        {
-            get { return _name; }
-        }
+        [ShowOnly]
+        public string Name = "null";
 
-        [SerializeField]
-        private float _size;
-        public float size
-        {
-            get { return _size; }
-        }
+        [ShowOnly]
+        public float size;
+
+        [ShowOnly]
+        public Boolean isRotate;
+
+        [ShowOnly]
+        public Boolean isHex;
+
+        [ShowOnly]
+        public byte cellType;
+
+        [ShowOnly]
+        public float edgeWidth;
+
+        [ShowOnly]
+        public byte terrain = 0;
+
+        [ShowOnly]
+        public int terrainID = 0;
 
         [SerializeField]
         private string _TemplateName;
@@ -55,6 +54,9 @@ namespace HexMapEditor
         {
             get { return _TemplateName; }
         }
+
+        [ShowOnly]
+        public string CoordInfo = "";
 
         //[SerializeField]
         private UnityEngine.Object _prefab;
@@ -75,27 +77,269 @@ namespace HexMapEditor
             Debug.LogWarning("OnMouseOver");
         }
 
-        public void initData(int i, int j, int k, HexCellDynamicTemplate template)
+        private void SetCoordInfo(List<int> list)
         {
-            _x = i;
-            _y = j;
-            _z = k;
-            _size = template.cellSize;
+            this.CoordInfo = "";
+
+            int count = list.Count;
+
+            for (var i = 0; i < count; i++)
+            {
+                this.CoordInfo += "" + list[i];
+
+                if (i < count - 1)
+                {
+                    this.CoordInfo += ",";
+                }
+            }
+
+        }
+
+        public Boolean initData(int i, int j, int k, HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter, Boolean rotate, Boolean hex, byte type, float edge, string specialName)
+        {
+            Boolean flag = false;
+
+            x = i;
+            y = j;
+            z = k;
+
+            size = template.cellSize;
             _TemplateName = template.name;
 
-            _name = x + "_" + y + "_" + z;
+            cellType = type;
+            isHex = hex;
+            isRotate = rotate;
+            edgeWidth = edge;
+
+            terrain = template.terrain;
+
+            this.CoordInfo = specialName;
+            Name = specialName != null ? specialName : x + "_" + y + "_" + z;
 
             go = transform.gameObject;
-            go.name = _name;
-            transform.name = _name;
+            go.name = Name;
+            transform.name = Name;
+
+            if (isHex)
+            {
+                HexTransform(template, bgCellSize, cellCenter);
+            }
+            else
+            {
+                PlaneTransform(template, bgCellSize, cellCenter);
+            }
+
+            // 定位结束后校正
+            cellType = formatType(type);
+
+            return flag;
+        }
+
+        /// <summary>
+        /// 边: 属于 Cell 的 右边缘 或 上边缘
+        /// 点: 属于 Cell 的 右上角点
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private byte formatType(byte type)
+        {
+            byte res = type;
+            switch (type)
+            {
+                case (Parame.RSquareEdgeType2):
+                    {
+                        res = Parame.RSquareEdgeType4;
+                        break;
+                    }
+                case (Parame.RSquareEdgeType3):
+                    {
+                        res = Parame.RSquareEdgeType1;
+                        break;
+                    }
+
+                case (Parame.RSquarePointType1):
+                case (Parame.RSquarePointType2):
+                case (Parame.RSquarePointType3):
+                case (Parame.RSquarePointType4):
+                    {
+                        res = Parame.RSquarePointType1;
+                        break;
+                    }
+            }
+
+            return res;
+        }
+
+        private void HexTransform(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            var hexGridDyn = gameObject.GetComponentInParent<HexGridDynamicComponent>();
+
+            if (hexGridDyn.EnableCellEdge)
+            {
+
+            }
+            else
+            {
+                edgeWidth = 0.02f;
+                if (isRotate)
+                {
+                    go.transform.localRotation = Quaternion.Euler(0, 30, 0);
+                }
+                else
+                {
+                    go.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                }
+                go.transform.localScale = new Vector3(template.cellSize - edgeWidth, template.cellSize - edgeWidth, template.cellSize - edgeWidth);
+                go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+            }
+        }
+
+        private void PlaneTransform(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            var hexGridDyn = gameObject.GetComponentInParent<HexGridDynamicComponent>();
+            if (hexGridDyn.EnableCellEdge)
+            {
+                if (cellType > 20)
+                {
+                    PlaneTransformPoint(template, bgCellSize, cellCenter);
+                }
+                else if(cellType > 10)
+                {
+                    PlaneTransformEdge(template, bgCellSize, cellCenter);
+                }
+                else
+                {
+                    PlaneTransformBaseWithEdgeAndPoint(template, bgCellSize, cellCenter);
+                }
+            }
+            else
+            {
+                edgeWidth = 0.02f;
+                PlaneTransformBase(template, bgCellSize, cellCenter);
+            }
+        }
+
+        private void PlaneTransformBase(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            if (isRotate)
+            {
+                if (Parame.planIndex == 0)
+                {
+                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+                }
+                else if (Parame.planIndex == 1)
+                {
+                    go.transform.position = new Vector3(cellCenter.x - (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) / 2.0f);
+                }
+                else if (Parame.planIndex == 2)
+                {
+                    go.transform.position = new Vector3(cellCenter.x + (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) / 2.0f);
+                }
+            }
+            else
+            {
+                if (Parame.diamondIndex == 0)
+                {
+                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+                }
+                else if (Parame.diamondIndex == 1)
+                {
+                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
+                }
+                else if (Parame.diamondIndex == 2)
+                {
+                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
+                }
+            }
+
+            go.transform.localScale = new Vector3(template.cellSize - 0.05f, template.cellSize - 0.05f, template.cellSize - 0.05f);
+            if (isRotate)
+            {
+                go.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+            else
+            {
+                go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+            }
+        }
+
+        private void PlaneTransformBaseWithEdgeAndPoint(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            PlaneTransformBase(template, bgCellSize, cellCenter);
+            go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize - edgeWidth * template.cellSize, template.cellSize - edgeWidth * template.cellSize);
+        }
+
+        private void PlaneTransformEdge(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            if (isRotate)
+            {
+                switch (cellType)
+                {
+                    case (Parame.RSquareEdgeType1):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z);
+                            go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
+                            break;
+                        }
+                    case (Parame.RSquareEdgeType2):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - size * 0.5f);
+                            go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+                            break;
+                        }
+                    case (Parame.RSquareEdgeType3):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z);
+                            go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
+                            break;
+                        }
+                    case (Parame.RSquareEdgeType4):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + size * 0.5f);
+                            go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+                            break;
+                        }
+                }
+            }
+        }
+
+        private void PlaneTransformPoint(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
+        {
+            if (isRotate)
+            {
+                switch (cellType)
+                {
+                    case (Parame.RSquarePointType1):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
+                            break;
+                        }
+                    case (Parame.RSquarePointType2):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
+                            break;
+                        }
+                    case (Parame.RSquarePointType3):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
+                            break;
+                        }
+                    case (Parame.RSquarePointType4):
+                        {
+                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
+                            break;
+                        }
+                }
+                go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+            }
         }
 
         public void CreatePlane()
         {
             go = transform.gameObject;
 
-            go.name = _name;
-            transform.name = _name;
+            go.name = Name;
+            transform.name = Name;
 
             var filter = go.AddComponent<MeshFilter>();
             filter.sharedMesh = HexMetrics.GetPlanMesh();
@@ -248,13 +492,71 @@ namespace HexMapEditor
 
             template.mat.color = template.color;
 
-            _size = template.cellSize;
+            size = template.cellSize;
             _TemplateName = template.name;
 
-            go.transform.localScale = new Vector3(template.cellSize - 0.05f, template.cellSize - 0.05f, template.cellSize - 0.05f);
+            //go.transform.localScale = new Vector3(template.cellSize - 0.05f, template.cellSize - 0.05f, template.cellSize - 0.05f);
 
             //UpdateColor(template.color);
             UpdateMaterial(template.mat);
+        }
+
+        public static Boolean CheckCanCreate(Boolean gridEnableEdge, Boolean rotate, Boolean hex)
+        {
+            Boolean flag = false;
+
+            if (hex)
+            {
+                if (rotate)
+                {
+                    if (gridEnableEdge)
+                    {
+
+                    }
+                    else
+                    {
+                        flag = true;
+                    }
+                }
+                else
+                {
+                    if (gridEnableEdge)
+                    {
+
+                    }
+                    else
+                    {
+                        flag = true;
+                    }
+                }
+            }
+            else
+            {
+                if (rotate)
+                {
+                    if (gridEnableEdge)
+                    {
+                        flag = true;
+                    }
+                    else
+                    {
+                        flag = true;
+                    }
+                }
+                else
+                {
+                    if (gridEnableEdge)
+                    {
+
+                    }
+                    else
+                    {
+                        flag = true;
+                    }
+                }
+            }
+
+            return flag;
         }
     }
 }

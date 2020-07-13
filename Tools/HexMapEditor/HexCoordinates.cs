@@ -23,6 +23,11 @@ namespace HexMapEditor
         public int col = 0;
         public int row = 0;
 
+        public string getName()
+        {
+            return hx + "_" + hy + "_" + hz;
+        }
+
         /// <summary>
         /// false: 尖角向上
         /// </summary>
@@ -244,6 +249,10 @@ namespace HexMapEditor
                     {
                         iX = -iY - iZ;
                     }
+                    else if (dy > dz)
+                    {
+                        iY = -iX - iZ;
+                    }
                     else
                     {
                         iZ = -iX - iY;
@@ -280,6 +289,10 @@ namespace HexMapEditor
                     if (dx > dy && dx > dz)
                     {
                         iX = -iY - iZ;
+                    }
+                    else if (dy > dz)
+                    {
+                        iY = -iX - iZ;
                     }
                     else
                     {
@@ -366,8 +379,8 @@ namespace HexMapEditor
 
                     for (int i = 0; i < temp; i++)
                     {
-                        if (isRotate)
-                        {
+                        //if (isRotate)
+                        //{
                             list.Add(HexCoordinates.FromIntPostionSquare(
                                     this.hx + t,
                                     0,
@@ -400,41 +413,41 @@ namespace HexMapEditor
                                     isRotate
                                     )
                                 );
-                        } else
-                        {
-                            list.Add(HexCoordinates.FromIntPostionSquare(
-                                    this.hx + t,
-                                    0,
-                                    this.hz - i,
-                                    size,
-                                    isRotate
-                                    )
-                                );
-                            list.Add(HexCoordinates.FromIntPostionSquare(
-                                    this.hx + t * -1,
-                                    0,
-                                    this.hz + i,
-                                    size,
-                                    isRotate
-                                    )
-                                );
-                            list.Add(HexCoordinates.FromIntPostionSquare(
-                                    this.hx + t - i,
-                                    0,
-                                    this.hz + i,
-                                    size,
-                                    isRotate
-                                    )
-                                );
-                            list.Add(HexCoordinates.FromIntPostionSquare(
-                                    this.hx - t + i,
-                                    0,
-                                    this.hz - i,
-                                    size,
-                                    isRotate
-                                    )
-                                );
-                        }
+                        //} else
+                        //{
+                        //    list.Add(HexCoordinates.FromIntPostionSquare(
+                        //            this.hx + t,
+                        //            0,
+                        //            this.hz - i,
+                        //            size,
+                        //            isRotate
+                        //            )
+                        //        );
+                        //    list.Add(HexCoordinates.FromIntPostionSquare(
+                        //            this.hx + t * -1,
+                        //            0,
+                        //            this.hz + i,
+                        //            size,
+                        //            isRotate
+                        //            )
+                        //        );
+                        //    list.Add(HexCoordinates.FromIntPostionSquare(
+                        //            this.hx + t - i,
+                        //            0,
+                        //            this.hz + i,
+                        //            size,
+                        //            isRotate
+                        //            )
+                        //        );
+                        //    list.Add(HexCoordinates.FromIntPostionSquare(
+                        //            this.hx - t + i,
+                        //            0,
+                        //            this.hz - i,
+                        //            size,
+                        //            isRotate
+                        //            )
+                        //        );
+                        //}
                     }
                 }
             }
@@ -466,8 +479,15 @@ namespace HexMapEditor
                 res.hx = iX;
                 res.hy = iY;
                 res.hz = iZ;
-                res.fx = size * (HexMetrics.squrt2 * iX + HexMetrics.squrt2 / 2 * iZ);
-                res.fz = size * (HexMetrics.squrt2 / 2 * iZ);
+
+                float q = size * (iX);
+                float r = size * (iZ);
+
+                //res.fx = size * (HexMetrics.squrt2 * iX + HexMetrics.squrt2 / 2 * iZ);
+                //res.fz = size * (HexMetrics.squrt2 / 2 * iZ);
+
+                res.fx = HexMetrics.cos45 * q + HexMetrics.sin45 * r;
+                res.fz = -HexMetrics.sin45 * q + HexMetrics.cos45 * r;
 
                 res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
                 res.row = res.hz;
@@ -503,22 +523,59 @@ namespace HexMapEditor
             // 尖角向上
             if (!isRotate)
             {
-                float q = (HexMetrics.squrt2 / 2 * x - HexMetrics.squrt2 / 2 * z) / size;
-                float r = (HexMetrics.squrt2 * z) / size;
+                //float q = (HexMetrics.squrt2 / 2 * x - HexMetrics.squrt2 / 2 * z) / size;
+                //float r = (HexMetrics.squrt2 * z) / size;
 
-                float fhx = q;
-                float fhy = -q - r;
-                float fhz = r;
+                //float fhx = q;
+                //float fhy = -q - r;
+                //float fhz = r;
 
-                int iX = Mathf.RoundToInt(fhx);
+                //int iX = Mathf.RoundToInt(fhx);
+                //int iY = Mathf.RoundToInt(fhy);
+                //int iZ = Mathf.RoundToInt(fhz);
+
+                //if (iX + iY + iZ != 0)
+                //{
+                //    float dx = Mathf.Abs(fhx - iX);
+                //    float dy = Mathf.Abs(fhy - iY);
+                //    float dz = Mathf.Abs(fhz - iZ);
+
+                //    if (dy < dx && dy < dz)
+                //    {
+                //        iY = -iX - iZ;
+                //    }
+                //    else if (dx < dz)
+                //    {
+                //        iX = -iY - iZ;
+                //    }
+                //    else
+                //    {
+                //        iZ = -iX - iY;
+                //    }
+                //}
+
+                //iY = 0;
+
+                float q = HexMetrics.cos45 * x - HexMetrics.sin45 * z;
+                float r = HexMetrics.sin45 * x + HexMetrics.cos45 * z;
+
+                int iX = Mathf.RoundToInt(q / size);
                 int iY = 0;
-                int iZ = Mathf.RoundToInt(fhz);
+                int iZ = Mathf.RoundToInt(r / size);
 
                 res.hx = iX;
                 res.hy = iY;
                 res.hz = iZ;
-                res.fx = size * (HexMetrics.squrt2 * iX + HexMetrics.squrt2 / 2 * iZ);
-                res.fz = size * (HexMetrics.squrt2 / 2 * iZ);
+
+                q = size * (iX);
+                r = size * (iZ);
+
+                res.fx = HexMetrics.cos45 * q + HexMetrics.sin45 * r;
+                res.fz = -HexMetrics.sin45 * q + HexMetrics.cos45 * r;
+
+
+                //res.fx = size * (HexMetrics.squrt2 * iX + HexMetrics.squrt2 / 2 * iZ);
+                //res.fz = size * (HexMetrics.squrt2 / 2 * iZ);
 
                 res.col = res.hx + (res.hz - (res.hz % 1)) / 2;
                 res.row = res.hz;
@@ -582,6 +639,25 @@ namespace HexMapEditor
             return HexCoordinates.FromPixelPositionSquare(vec.x, vec.y, vec.z, outR, isRotate);
         }
 
+        /////////////////////////////////////////////////////////////////
+        public static HexCoordinates FromIntPosition(int iX, int iY, int iZ, float size, Boolean isHex, Boolean isRotate)
+        {
+            if (isHex)
+            {
+                return HexCoordinates.FromIntPostionHex(iX, iY, iZ, size, isRotate);
+            }
+            else
+            {
+                return HexCoordinates.FromIntPostionSquare(iX, iY, iZ, size, isRotate);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
         public static int ComputeDistance(HexCoordinates a, HexCoordinates b)
         {
             if (!a.isHex && !a.isRotate)
@@ -598,6 +674,342 @@ namespace HexMapEditor
             {
                 return Math.Max(Math.Abs(a.hx - b.hx), Math.Max(Math.Abs(a.hy - b.hy), Math.Abs(a.hz - b.hz)));
             }
+        }
+
+        /// <summary>
+        /// 
+        ///   24|  14 | 21
+        ///    -+-----+-
+        ///  13 |     |
+        ///     |     | 11
+        ///    -+-----+-
+        ///   23| 12  | 22
+        /// </summary>
+        /// <param name="hitLocalPos"></param>
+        /// <param name="edgeWidth"></param>
+        /// <param name="cellSize"></param>
+        /// <param name="isHex"></param>
+        /// <param name="isRotate"></param>
+        /// <returns></returns>
+        public static byte CheckHitCellType(Vector3 hitLocalPos, float edgeWidth, float cellSize, Boolean isHex, Boolean isRotate)
+        {
+            byte res = 0;
+
+            if (isHex)
+            {
+                if (isRotate)
+                {
+                    res = Parame.RHexType;
+                }
+                else
+                {
+                    res = Parame.HexType;
+                }
+            } else
+            {
+                if (isRotate)
+                {
+                    res = Parame.RSquareType;
+
+                    var tempWidth = (1 - edgeWidth) * cellSize * 0.5f;
+                    if (Mathf.Abs(hitLocalPos.z) >= (tempWidth) && Mathf.Abs(hitLocalPos.x) >= (tempWidth))
+                    {
+                        if (hitLocalPos.z > 0)
+                        {
+                            if (hitLocalPos.x > 0)
+                            {
+                                res = Parame.RSquarePointType1;
+                            } else
+                            {
+                                res = Parame.RSquarePointType4;
+                            }
+                        }
+                        else
+                        {
+                            if (hitLocalPos.x > 0)
+                            {
+                                res = Parame.RSquarePointType2;
+                            }
+                            else
+                            {
+                                res = Parame.RSquarePointType3;
+                            }
+                        }
+                    } else if (Mathf.Abs(hitLocalPos.z) >= (tempWidth) || Mathf.Abs(hitLocalPos.x) >= (tempWidth))
+                    {
+                        if (hitLocalPos.x > tempWidth)
+                        {
+                            res = Parame.RSquareEdgeType1;
+                        }
+                        else if(hitLocalPos.x < -tempWidth)
+                        {
+                            res = Parame.RSquareEdgeType3;
+                        }
+                        else if (hitLocalPos.z > tempWidth)
+                        {
+                            res = Parame.RSquareEdgeType4;
+                        }
+                        else if (hitLocalPos.z < -tempWidth)
+                        {
+                            res = Parame.RSquareEdgeType2;
+                        }
+                    }
+                }
+                else
+                {
+                    res = Parame.SquareType;
+                }
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// 获取边/点的相邻Cell，按x由小到大,z由小到大排列
+        /// </summary>
+        /// <param name="ownX"></param>
+        /// <param name="ownY"></param>
+        /// <param name="ownZ"></param>
+        /// <param name="cellType"></param>
+        /// <param name="isHex"></param>
+        /// <param name="isRotate"></param>
+        /// <returns></returns>
+        public static List<int> FindNearCellIDList(int ownX, int ownY, int ownZ, int cellType, Boolean isHex, Boolean isRotate)
+        {
+            List<int> list = new List<int>();
+
+            if (isHex)
+            {
+                list.Add(ownX);
+                list.Add(ownY);
+                list.Add(ownZ);
+            }
+            else
+            {
+                if (isRotate)
+                {
+                    if (cellType >= Parame.RSquarePointType1)
+                    {
+                        switch(cellType)
+                        {
+                            case (Parame.RSquarePointType1):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ + 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquarePointType2):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ -1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX +1, ownY, ownZ -1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquarePointType3):
+                                {
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX -1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ -1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ -1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquarePointType4):
+                                {
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+
+                                    //temp = HexCoordinates.FromIntPosition(ownX -1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX -1, ownY, ownZ + 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                        }
+                    }
+                    else if (cellType >= Parame.RSquareEdgeType1)
+                    {
+                        switch (cellType)
+                        {
+                            case (Parame.RSquareEdgeType1):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX +1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquareEdgeType2):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ -1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ - 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquareEdgeType3):
+                                {
+                                    list.Add(ownX -1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                            case (Parame.RSquareEdgeType4):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ +1);
+
+                                    //temp = own;
+                                    //list.Add(temp.getName());
+                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
+                                    //list.Add(temp.getName());
+                                    break;
+                                }
+                        }
+                    }
+                    else
+                    {
+                        list.Add(ownX);
+                        list.Add(ownY);
+                        list.Add(ownZ);
+                    }
+                }
+                else
+                {
+                    list.Add(ownX);
+                    list.Add(ownY);
+                    list.Add(ownZ);
+                }
+            }
+
+            return list;
+        }
+
+        public static string CellIDFromNearList(List<int> list)
+        {
+            string res = "";
+
+            int count = list.Count;
+
+            res += "[";
+            for (var i = 0; i < count; i++)
+            {
+                res += "" + list[i];
+
+                if (i < count - 1)
+                {
+                    res += ",";
+                }
+            }
+            res += "]";
+
+            return res;
         }
     }
 }

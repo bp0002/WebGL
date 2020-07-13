@@ -13,6 +13,8 @@ namespace HexMapEditor
         public Color color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
         public int cellSize = 1;
 
+        public byte terrain = 0;
+
         public Material mat;
     }
 }

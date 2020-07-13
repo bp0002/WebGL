@@ -13,6 +13,7 @@ namespace HexMapEditor
         public static string BackgroundDesc = "创建背景网格,用于辅助编辑.";
         public static string HexGridDesc = "(已淘汰)创建网格编辑的根节点,已预创建了单元格。";
         public static string HexGridDynamicDesc = "创建网格编辑的根节点,编辑时动态创建单元格。(编辑模式更灵活)";
+        public static string HexGridCellEdgeWidthDesc = "创建 HexGridDynamic 前指定 Cell 是否启用边的宽度. 有的话将允许 边 和 点 的编辑。当前仅支持 isHex:false , isRotate:true 的情况。";
 
         private HexMapComponent hexMap;
         private GameObject gameObject;
@@ -60,6 +61,7 @@ namespace HexMapEditor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            EditorGUILayout.HelpBox(HexGridCellEdgeWidthDesc, MessageType.Warning);
 
             if (GUILayout.Button("Create Background Grid"))
             {
@@ -77,7 +79,7 @@ namespace HexMapEditor
             //{
             //    createHexCellTemplate();
             //}
-
+            
             if (GUILayout.Button("Create New HexGridDynamic"))
             {
                 createHexGridDynamic();
@@ -133,11 +135,13 @@ namespace HexMapEditor
 
         private void createHexGridDynamic()
         {
+            var hexMap = gameObject.GetComponent<HexMapComponent>();
+
             GameObject go = new GameObject();
             go.name = "HexGridDynamic" + getChildHexGrids().Count;
             go.transform.name = go.name;
             go.transform.parent = gameObject.transform;
-            go.AddComponent<HexGridDynamicComponent>();
+            go.AddComponent<HexGridDynamicComponent>().SetCellEdgeWidth(hexMap.GridCellEdgeWidth).SetEnableCellEdge(hexMap.GridEnableEdge);
             go.AddComponent<LockPos>();
 
             GameObject cellsParent = new GameObject();

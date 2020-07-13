@@ -18,18 +18,15 @@ namespace HexMapEditor
         public static string exportFileName;
         //public static int selectColorIndex = 0;
 
-        public static Boolean exportHexGrid             = false;
-        public static string exportHexGridDesc = "是否导出 HexGrid 数据,(通过 HexGrid 编辑)";
-
-        public static Boolean exportHexGridDynamic      = false;
-        public static string exportHexGridDynamicDesc = "是否导出 HexGridDynamic 数据,(通过 HexGridDynamic 编辑)";
+        public static Boolean exportHexGridDynamicTerrain = false;
+        public static string exportHexGridDynamicTerrainDesc = "是否导出 HexGridDynamic 的 Terrain 数据";
 
         public static Boolean exportCellWorldPosition   = true;
         public static string exportCellWorldPositionDesc = "导出 单元格坐标数据时，是否导出 绝对坐标,‘否’则导出相对坐标";
 
         public static Boolean exportCellWorldScale      = false;
 
-        public static Boolean exportSimpleCellData      = true;
+        public static Boolean exportSimpleCellData      = false;
         public static string exportSimpleCellDataDesc = "导出 HexGridDynamic 编辑的网格数据时，是否仅导出 单元格信息;仅将编辑器用于地块定位时会用到.导出的简单数据便于Excel操作.";
 
         public static Boolean activeDown = true;
@@ -79,5 +76,69 @@ namespace HexMapEditor
         public static int distanceTypeIndex = 0;
 
         public static int realTimeDistance = 0;
+
+        public static string edgeWaring = "BackgroundGrid 启用Edge时,模板cellSize需要与BackgroundGrid的celllSize相等!";
+
+        public static Boolean hitInfoFlag = false;
+        public static RaycastHit hitInfo = new RaycastHit();
+
+        public static float GridCellEdgeWidth = 0.0f;
+        public static Boolean EditEdge = false;
+        public static Boolean EditPoint = false;
+
+        public const byte RSquareType = 1;
+        public const byte SquareType = 2;
+        public const byte RHexType = 3;
+        public const byte HexType = 4;
+                     
+        public const byte RSquareEdgeType1 = 11;
+        public const byte RSquareEdgeType2 = 12;
+        public const byte RSquareEdgeType3 = 13;
+        public const byte RSquareEdgeType4 = 14;
+                     
+        public const byte RSquarePointType1 = 21;
+        public const byte RSquarePointType2 = 22;
+        public const byte RSquarePointType3 = 23;
+        public const byte RSquarePointType4 = 24;
+                     
+        public const byte SquareEdgeType1 = 31;
+        public const byte SquareEdgeType2 = 32;
+        public const byte SquareEdgeType3 = 33;
+        public const byte SquareEdgeType4 = 34;
+                     
+        public const byte SquarePointType1 = 41;
+        public const byte SquarePointType2 = 42;
+        public const byte SquarePointType3 = 43;
+        public const byte SquarePointType4 = 44;
+                     
+        public const byte RHexEdgeType1 = 51;
+        public const byte RHexEdgeType2 = 52;
+        public const byte RHexEdgeType3 = 53;
+        public const byte RHexEdgeType4 = 54;
+        public const byte RHexEdgeType5 = 55;
+        public const byte RHexEdgeType6 = 56;
+                     
+        public const byte RHexPointType1 = 61;
+        public const byte RHexPointType2 = 62;
+        public const byte RHexPointType3 = 63;
+        public const byte RHexPointType4 = 64;
+        public const byte RHexPointType5 = 65;
+        public const byte RHexPointType6 = 66;
+                     
+        public const byte HexEdgeType1 = 71;
+        public const byte HexEdgeType2 = 72;
+        public const byte HexEdgeType3 = 73;
+        public const byte HexEdgeType4 = 74;
+        public const byte HexEdgeType5 = 75;
+        public const byte HexEdgeType6 = 76;
+                     
+        public const byte HexPointType1 = 81;
+        public const byte HexPointType2 = 82;
+        public const byte HexPointType3 = 83;
+        public const byte HexPointType4 = 84;
+        public const byte HexPointType5 = 85;
+        public const byte HexPointType6 = 86;
+
+        public static byte[] tempTerrainData = null;
     }
 }

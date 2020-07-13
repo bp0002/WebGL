@@ -25,6 +25,9 @@ namespace HexMapEditor
         private static Mesh HexMesh = null;
         private static Mesh PlanMesh = null;
 
+        public static float sin45 = Mathf.Sin(0.25f * Mathf.PI);
+        public static float cos45 = Mathf.Cos(0.25f * Mathf.PI);
+
         public static void changeSize(float num)
         {
             outerRadius = num;

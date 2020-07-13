@@ -15,22 +15,37 @@ namespace HexMapEditor
         {
             DrawDefaultInspector();
 
-            if (GUILayout.Button("更新 Cells"))
+            var template = target as HexCellDynamicTemplate;
+
+            var hexMap = template.GetComponentInParent<HexMapComponent>();
+            var hexGrid = template.GetComponentInParent<HexGridDynamicComponent>();
+            var background = hexMap.GetComponentInChildren<BackgroundGrid>();
+
+            var flag = true;
+
+            if (hexGrid.CellEdgeWidth != 0.0f && background.cellSize != template.cellSize)
             {
-                var template = target as HexCellDynamicTemplate;
+                EditorGUILayout.HelpBox(Parame.edgeWaring, MessageType.Error);
+                flag = false;
+            }
 
-                var grid = template.GetComponentInParent<HexGridDynamicComponent>();
-                var cells = grid.GetComponentsInChildren<HexCellDynamicComponent>();
-
-                foreach (var cell in cells)
+            if (flag)
+            {
+                if (GUILayout.Button("更新 Cells"))
                 {
-                    if (cell.TemplateName == template.name)
+                    
+                    var cells = hexGrid.GetComponentsInChildren<HexCellDynamicComponent>();
+
+                    foreach (var cell in cells)
                     {
-                        cell.UpdateFromTemplate(template);
+                        if (cell.TemplateName == template.name)
+                        {
+                            cell.UpdateFromTemplate(template);
+                        }
                     }
                 }
+                EditorGUILayout.HelpBox(desc, MessageType.Info);
             }
-            EditorGUILayout.HelpBox(desc, MessageType.Info);
         }
     }
 }

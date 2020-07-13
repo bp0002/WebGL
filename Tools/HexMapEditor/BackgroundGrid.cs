@@ -15,6 +15,8 @@ namespace HexMapEditor
 
         public int cellSize = 1;
 
+        //public Boolean EnableEdge = false;
+
         private string _name = "BackgroundGrid";
 
         public static List<Vector3> PlaneVertex;
@@ -27,7 +29,7 @@ namespace HexMapEditor
 
         public readonly static float size = 1f;
 
-        public static float outerRadius = 1f - 0.05f;
+        public static float outerRadius = 1f;
 
         public static float innerRadius = outerRadius * 0.866025404f;
 
@@ -58,6 +60,33 @@ namespace HexMapEditor
 
         public void Create()
         {
+            //if (EnableEdge)
+            //{
+            //    outerRadius = 1.0f - 0.02f;
+            //}
+            //else
+            //{
+            //    outerRadius = 1.0f - 0.02f;
+            //}
+            outerRadius = 1.0f - 0.02f;
+
+            innerRadius = outerRadius * 0.866025404f;
+            sin0 = Mathf.Sin(Mathf.PI * 0 / 180) * outerRadius * 0.5f;
+            sin30 = Mathf.Sin(Mathf.PI * 30 / 180) * outerRadius * 0.5f;
+            sin60 = Mathf.Sin(Mathf.PI * 60 / 180) * outerRadius * 0.5f;
+            sin90 = Mathf.Sin(Mathf.PI * 90 / 180) * outerRadius * 0.5f;
+            sin120 = Mathf.Sin(Mathf.PI * 120 / 180) * outerRadius * 0.5f;
+            sin150 = Mathf.Sin(Mathf.PI * 150 / 180) * outerRadius * 0.5f;
+            sin180 = Mathf.Sin(Mathf.PI * 180 / 180) * outerRadius * 0.5f;
+
+            cos0 = Mathf.Cos(Mathf.PI * 0 / 180) * outerRadius * 0.5f;
+            cos30 = Mathf.Cos(Mathf.PI * 30 / 180) * outerRadius * 0.5f;
+            cos60 = Mathf.Cos(Mathf.PI * 60 / 180) * outerRadius * 0.5f;
+            cos90 = Mathf.Cos(Mathf.PI * 90 / 180) * outerRadius * 0.5f;
+            cos120 = Mathf.Cos(Mathf.PI * 120 / 180) * outerRadius * 0.5f;
+            cos150 = Mathf.Cos(Mathf.PI * 150 / 180) * outerRadius * 0.5f;
+            cos180 = Mathf.Cos(Mathf.PI * 180 / 180) * outerRadius * 0.5f;
+
             if (material == null)
             {
                 material = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
@@ -392,10 +421,19 @@ namespace HexMapEditor
             var arr = gameObject.GetComponentsInChildren<LockPos>();
             float num = float.PositiveInfinity;
 
+            //if (EnableEdge)
+            //{
+            //    Parame.distance = 0;
+            //}
+
             foreach (var cell in arr)
             {
                 RaycastHit hit;
                 MeshFilter meshFilter = cell.gameObject.GetComponent<MeshFilter>();
+                if (!meshFilter)
+                {
+                    continue;
+                }
                 Mesh sharedMesh = meshFilter.sharedMesh;
                 if (sharedMesh
                     && RXLookingGlass.IntersectRayMesh(ray, sharedMesh, meshFilter.transform.localToWorldMatrix, out hit)
@@ -500,6 +538,9 @@ namespace HexMapEditor
 
                     //    list.Add(info);
                     }
+
+                    Parame.hitInfoFlag = true;
+                    Parame.hitInfo = hit;
 
                     break;
 

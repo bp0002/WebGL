@@ -45,6 +45,9 @@ public class EditorPanel : EditorWindow
         //Parame.activeUp = EditorGUILayout.ToggleLeft("鼠标弹起时时响应", Parame.activeUp);
         Parame.activeEditor = EditorGUILayout.ToggleLeft("启用编辑", Parame.activeEditor);
 
+        Parame.EditEdge = EditorGUILayout.ToggleLeft("编辑 边", Parame.EditEdge);
+        Parame.EditPoint = EditorGUILayout.ToggleLeft("编辑 点", Parame.EditPoint);
+
         EditorGUILayout.HelpBox(Parame.activeDesc, MessageType.Info);
 
         GUILayout.BeginHorizontal();
@@ -93,11 +96,8 @@ public class EditorPanel : EditorWindow
             Parame.exportPath = EditorUtility.OpenFolderPanel("Export Path", Parame.exportPath, "");
         }
         GUILayout.EndHorizontal();
-
-        Parame.exportHexGrid = EditorGUILayout.ToggleLeft("是否导出 HexGrid", Parame.exportHexGrid);
-        Parame.exportHexGridDynamic = EditorGUILayout.ToggleLeft("是否导出 HexGridDynamic", Parame.exportHexGridDynamic);
-
-        EditorGUILayout.HelpBox(Parame.exportHexGridDynamicDesc, MessageType.Info);
+        
+        Parame.exportHexGridDynamicTerrain = EditorGUILayout.ToggleLeft(Parame.exportHexGridDynamicTerrainDesc, Parame.exportHexGridDynamicTerrain);
 
         Parame.exportCellWorldPosition = EditorGUILayout.ToggleLeft("是否导出 单元格 绝对位置", Parame.exportCellWorldPosition);
 
@@ -128,7 +128,14 @@ public class EditorPanel : EditorWindow
             {
                 GUIUtility.hotControl = controlId;
 
-                checkRayHitMouseDrag(sceneView);
+                try
+                {
+                    checkRayHitMouseDrag(sceneView);
+                }
+                catch
+                {
+
+                }
                 //if (checkRayHitMouseDrag(sceneView))
                 //{
                 //    GUIUtility.hotControl = controlId;
@@ -138,7 +145,14 @@ public class EditorPanel : EditorWindow
             {
                 GUIUtility.hotControl = controlId;
 
-                checkRayHitDownDynamic(sceneView);
+                try
+                {
+                    checkRayHitDownDynamic(sceneView);
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -156,8 +170,14 @@ public class EditorPanel : EditorWindow
             } else if (getSelectHexCellDynamicTemplate() != null)
             {
                 GUIUtility.hotControl = controlId;
+                try
+                {
+                    checkRayHitDownDynamic(sceneView);
+                }
+                catch
+                {
 
-                checkRayHitDownDynamic(sceneView);
+                }
             }
         }
 
@@ -228,550 +248,9 @@ public class EditorPanel : EditorWindow
 
     private void doExport()
     {
-        GameObject root = null;
-        HexMapComponent hexMapComponent = null;
-
-        if (Selection.gameObjects.Length == 1)
-        {
-            root = Selection.gameObjects[0];
-            hexMapComponent = root.GetComponent<HexMapComponent>();
-
-            if (hexMapComponent)
-            {
-
-                Parame.exportFileName = Path.Combine(Parame.exportPath, hexMapComponent.Name + ".hexgrid");
-
-                string JSONSTR = "";
-                int count = 0;
-
-                JSONSTR += "[\n";
-
-                if (Parame.exportHexGridDynamic)
-                {
-                    string childJSON = exportGridsDynamic(root, hexMapComponent);
-                    JSONSTR += childJSON;
-
-                    count++;
-                }
-
-                if (Parame.exportHexGrid)
-                {
-                    if (count > 0)
-                    {
-                        JSONSTR += ",\n";
-                    }
-                    string childJSON = exportGrids(root, hexMapComponent);
-                    JSONSTR += childJSON;
-
-                    count++;
-                }
-
-                JSONSTR += "]\n";
-                
-                var fs = File.Open(Parame.exportFileName, FileMode.Create);
-                var jsonWriter = new StreamWriter(fs);
-
-                jsonWriter.Write(JSONSTR);
-
-                jsonWriter.Close();
-                fs.Close();
-            }
-        }
-        else
-        {
-            Debug.LogWarning("请选择需要导出的 HexGridComponent 节点");
-        }
+        EditorExport.doExport();
     }
-
-    private string exportGrids(GameObject root, HexMapComponent hexMapComponent)
-    {
-        HexGridComponent[] hexGrdiCompARR = root.GetComponentsInChildren<HexGridComponent>();
-
-        List<HexGridComponent> hexGrdiCompList = new List<HexGridComponent>();
-        foreach (var temp in hexGrdiCompARR)
-        {
-            if (temp.gameObject.activeInHierarchy)
-            {
-                hexGrdiCompList.Add(temp);
-            }
-        }
-
-        string JSONSTR = "";
-
-        BackgroundGrid background = hexMapComponent.GetComponentInChildren<BackgroundGrid>();
-
-        JSONSTR += "{\n";
-        JSONSTR += "\"name\":\"" + hexMapComponent.Name + "\",\n";
-        JSONSTR += "\"position\":" + hexMapComponent.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-        JSONSTR += "\"rotation\":" + hexMapComponent.transform.rotation.eulerAngles.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-        JSONSTR += "\"grids\":[\n";
-
-        int count = hexGrdiCompList.Count;
-
-        for (int i = 0; i < count; i++)
-        {
-            var temp = hexGrdiCompList[i];
-
-            JSONSTR += getHexGridJSON(temp, background);
-
-            if (i < count - 1)
-            {
-                JSONSTR += ",\n";
-            }
-        }
-
-        JSONSTR += "\n";
-
-        JSONSTR += "]\n";
-        JSONSTR += "}\n";
-        Debug.LogWarning(JSONSTR);
-
-        return JSONSTR;
-    }
-
-
-    private string exportGridsDynamic(GameObject root, HexMapComponent hexMapComponent)
-    {
-        HexGridDynamicComponent[] hexGrdiCompARR = root.GetComponentsInChildren<HexGridDynamicComponent>();
-
-        List<HexGridDynamicComponent> hexGrdiCompList = new List<HexGridDynamicComponent>();
-        foreach (var temp in hexGrdiCompARR)
-        {
-            if (temp.gameObject.activeInHierarchy)
-            {
-                hexGrdiCompList.Add(temp);
-            }
-        }
-
-        string JSONSTR = "";
-
-        BackgroundGrid background = hexMapComponent.GetComponentInChildren<BackgroundGrid>();
-
-        if (!Parame.exportSimpleCellData)
-        {
-            JSONSTR += "{\n";
-            JSONSTR += "\"name\":\"" + hexMapComponent.Name + "\",\n";
-            JSONSTR += "\"position\":" + hexMapComponent.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-            JSONSTR += "\"rotation\":" + hexMapComponent.transform.rotation.eulerAngles.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-            JSONSTR += "\"grids\":[\n";
-
-            int count = hexGrdiCompList.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                var temp = hexGrdiCompList[i];
-
-                JSONSTR += getHexGridDynaJSON(temp, background);
-
-                if (i < count - 1)
-                {
-                    JSONSTR += ",\n";
-                }
-            }
-
-            JSONSTR += "\n";
-
-            JSONSTR += "]\n";
-            JSONSTR += "}\n";
-        }
-        else
-        {
-            int count = hexGrdiCompList.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                var temp = hexGrdiCompList[i];
-
-                JSONSTR += getHexGridDynaSimpleJSON(temp, background);
-
-                if (i < count - 1)
-                {
-                    JSONSTR += ",\n";
-                }
-            }
-        }
-
-        Debug.LogWarning(JSONSTR);
-
-        return JSONSTR;
-    }
-
-    private string getHexGridJSON(HexGridComponent hexGridComponent, BackgroundGrid background)
-    {
-        string JSONSTR = "";
-
-        // 首
-        {
-            JSONSTR += "{\n";
-        }
-
-        // 名称
-        {
-            JSONSTR += "    ";
-            JSONSTR += "\"name\":\"" + hexGridComponent.Name + "\",\n";
-        }
-
-        // 宽高,位置，尺寸
-        {
-            JSONSTR += "    ";
-            JSONSTR += "\"width\":" + hexGridComponent.width + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"height\":" + hexGridComponent.height + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"cellSize\":" + hexGridComponent.cellSize + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"position\":" + hexGridComponent.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"rotation\":" + hexGridComponent.transform.localRotation.eulerAngles.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"isHex\":" + (hexGridComponent.isHex ? "true" : "false") + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"isRotate\":" + (hexGridComponent.isRotate ? "true" : "false") + ",\n";
-        }
-
-        // 网格单元数组
-        {
-            JSONSTR += "    ";
-            JSONSTR += "\"cells\":[\n";
-
-            List<HexCellComponent> cells = hexGridComponent.getHexCells();
-
-            List<HexCellComponent> list = new List<HexCellComponent>();
-
-
-            foreach (var temp in cells)
-            {
-                if (temp.checkActive())
-                {
-                    list.Add(temp);
-                }
-            }
-
-            int count = list.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                HexCellComponent cell = list[i];
-                if (cell != null)
-                {
-                    // 网格单元
-                    JSONSTR += "        ";
-                    JSONSTR += "{\n";
-                    {
-
-                        // 坐标
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"x\":" + cell.x + ",\n";
-                            JSONSTR += "            ";
-                            JSONSTR += "\"y\":" + cell.y + ",\n";
-                            JSONSTR += "            ";
-                            JSONSTR += "\"z\":" + cell.z + ",\n";
-                            JSONSTR += "            ";
-                            if (Parame.exportCellWorldPosition)
-                            {
-                                JSONSTR += "\"position\":" + cell.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                            }
-                            else
-                            {
-                                JSONSTR += "\"position\":" + cell.transform.localPosition.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                            }
-                            JSONSTR += "            ";
-                            JSONSTR += "\"scaling\":" + cell.transform.localScale.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                        }
-
-                        int attrCount = cell.attrNames.Count;
-                        attrCount = Math.Min(attrCount, cell.attrValues.Count);
-
-                        // 属性名
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"attrNames\":[";
-
-                            for (var j = 0; j < attrCount; j++)
-                            {
-                                JSONSTR += "\"" + cell.attrNames[j] + "\"";
-
-                                if (j != attrCount - 1)
-                                {
-                                    JSONSTR += ",";
-                                }
-                            }
-
-                            JSONSTR += "],\n";
-                        }
-
-                        // 属性值
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"attrValues\":[";
-
-                            for (var j = 0; j < attrCount; j++)
-                            {
-                                JSONSTR += "\"" + cell.attrValues[j] + "\"";
-
-                                if (j != attrCount - 1)
-                                {
-                                    JSONSTR += ",";
-                                }
-                            }
-
-                            JSONSTR += "]\n";
-                        }
-                    }
-
-                    JSONSTR += "        ";
-                    JSONSTR += "}";
-                }
-                else
-                {
-                    JSONSTR += "        ";
-                    JSONSTR += "null";
-                }
-
-                if (i != count - 1)
-                {
-                    JSONSTR += ",\n";
-                }
-                else
-                {
-                    JSONSTR += "\n";
-                }
-            }
-
-            JSONSTR += "    ";
-            JSONSTR += "]\n";
-        }
-
-        // 尾
-        {
-            JSONSTR += "}";
-        }
-
-        return JSONSTR;
-    }
-
-    private string getHexGridDynaJSON(HexGridDynamicComponent hexGridComponent, BackgroundGrid background)
-    {
-        string JSONSTR = "";
-
-        // 首
-        {
-            JSONSTR += "{\n";
-        }
-
-        // 名称
-        {
-            if (background)
-            {
-                JSONSTR += "    ";
-                JSONSTR += "\"isHex\":" + (background.isHex ? "true" : "false") + ",\n";
-                JSONSTR += "    ";
-                JSONSTR += "\"isRotate\":" + (background.isRotate ? "true" : "false") + ",\n";
-                JSONSTR += "    ";
-                JSONSTR += "\"cellSize\":" + (background.cellSize) + ",\n";
-            }
-            JSONSTR += "    ";
-            JSONSTR += "\"name\":\"" + hexGridComponent.Name + "\",\n";
-        }
-
-        // 宽高,位置，尺寸
-        {
-            JSONSTR += "    ";
-            JSONSTR += "\"position\":" + hexGridComponent.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-            JSONSTR += "    ";
-            JSONSTR += "\"rotation\":" + hexGridComponent.transform.localRotation.eulerAngles.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-        }
-
-        // 网格单元数组
-        {
-            JSONSTR += "    ";
-            JSONSTR += "\"cells\":[\n";
-
-            List<HexCellDynamicComponent> cells = hexGridComponent.getHexCells();
-
-            List<HexCellDynamicComponent> list = new List<HexCellDynamicComponent>();
-
-
-            foreach (var temp in cells)
-            {
-                if (temp.gameObject.activeInHierarchy)
-                {
-                    list.Add(temp);
-                }
-            }
-
-            int count = list.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                HexCellDynamicComponent cell = list[i];
-                if (cell != null)
-                {
-                    // 网格单元
-                    JSONSTR += "        ";
-                    JSONSTR += "{\n";
-                    {
-
-                        // 坐标
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"x\":" + cell.x + ",\n";
-                            JSONSTR += "            ";
-                            JSONSTR += "\"y\":" + cell.y + ",\n";
-                            JSONSTR += "            ";
-                            JSONSTR += "\"z\":" + cell.z + ",\n";
-                            JSONSTR += "            ";
-                            JSONSTR += "\"size\":" + cell.size + ",\n";
-                            JSONSTR += "            ";
-                            if (Parame.exportCellWorldPosition)
-                            {
-                                JSONSTR += "\"position\":" + cell.transform.position.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                            } else
-                            {
-                                JSONSTR += "\"position\":" + cell.transform.localPosition.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                            }
-                            JSONSTR += "            ";
-                            JSONSTR += "\"scaling\":" + cell.transform.localScale.ToString().Replace('(', '[').Replace(')', ']') + ",\n";
-                        }
-
-                        int attrCount = cell.attrNames.Count;
-                        attrCount = Math.Min(attrCount, cell.attrValues.Count);
-
-                        // 属性名
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"attrNames\":[";
-
-                            for (var j = 0; j < attrCount; j++)
-                            {
-                                JSONSTR += "\"" + cell.attrNames[j] + "\"";
-
-                                if (j != attrCount - 1)
-                                {
-                                    JSONSTR += ",";
-                                }
-                            }
-
-                            JSONSTR += "],\n";
-                        }
-
-                        // 属性值
-                        {
-                            JSONSTR += "            ";
-                            JSONSTR += "\"attrValues\":[";
-
-                            for (var j = 0; j < attrCount; j++)
-                            {
-                                JSONSTR += "\"" + cell.attrValues[j] + "\"";
-
-                                if (j != attrCount - 1)
-                                {
-                                    JSONSTR += ",";
-                                }
-                            }
-
-                            JSONSTR += "]\n";
-                        }
-                    }
-
-                    JSONSTR += "        ";
-                    JSONSTR += "}";
-                }
-                else
-                {
-                    JSONSTR += "        ";
-                    JSONSTR += "null";
-                }
-
-                if (i != count - 1)
-                {
-                    JSONSTR += ",\n";
-                }
-                else
-                {
-                    JSONSTR += "\n";
-                }
-            }
-
-            JSONSTR += "    ";
-            JSONSTR += "]\n";
-        }
-
-        // 尾
-        {
-            JSONSTR += "}";
-        }
-
-        return JSONSTR;
-    }
-
-    private string getHexGridDynaSimpleJSON(HexGridDynamicComponent hexGridComponent, BackgroundGrid background)
-    {
-        string JSONSTR = "";
-
-        // 网格单元数组
-        {
-            JSONSTR += "[\n";
-
-            List<HexCellDynamicComponent> cells = hexGridComponent.getHexCells();
-
-            List<HexCellDynamicComponent> list = new List<HexCellDynamicComponent>();
-
-
-            foreach (var temp in cells)
-            {
-                if (temp.checkActive())
-                {
-                    list.Add(temp);
-                }
-            }
-
-            int count = list.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                HexCellDynamicComponent cell = list[i];
-                if (cell != null)
-                {
-                    JSONSTR += cell.size + ",";
-
-                    JSONSTR += "\"" + cell.transform.name + "\",";
-
-                    Vector3 vec = new Vector3(Mathf.RoundToInt(cell.transform.localScale.x), Mathf.RoundToInt(cell.transform.localScale.y), Mathf.RoundToInt(cell.transform.localScale.z));
-                    JSONSTR += vec.ToString().Replace('(', '[').Replace(')', ']') + ",";
-
-                    if (Parame.exportCellWorldPosition)
-                    {
-                        JSONSTR += "" + cell.transform.position.ToString().Replace('(', '[').Replace(')', ']');
-                    }
-                    else
-                    {
-                        JSONSTR += "" + cell.transform.localPosition.ToString().Replace('(', '[').Replace(')', ']');
-                    }
-                }
-                else
-                {
-                    JSONSTR += "        ";
-                    JSONSTR += "null";
-                }
-
-                if (i != count - 1)
-                {
-                    JSONSTR += ",\n";
-                }
-                else
-                {
-                    JSONSTR += "\n";
-                }
-            }
-
-            JSONSTR += "]\n";
-        }
-
-        return JSONSTR;
-    }
-
+    
     /// <summary>
     /// https://blog.csdn.net/akof1314/java/article/details/78639075
     /// </summary>
@@ -854,6 +333,7 @@ public class EditorPanel : EditorWindow
         mousePosition.x *= mult;
 
         HexCellDynamicTemplate templateCellDyn = getSelectHexCellDynamicTemplate();
+
         if (templateCellDyn)
         {
             Ray ray = sceneView.camera.ScreenPointToRay(mousePosition);
@@ -862,79 +342,125 @@ public class EditorPanel : EditorWindow
 
             BackgroundGrid backgroundGrid = hexMap.gameObject.GetComponentInChildren<BackgroundGrid>();
 
+            var gridDyn = templateCellDyn.transform.parent.parent.gameObject;
+
+            var hexGridDyn = templateCellDyn.GetComponentInParent<HexGridDynamicComponent>();
+
+            var cellListComp = gridDyn.GetComponentInChildren<CellListComponent>();
+
             /// 处理 distance
             if (templateCellDyn.cellSize != backgroundGrid.cellSize)
             {
                 Parame.distance = 0;
             }
 
+            if (hexGridDyn.EnableCellEdge)
+            {
+                Parame.distance = 0;
+            }
+
+            if (hexGridDyn.EnableCellEdge && backgroundGrid.cellSize != templateCellDyn.cellSize)
+            {
+                Debug.LogWarning(Parame.edgeWaring);
+                return false;
+            }
+
+            Parame.hitInfoFlag = false;
             List<CustomRayInfo> list = backgroundGrid.rayCast(ray);
 
             if (list.Count > 0)
             {
                 flag = true;
 
-                //var grid = hexCellComp.gameObject.transform.parent.GetComponent<HexGridComponent>();
-
-                var gridDyn = templateCellDyn.transform.parent.parent.gameObject;
-
-                var cellListComp = gridDyn.GetComponentInChildren<CellListComponent>();
-
-                foreach (var info in list)
+                if (Parame.hitInfoFlag)
                 {
-                    if (cellListComp)
-                    {
-                        if (cellListComp.transform.FindChild(info.getName()) || gridDyn.transform.FindChild(info.getName()))
-                        {
+                    var hitLocalBackgroundPos = Parame.hitInfo.point;
 
+                    //var grid = hexCellComp.gameObject.transform.parent.GetComponent<HexGridComponent>();
+
+                    foreach (var info in list)
+                    {
+                        byte cellType = 0;
+                        var hitLocalCellPos = hitLocalBackgroundPos - info.getPos();
+
+                        if (hexGridDyn.EnableCellEdge && backgroundGrid.cellSize == templateCellDyn.cellSize)
+                        {
+                            cellType = HexCoordinates.CheckHitCellType(hitLocalCellPos, hexGridDyn.CellEdgeWidth, backgroundGrid.cellSize, backgroundGrid.isHex, backgroundGrid.isRotate);
+                            if (backgroundGrid.isHex)
+                            {
+
+                            }
+                            else
+                            {
+                                if (!Parame.EditPoint && cellType > 20)
+                                {
+                                    continue;
+                                }
+                                if (!Parame.EditEdge && (cellType > 10 && cellType < 20))
+                                {
+                                    continue;
+                                }
+                                if ((Parame.EditPoint || Parame.EditEdge) && cellType < 10)
+                                {
+                                    continue;
+                                }
+                            }
                         }
                         else
                         {
-                            templateCellDyn.GetComponentInParent<HexGridDynamicComponent>().CreateCellDynamic(info.ix, info.iy, info.iz, backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn);
+                            if (backgroundGrid.isHex)
+                            {
+                                if (backgroundGrid.isRotate)
+                                {
+                                    cellType = Parame.RHexType;
+                                }
+                                else
+                                {
+                                    cellType = Parame.HexType;
+                                }
+                            }
+                            else
+                            {
+                                if (backgroundGrid.isRotate)
+                                {
+                                    cellType = Parame.RSquareType;
+                                }
+                                else
+                                {
+                                    cellType = Parame.SquareType;
+                                }
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (gridDyn.transform.FindChild(info.getName()))
-                        {
 
+                        if (cellType > 10)
+                        {
+                            List<int> specialNear = HexCoordinates.FindNearCellIDList(info.ix, info.iy, info.iz, cellType, backgroundGrid.isHex, backgroundGrid.isRotate);
+                            string specialName = HexCoordinates.CellIDFromNearList(specialNear);
+                            
+                            if ((!cellListComp || !cellListComp.transform.FindChild(specialName)) && !gridDyn.transform.FindChild(specialName))
+                            {
+                                hexGridDyn.UpdateMinMax(specialNear);
+                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn, cellType, specialName);
+                            }
                         }
                         else
                         {
-                            templateCellDyn.GetComponentInParent<HexGridDynamicComponent>().CreateCellDynamic(info.ix, info.iy, info.iz, backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn);
+                            List<int> specialNear = HexCoordinates.FindNearCellIDList(info.ix, info.iy, info.iz, cellType, backgroundGrid.isHex, backgroundGrid.isRotate);
+                            string specialName = HexCoordinates.CellIDFromNearList(specialNear);
+
+                            if ((!cellListComp || !cellListComp.transform.FindChild(specialName)) && !gridDyn.transform.FindChild(specialName))
+                            {
+                                hexGridDyn.UpdateMinMax(specialNear);
+                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn, cellType, specialName);
+                            }
                         }
+
                     }
                 }
+
             }
 
-            //HexCellComponent[] componentsInChildren = GameObject.FindObjectsOfType<HexCellComponent>();
-            //float num = float.PositiveInfinity;
-            //foreach (HexCellComponent hexCellComp in componentsInChildren)
-            //{
-            //    MeshFilter meshFilter = hexCellComp.gameObject.GetComponent<MeshFilter>();
-            //    Mesh sharedMesh = meshFilter.sharedMesh;
-            //    RaycastHit hit;
-            //    if (sharedMesh
-            //        && RXLookingGlass.IntersectRayMesh(ray, sharedMesh, meshFilter.transform.localToWorldMatrix, out hit)
-            //        && hit.distance < num)
-            //    {
-            //        flag = true;
-
-            //        var grid = hexCellComp.gameObject.transform.parent.GetComponent<HexGridComponent>();
-
-            //        var gridDyn = templateCellDyn.transform.parent.parent.gameObject;
-
-            //        if (gridDyn.transform.FindChild(hexCellComp.name))
-            //        {
-
-            //        } else
-            //        {
-            //            templateCellDyn.GetComponentInParent<HexGridDynamicComponent>().CreateCellDynamic(hexCellComp.x, hexCellComp.y, hexCellComp.z, grid.cellSize, hexCellComp.transform.position, templateCellDyn);
-            //        }
-
-            //        break;
-            //    }
-            //}
+            Parame.hitInfoFlag = false;
         }
 
 
@@ -1021,37 +547,5 @@ public class EditorPanel : EditorWindow
     {
         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
     }
-
-    //void OnSceneMouseOver(SceneView view)
-    //{
-    //    if (Event.current.type == EventType.MouseDrag)
-    //    {
-    //        Debug.LogWarning("ddddddddd");
-    //    }
-
-    //    if (Event.current.type == EventType.MouseDown)
-    //    {
-    //        Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
-    //        RaycastHit hit;
-
-    //        var res = Physics.Raycast(ray, out hit);
-
-    //        //And add switch Event.current.type for checking Mouse click and switch tiles
-    //        if (res)
-    //        {
-    //            var hexCellComp = hit.transform.gameObject.GetComponent<HexCellComponent>();
-
-    //            if (hexCellComp)
-    //            {
-    //                Debug.DrawRay(ray.origin, hit.transform.position, Color.blue, 5f);
-    //            }
-    //        }
-    //        Debug.LogWarning("aaaaaaaaaaa");
-    //    }
-
-    //    if (Event.current.type == EventType.MouseMove)
-    //    {
-    //        Debug.LogWarning("mmmmmmmmm");
-    //    }
-    //}
+    
 }

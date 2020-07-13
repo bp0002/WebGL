@@ -13,6 +13,7 @@ namespace HexMapEditor
     {
         private string CellListDesc = "创建 CellList 节点，编辑生成的Cell会挂在该节点下.";
         private string TemplateDesc = "创建模板节点,模板节点的数据会应用与编辑出的Cell";
+        private string RefreshDesc = "手动删除 Cell 节点后刷新 Min Max 统计";
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -47,6 +48,12 @@ namespace HexMapEditor
                         createTemplate();
                     }
                     EditorGUILayout.HelpBox(TemplateDesc, MessageType.Info);
+
+                    if (GUILayout.Button("Refresh Min Max"))
+                    {
+                        gameObject.GetComponent<HexGridDynamicComponent>().RefreshMinMax();
+                    }
+                    EditorGUILayout.HelpBox(RefreshDesc, MessageType.Info);
                 }
             }
         }
