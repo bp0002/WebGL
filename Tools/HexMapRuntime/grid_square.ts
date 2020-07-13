@@ -298,7 +298,7 @@ export class GridSquare extends HexGrid {
      * TODO
      */
     public computeContainTerrains(aabb: [number, number, number, number], rotate: number, res: number[]) : void {
-        const aabbLoc = [aabb[0] - this.x_pos, aabb[1] - this.x_pos, aabb[2] - this.z_pos, aabb[3] - this.z_pos];
+        let aabbLoc: [number, number, number, number] = [aabb[0] - this.x_pos, aabb[1] - this.x_pos, aabb[2] - this.z_pos, aabb[3] - this.z_pos];
 
         // 逆时针旋转 45
         let tempX: number = (aabbLoc[0] + aabbLoc[1]) / 2;
@@ -306,8 +306,7 @@ export class GridSquare extends HexGrid {
         const centerX = HexCoordinates.cos45 * tempX - HexCoordinates.sin45 * tempZ;
         const centerZ = HexCoordinates.sin45 * tempX + HexCoordinates.cos45 * tempZ;
 
-        // 逆时针旋转 45
-        rotate -= Math.PI * 0.25;
+        aabbLoc = HexMapTools.rotateAABB(aabbLoc, -0.25 * Math.PI);
 
         const minX = Math.min(aabbLoc[0], aabbLoc[1]);
         const maxX = Math.max(aabbLoc[0], aabbLoc[1]);
@@ -330,7 +329,7 @@ export class GridSquare extends HexGrid {
             for (let j = minBaseCellZ; j <= maxBaseCellZ; j++) {
                 for (let i = minBaseCellX; i <= maxBaseCellX; i++) {
                     // RSquareType
-                    const baseTerrainID = this.getTerrrainIDByCellAndType(i, 0, j, Parame.RSquareType);
+                    const baseTerrainID = this.getTerrrainIDByCellAndType(i, 0, j, Parame.SquareType);
                     HexCoordinates.ComputeBaseCellLocalPos(i, 0, j, this.cellSize, this.isHex, this.isRotate);
                     tempX = HexCoordinates.TempFX;
                     tempZ = HexCoordinates.TempFZ;

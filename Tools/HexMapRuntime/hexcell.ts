@@ -33,18 +33,59 @@ export type PointCell = HexCell;
 export type ICell = [number, number, number, number, number[], number, number, [number, number, number], [number, number, number], string[], string[]];
 
 export class HexCell {
+    /**
+     * 单元格唯一标识
+     */
     public readonly id: string = '';
+    /**
+     * 单元格大小
+     */
     public readonly size: number;
+    /**
+     * 自定义数据键列表
+     */
     public readonly attrKeys: string[];
+    /**
+     * 自定义数据值列表
+     */
     public readonly attrValues: string[];
+    /**
+     * 是否为六边形单元格
+     */
     public readonly isHex: boolean;
+    /**
+     * 是否旋转 - true 表示 某一角向上,false表示某一边向上
+     */
     public readonly isRotate: boolean;
+    /**
+     * 单元格位置
+     * * 导出时选择导出绝对位置还是相对位置 
+     * * （绝对位置较常用）
+     */
     public readonly position: [number, number, number];
+    /**
+     * 单元格缩放系数
+     */
     public readonly scaling: [number, number, number];
+    /**
+     * 单元格地形ID
+     */
     public readonly terrainID: number;
+    /**
+     * 单元格类型
+     */
     public readonly cellType: number;
+    /**
+     * 单元格被共享信息
+     */
     public readonly shareOwnInfo: number[];
-
+    /**
+     * 单元格
+     * @param data 导入数据
+     * @param size 网格层记录的默认尺寸
+     * @param isHex 是否为六边形
+     * @param isRotate 是否进行旋转
+     */
     constructor(data: Uint8Array | ICell, size: number, isHex: boolean, isRotate: boolean) {
 
         this.size = size;

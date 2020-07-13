@@ -19,4 +19,26 @@ export namespace HexMapTools {
             res[1] = sin * posX + cos * posY;
         }
     }
+
+    export function rotateAABB(aabb: [number, number, number, number], radian: number) : [number, number, number, number] {
+        const cos = Math.cos(radian);
+        const sin = Math.sin(radian);
+
+        const x0    = cos * aabb[0] - sin * aabb[2];
+        const x00   = cos * aabb[0] - sin * aabb[3];
+        const x1    = cos * aabb[1] - sin * aabb[2];
+        const x11   = cos * aabb[1] - sin * aabb[3];
+
+        const z0    = -sin * aabb[0] + cos * aabb[2];
+        const z00   = -sin * aabb[0] + cos * aabb[3];
+        const z1    = -sin * aabb[1] + cos * aabb[2];
+        const z11   = -sin * aabb[1] + cos * aabb[3];
+
+        return [
+            Math.min(x0, x00, x1, x11),
+            Math.max(x0, x00, x1, x11),
+            Math.min(z0, z00, z1, z11),
+            Math.max(z0, z00, z1, z11)
+        ];
+    }
 }

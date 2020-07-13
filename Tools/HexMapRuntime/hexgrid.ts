@@ -20,31 +20,92 @@ export interface IGrid {
 }
 
 export class HexGrid {
+    /**
+     * 网格唯一标识
+     */
     public readonly id: string;
+    /**
+     * 单元格缓存堆
+     * @key 单元格唯一标识
+     * @value 单元格
+     */
     public readonly map: Map<string, HexCell> = new Map();
     public readonly list: HexCell[];
+    /**
+     * 网格绝对位置-x
+     */
     public readonly x_pos: number;
+    /**
+     * 网格绝对位置-y
+     */
     public readonly y_pos: number;
+    /**
+     * 网格绝对位置-z
+     */
     public readonly z_pos: number;
-
+    /***
+     * 网格内的单元格默认尺寸
+     */
     public readonly cellSize: number;
+    /**
+     * 是否为六边形
+     */
     public readonly isHex: boolean;
+    /**
+     * 是否进行旋转
+     */
     public readonly isRotate: boolean;
+    /**
+     * 是否激活了单元格边的宽度
+     */
     public readonly enableEdge: boolean = false;
+    /**
+     * 单元格边的宽度
+     */
     public readonly cellEdge: number = 0;
-
+    /**
+     * 网格内单元格网格坐标AABB
+     */
     public readonly minIX: number = Number.MAX_SAFE_INTEGER;
+    /**
+     * 网格内单元格网格坐标AABB
+     */
     public readonly minIZ: number = Number.MAX_SAFE_INTEGER;
+    /**
+     * 网格内单元格网格坐标AABB
+     */
     public readonly maxIX: number = Number.MIN_SAFE_INTEGER;
+    /**
+     * 网格内单元格网格坐标AABB
+     */
     public readonly maxIZ: number = Number.MIN_SAFE_INTEGER;
 
+    /**
+     * 网格内单元格网格坐标AABB宽度
+     */
     public readonly cellWidth: number = 0;
+    /**
+     * 网格内单元格网格坐标AABB高度
+     */
     public readonly cellHeight: number = 0;
 
+    /**
+     * 网格内地形数据
+     */
     public readonly terrain: Uint8Array | undefined;
+    /**
+     * 网格内地形ID对应的网格数据堆
+     */
     public readonly terrainMap: Map<number, HexCell> = new Map();
+    /**
+     * 网格内地形ID对应的地形坐标 - 绝对坐标
+     */
     public readonly terrainPosMap: Map<number, [number, number, number]> = new Map();
-
+    /**
+     * 网格
+     * @param data 导入网格数据
+     * @param terrainData 导入地形数据
+     */
     constructor(data: IGrid, terrainData?: Uint8Array) {
         this.list = [];
         this.id = '';
