@@ -300,13 +300,18 @@ export class GridSquare extends HexGrid {
     public computeContainTerrains(aabb: [number, number, number, number], rotate: number, res: number[]) : void {
         let aabbLoc: [number, number, number, number] = [aabb[0] - this.x_pos, aabb[1] - this.x_pos, aabb[2] - this.z_pos, aabb[3] - this.z_pos];
 
-        // 逆时针旋转 45
+        // // 逆时针旋转 45
         let tempX: number = (aabbLoc[0] + aabbLoc[1]) / 2;
         let tempZ: number = (aabbLoc[2] + aabbLoc[3]) / 2;
-        const centerX = HexCoordinates.cos45 * tempX - HexCoordinates.sin45 * tempZ;
-        const centerZ = HexCoordinates.sin45 * tempX + HexCoordinates.cos45 * tempZ;
+        // const centerX = HexCoordinates.cos45 * tempX - HexCoordinates.sin45 * tempZ;
+        // const centerZ = HexCoordinates.sin45 * tempX + HexCoordinates.cos45 * tempZ;
 
         aabbLoc = HexMapTools.rotateAABB(aabbLoc, -0.25 * Math.PI);
+
+        rotate -= -0.25 * Math.PI;
+
+        const centerX = (aabbLoc[0] + aabbLoc[1]) / 2;
+        const centerZ = (aabbLoc[2] + aabbLoc[3]) / 2;
 
         const minX = Math.min(aabbLoc[0], aabbLoc[1]);
         const maxX = Math.max(aabbLoc[0], aabbLoc[1]);
@@ -316,8 +321,8 @@ export class GridSquare extends HexGrid {
         const sin = Math.sin(rotate);
         const cos = Math.cos(rotate);
 
-        const w = Math.abs((aabbLoc[0] - aabbLoc[1]) / 2);
-        const h = Math.abs((aabbLoc[2] - aabbLoc[3]) / 2);
+        const w = Math.abs((aabb[0] - aabb[1]) / 2);
+        const h = Math.abs((aabb[2] - aabb[3]) / 2);
 
         if (this.enableEdge) {
             const minBaseCellX = Math.max(Math.floor(minX / this.cellSize), this.minIX);
@@ -330,33 +335,33 @@ export class GridSquare extends HexGrid {
                 for (let i = minBaseCellX; i <= maxBaseCellX; i++) {
                     // RSquareType
                     const baseTerrainID = this.getTerrrainIDByCellAndType(i, 0, j, Parame.SquareType);
-                    HexCoordinates.ComputeBaseCellLocalPos(i, 0, j, this.cellSize, this.isHex, this.isRotate);
+                    HexCoordinates.ComputeBaseCellLocalPos(i, 0, j, this.cellSize, this.isHex, true);
                     tempX = HexCoordinates.TempFX;
                     tempZ = HexCoordinates.TempFZ;
-                    HexCoordinates.TempFX = HexCoordinates.cos45 * tempX - HexCoordinates.sin45 * tempZ;
-                    HexCoordinates.TempFZ = HexCoordinates.sin45 * tempX + HexCoordinates.cos45 * tempZ;
+                    // HexCoordinates.TempFX = HexCoordinates.cos45 * tempX - HexCoordinates.sin45 * tempZ;
+                    // HexCoordinates.TempFZ = HexCoordinates.sin45 * tempX + HexCoordinates.cos45 * tempZ;
                     HexCoordinates.TempFX -= centerX;
                     HexCoordinates.TempFZ -= centerZ;
 
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID);
                     }
 
                     // RSquareEdgeType1
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 1);
                     }
 
                     // RSquareEdgeType4
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ + this.cellSize / 2, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ + this.cellSize / 2, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 2);
                     }
 
                     // RSquarePointType1
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ + this.cellSize / 2, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ + this.cellSize / 2, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 3);
                     }

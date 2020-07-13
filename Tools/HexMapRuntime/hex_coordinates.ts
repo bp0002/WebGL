@@ -275,7 +275,7 @@ export namespace HexCoordinates {
             else
             {
                 let q = cellSize * iX;
-                let r = cellSize * iY;
+                let r = cellSize * iZ;
 
                 HexCoordinates.TempFX = HexCoordinates.cos45 * q + HexCoordinates.sin45 * r;
                 HexCoordinates.TempFY = 0;

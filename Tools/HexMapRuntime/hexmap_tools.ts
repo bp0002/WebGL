@@ -24,10 +24,10 @@ export namespace HexMapTools {
         const cos = Math.cos(radian);
         const sin = Math.sin(radian);
 
-        const x0    = cos * aabb[0] - sin * aabb[2];
-        const x00   = cos * aabb[0] - sin * aabb[3];
-        const x1    = cos * aabb[1] - sin * aabb[2];
-        const x11   = cos * aabb[1] - sin * aabb[3];
+        const x0    = cos * aabb[0] + sin * aabb[2];
+        const x00   = cos * aabb[0] + sin * aabb[3];
+        const x1    = cos * aabb[1] + sin * aabb[2];
+        const x11   = cos * aabb[1] + sin * aabb[3];
 
         const z0    = -sin * aabb[0] + cos * aabb[2];
         const z00   = -sin * aabb[0] + cos * aabb[3];

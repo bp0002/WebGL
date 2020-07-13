@@ -324,25 +324,25 @@ export class GridSquareR extends HexGrid {
                     HexCoordinates.TempFX -= centerX;
                     HexCoordinates.TempFZ -= centerZ;
 
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID);
                     }
 
                     // RSquareEdgeType1
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 1);
                     }
 
                     // RSquareEdgeType4
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ + this.cellSize / 2, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX, HexCoordinates.TempFZ + this.cellSize / 2, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 2);
                     }
 
                     // RSquarePointType1
-                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ + this.cellSize / 2, false, tempPos);
+                    HexMapTools.rotatePos(cos, sin, HexCoordinates.TempFX + this.cellSize / 2, HexCoordinates.TempFZ + this.cellSize / 2, true, tempPos);
                     if (HexMapTools.checkRectContainPosition(w, h, tempPos[0], tempPos[1])) {
                         res.push(baseTerrainID + 3);
                     }
