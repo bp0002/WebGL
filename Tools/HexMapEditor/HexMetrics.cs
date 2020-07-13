@@ -133,5 +133,13 @@ namespace HexMapEditor
 
             return PlanMesh;
         }
+
+        public static Vector3 RotatePos(float x, float y, float z, float angle)
+        {
+            float cos = Mathf.Cos(angle / 180 * Mathf.PI);
+            float sin = Mathf.Sin(angle / 180 * Mathf.PI);
+
+            return new Vector3(cos * x + sin * z, y, -sin * x + cos * z);
+        }
     }
 }

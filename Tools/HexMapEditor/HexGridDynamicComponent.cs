@@ -58,7 +58,7 @@ namespace HexMapEditor
         /// <param name="position">单元格相对背景网格原点坐标</param>
         /// <param name="templateCellDyn">模板数据</param>
         /// <param name="cellType">网格类型 - 块 - 边(4/6种) - 点(4/6种)</param>
-        public void CreateCellDynamic(int x, int y, int z, Boolean isHex, Boolean isRotate, float bgCellSize, Vector3 position, HexCellDynamicTemplate templateCellDyn, byte cellType, string specialName)
+        public void CreateCellDynamic(int x, int y, int z, Boolean isHex, Boolean isRotate, float bgCellSize, Vector3 locPos, HexCellDynamicTemplate templateCellDyn, byte cellType, string specialName)
         {
 
             CellListComponent cellListComp = gameObject.GetComponentInChildren<CellListComponent>();
@@ -77,7 +77,7 @@ namespace HexMapEditor
                     GameObject go = new GameObject();
                     go.transform.parent = parentTransform;
                     var comp = go.AddComponent<HexCellDynamicComponent>();
-                    var flag = comp.initData(x, y, z, templateCellDyn, bgCellSize, position, isRotate, isHex, cellType, CellEdgeWidth, specialName);
+                    var flag = comp.initData(x, y, z, templateCellDyn, bgCellSize, locPos, isRotate, isHex, cellType, CellEdgeWidth, specialName);
                     comp.CreatePlane();
                     comp.UpdateFromTemplate(templateCellDyn);
                     comp.UpdateHexPlane();
@@ -90,7 +90,7 @@ namespace HexMapEditor
                     GameObject go = new GameObject();
                     go.transform.parent = parentTransform;
                     var comp = go.AddComponent<HexCellDynamicComponent>();
-                    var flag = comp.initData(x, y, z, templateCellDyn, bgCellSize, position, isRotate, isHex, cellType, CellEdgeWidth, specialName);
+                    var flag = comp.initData(x, y, z, templateCellDyn, bgCellSize, locPos, isRotate, isHex, cellType, CellEdgeWidth, specialName);
                     comp.CreatePlane();
                     comp.UpdateFromTemplate(templateCellDyn);
                     comp.UpdatePlane();

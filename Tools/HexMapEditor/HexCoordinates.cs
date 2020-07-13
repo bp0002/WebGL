@@ -758,6 +758,53 @@ namespace HexMapEditor
                 else
                 {
                     res = Parame.SquareType;
+
+                    var rotPos = HexMetrics.RotatePos(hitLocalPos.x, hitLocalPos.y, hitLocalPos.z, -45);
+                    var tempWidth = (1 - edgeWidth) * cellSize * 0.5f;
+                    if (Mathf.Abs(rotPos.z) >= (tempWidth) && Mathf.Abs(rotPos.x) >= (tempWidth))
+                    {
+                        if (rotPos.z > 0)
+                        {
+                            if (rotPos.x > 0)
+                            {
+                                res = Parame.SquarePointType1;
+                            }
+                            else
+                            {
+                                res = Parame.SquarePointType4;
+                            }
+                        }
+                        else
+                        {
+                            if (rotPos.x > 0)
+                            {
+                                res = Parame.SquarePointType2;
+                            }
+                            else
+                            {
+                                res = Parame.SquarePointType3;
+                            }
+                        }
+                    }
+                    else if (Mathf.Abs(rotPos.z) >= (tempWidth) || Mathf.Abs(rotPos.x) >= (tempWidth))
+                    {
+                        if (rotPos.x > tempWidth)
+                        {
+                            res = Parame.SquareEdgeType1;
+                        }
+                        else if (rotPos.x < -tempWidth)
+                        {
+                            res = Parame.SquareEdgeType3;
+                        }
+                        else if (rotPos.z > tempWidth)
+                        {
+                            res = Parame.SquareEdgeType4;
+                        }
+                        else if (rotPos.z < -tempWidth)
+                        {
+                            res = Parame.SquareEdgeType2;
+                        }
+                    }
                 }
             }
 
@@ -790,7 +837,7 @@ namespace HexMapEditor
                 {
                     if (cellType >= Parame.RSquarePointType1)
                     {
-                        switch(cellType)
+                        switch (cellType)
                         {
                             case (Parame.RSquarePointType1):
                                 {
@@ -801,20 +848,14 @@ namespace HexMapEditor
                                     list.Add(ownX + 1);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
 
                                     list.Add(ownX);
                                     list.Add(ownY);
                                     list.Add(ownZ + 1);
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
 
                                     list.Add(ownX + 1);
                                     list.Add(ownY);
                                     list.Add(ownZ + 1);
-                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ + 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquarePointType2):
@@ -834,15 +875,6 @@ namespace HexMapEditor
                                     list.Add(ownX + 1);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ -1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX +1, ownY, ownZ -1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = own;
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquarePointType3):
@@ -855,22 +887,13 @@ namespace HexMapEditor
                                     list.Add(ownY);
                                     list.Add(ownZ - 1);
 
-                                    list.Add(ownX -1);
+                                    list.Add(ownX - 1);
                                     list.Add(ownY);
                                     list.Add(ownZ);
 
                                     list.Add(ownX);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-
-                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ -1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ -1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = own;
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquarePointType4):
@@ -890,15 +913,6 @@ namespace HexMapEditor
                                     list.Add(ownX);
                                     list.Add(ownY);
                                     list.Add(ownZ + 1);
-
-                                    //temp = HexCoordinates.FromIntPosition(ownX -1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = own;
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX -1, ownY, ownZ + 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                         }
@@ -913,46 +927,31 @@ namespace HexMapEditor
                                     list.Add(ownY);
                                     list.Add(ownZ);
 
-                                    list.Add(ownX +1);
+                                    list.Add(ownX + 1);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-
-                                    //temp = own;
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX + 1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquareEdgeType2):
                                 {
                                     list.Add(ownX);
                                     list.Add(ownY);
-                                    list.Add(ownZ -1);
+                                    list.Add(ownZ - 1);
 
                                     list.Add(ownX);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ - 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = own;
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquareEdgeType3):
                                 {
-                                    list.Add(ownX -1);
+                                    list.Add(ownX - 1);
                                     list.Add(ownY);
                                     list.Add(ownZ);
 
                                     list.Add(ownX);
                                     list.Add(ownY);
                                     list.Add(ownZ);
-
-                                    //temp = HexCoordinates.FromIntPosition(ownX - 1, ownY, ownZ, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
-                                    //temp = own;
-                                    //list.Add(temp.getName());
                                     break;
                                 }
                             case (Parame.RSquareEdgeType4):
@@ -963,12 +962,8 @@ namespace HexMapEditor
 
                                     list.Add(ownX);
                                     list.Add(ownY);
-                                    list.Add(ownZ +1);
-
-                                    //temp = own;
-                                    //list.Add(temp.getName());
-                                    //temp = HexCoordinates.FromIntPosition(ownX, ownY, ownZ + 1, size, isHex, isRotate);
-                                    //list.Add(temp.getName());
+                                    list.Add(ownZ + 1);
+                                    
                                     break;
                                 }
                         }
@@ -982,9 +977,147 @@ namespace HexMapEditor
                 }
                 else
                 {
-                    list.Add(ownX);
-                    list.Add(ownY);
-                    list.Add(ownZ);
+                    if (cellType >= Parame.SquarePointType1)
+                    {
+                        switch (cellType)
+                        {
+                            case (Parame.SquarePointType1):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+                                    break;
+                                }
+                            case (Parame.SquarePointType2):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+                                    break;
+                                }
+                            case (Parame.SquarePointType3):
+                                {
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    break;
+                                }
+                            case (Parame.SquarePointType4):
+                                {
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+
+                                    break;
+                                }
+                        }
+                    }
+                    else if (cellType >= Parame.SquareEdgeType1)
+                    {
+                        switch (cellType)
+                        {
+                            case (Parame.SquareEdgeType1):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX + 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    break;
+                                }
+                            case (Parame.SquareEdgeType2):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ - 1);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+                                    break;
+                                }
+                            case (Parame.SquareEdgeType3):
+                                {
+                                    list.Add(ownX - 1);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+                                    break;
+                                }
+                            case (Parame.SquareEdgeType4):
+                                {
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ);
+
+                                    list.Add(ownX);
+                                    list.Add(ownY);
+                                    list.Add(ownZ + 1);
+                                    break;
+                                }
+                        }
+                    }
+                    else
+                    {
+                        list.Add(ownX);
+                        list.Add(ownY);
+                        list.Add(ownZ);
+                    }
                 }
             }
 

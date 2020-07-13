@@ -95,7 +95,7 @@ namespace HexMapEditor
 
         }
 
-        public Boolean initData(int i, int j, int k, HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter, Boolean rotate, Boolean hex, byte type, float edge, string specialName)
+        public Boolean initData(int i, int j, int k, HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenterLocPos, Boolean rotate, Boolean hex, byte type, float edge, string specialName)
         {
             Boolean flag = false;
 
@@ -122,11 +122,11 @@ namespace HexMapEditor
 
             if (isHex)
             {
-                HexTransform(template, bgCellSize, cellCenter);
+                HexTransform(template, bgCellSize, cellCenterLocPos);
             }
             else
             {
-                PlaneTransform(template, bgCellSize, cellCenter);
+                PlaneTransform(template, bgCellSize, cellCenterLocPos);
             }
 
             // 定位结束后校正
@@ -199,7 +199,15 @@ namespace HexMapEditor
             var hexGridDyn = gameObject.GetComponentInParent<HexGridDynamicComponent>();
             if (hexGridDyn.EnableCellEdge)
             {
-                if (cellType > 20)
+                if (cellType > 40)
+                {
+                    PlaneTransformPoint(template, bgCellSize, cellCenter);
+                }
+                else if (cellType > 30)
+                {
+                    PlaneTransformEdge(template, bgCellSize, cellCenter);
+                }
+                else if (cellType > 20)
                 {
                     PlaneTransformPoint(template, bgCellSize, cellCenter);
                 }
@@ -225,30 +233,30 @@ namespace HexMapEditor
             {
                 if (Parame.planIndex == 0)
                 {
-                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+                    go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
                 }
                 else if (Parame.planIndex == 1)
                 {
-                    go.transform.position = new Vector3(cellCenter.x - (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) / 2.0f);
+                    go.transform.localPosition = new Vector3(cellCenter.x - (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) / 2.0f);
                 }
                 else if (Parame.planIndex == 2)
                 {
-                    go.transform.position = new Vector3(cellCenter.x + (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) / 2.0f);
+                    go.transform.localPosition = new Vector3(cellCenter.x + (template.cellSize - bgCellSize) / 2.0f, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) / 2.0f);
                 }
             }
             else
             {
                 if (Parame.diamondIndex == 0)
                 {
-                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+                    go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
                 }
                 else if (Parame.diamondIndex == 1)
                 {
-                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
+                    go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
                 }
                 else if (Parame.diamondIndex == 2)
                 {
-                    go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
+                    go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + (template.cellSize - bgCellSize) * HexMetrics.squrt2 / 2.0f);
                 }
             }
 
@@ -271,67 +279,117 @@ namespace HexMapEditor
 
         private void PlaneTransformEdge(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
         {
-            if (isRotate)
-            {
+            var tempDiff = this.isRotate ? size * 0.5f : template.cellSize * HexMetrics.squrt2 * 0.25f;
                 switch (cellType)
                 {
                     case (Parame.RSquareEdgeType1):
                         {
-                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z);
+                            go.transform.localPosition = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z);
                             go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
-                            break;
+                        break;
                         }
                     case (Parame.RSquareEdgeType2):
                         {
-                            go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - size * 0.5f);
+                            go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z - size * 0.5f);
                             go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
                             break;
                         }
                     case (Parame.RSquareEdgeType3):
                         {
-                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z);
+                            go.transform.localPosition = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z);
                             go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
                             break;
                         }
                     case (Parame.RSquareEdgeType4):
                         {
-                            go.transform.position = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + size * 0.5f);
+                            go.transform.localPosition = new Vector3(cellCenter.x, cellCenter.y, cellCenter.z + size * 0.5f);
+                            go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+                            break;
+                        }
+                    /////////////////////////////////////////////////
+                    case (Parame.SquareEdgeType1):
+                        {
+                            go.transform.localPosition = new Vector3(cellCenter.x + tempDiff, cellCenter.y, cellCenter.z - tempDiff);
+                            go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
+                            go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                            break;
+                        }
+                    case (Parame.SquareEdgeType2):
+                        {
+                            go.transform.localPosition = new Vector3(cellCenter.x - tempDiff, cellCenter.y, cellCenter.z - tempDiff);
+                            go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+                            go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                            break;
+                        }
+                    case (Parame.SquareEdgeType3):
+                        {
+                            go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                            go.transform.localPosition = new Vector3(cellCenter.x - tempDiff, cellCenter.y, cellCenter.z + tempDiff);
+                            go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, template.cellSize - edgeWidth * template.cellSize);
+                            break;
+                        }
+                    case (Parame.SquareEdgeType4):
+                        {
+                            go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                            go.transform.localPosition = new Vector3(cellCenter.x + tempDiff, cellCenter.y, cellCenter.z + tempDiff);
                             go.transform.localScale = new Vector3(template.cellSize - edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
                             break;
                         }
                 }
-            }
         }
 
         private void PlaneTransformPoint(HexCellDynamicTemplate template, float bgCellSize, Vector3 cellCenter)
         {
-            if (isRotate)
+            var tempDiff = this.isRotate ? size * 0.5f : template.cellSize * HexMetrics.squrt2 * 0.5f;
+            switch (cellType)
             {
-                switch (cellType)
-                {
-                    case (Parame.RSquarePointType1):
-                        {
-                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
-                            break;
-                        }
-                    case (Parame.RSquarePointType2):
-                        {
-                            go.transform.position = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
-                            break;
-                        }
-                    case (Parame.RSquarePointType3):
-                        {
-                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
-                            break;
-                        }
-                    case (Parame.RSquarePointType4):
-                        {
-                            go.transform.position = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
-                            break;
-                        }
-                }
-                go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
+                case (Parame.RSquarePointType1):
+                    {
+                        go.transform.localPosition = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
+                        break;
+                    }
+                case (Parame.RSquarePointType2):
+                    {
+                        go.transform.localPosition = new Vector3(cellCenter.x + size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
+                        break;
+                    }
+                case (Parame.RSquarePointType3):
+                    {
+                        go.transform.localPosition = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z - size * 0.5f);
+                        break;
+                    }
+                case (Parame.RSquarePointType4):
+                    {
+                        go.transform.localPosition = new Vector3(cellCenter.x - size * 0.5f, cellCenter.y, cellCenter.z + size * 0.5f);
+                        break;
+                    }
+                ///////////////////////
+                case (Parame.SquarePointType1):
+                    {
+                        go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                        go.transform.localPosition = new Vector3(cellCenter.x + tempDiff, cellCenter.y, cellCenter.z + 0);
+                        break;
+                    }
+                case (Parame.SquarePointType2):
+                    {
+                        go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                        go.transform.localPosition = new Vector3(cellCenter.x + 0, cellCenter.y, cellCenter.z - tempDiff);
+                        break;
+                    }
+                case (Parame.SquarePointType3):
+                    {
+                        go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                        go.transform.localPosition = new Vector3(cellCenter.x - tempDiff, cellCenter.y, cellCenter.z - 0);
+                        break;
+                    }
+                case (Parame.SquarePointType4):
+                    {
+                        go.transform.localRotation = Quaternion.Euler(0, 45, 0);
+                        go.transform.localPosition = new Vector3(cellCenter.x - 0, cellCenter.y, cellCenter.z + tempDiff);
+                        break;
+                    }
             }
+            go.transform.localScale = new Vector3(edgeWidth * template.cellSize, template.cellSize, edgeWidth * template.cellSize);
         }
 
         public void CreatePlane()
@@ -547,7 +605,7 @@ namespace HexMapEditor
                 {
                     if (gridEnableEdge)
                     {
-
+                        flag = true;
                     }
                     else
                     {

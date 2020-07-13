@@ -923,7 +923,7 @@ namespace HexMapEditor
         {
             List<HexCellDynamicComponent> temp = hexGridDyn.getHexCells();
 
-            if (isHex || !isRotate)
+            if (isHex)
             {
                 return;
             }
@@ -958,12 +958,15 @@ namespace HexMapEditor
 
                 byte[] byteArr = new byte[cellCount];
 
+                byte cellType = 0;
+
                 for (int i = 0; i < gridHeight; i++)
                 {
                     for (int j = 0; j < gridWidth; j++)
                     {
+                        cellType = isRotate ? Parame.RSquareType : Parame.SquareType;
                         int currCellIndex = (i * gridWidth + j) * perCellCount;
-                        var listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, Parame.RSquareType, isHex, isRotate);
+                        var listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, cellType, isHex, isRotate);
                         var id = HexCoordinates.CellIDFromNearList(listNear);
                         var cell = cellsParent.FindChild(id);
                         HexCellDynamicComponent cellComp = null;
@@ -973,27 +976,30 @@ namespace HexMapEditor
 
                         if (hexGridDyn.EnableCellEdge)
                         {
+                            cellType = isRotate ? Parame.RSquareEdgeType1 : Parame.SquareEdgeType1;
                             cell = null;
                             cellComp = null;
-                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, Parame.RSquareEdgeType1, isHex, isRotate);
+                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, cellType, isHex, isRotate);
                             id = HexCoordinates.CellIDFromNearList(listNear);
                             cell = cellsParent.FindChild(id);
                             if (cell) cellComp = cell.GetComponent<HexCellDynamicComponent>();
                             if (cellComp) cellComp.terrainID = currCellIndex + 1;
                             byteArr[currCellIndex + 1] = cell ? (byte)(cellComp.terrain << 4) : (byte)0;
 
+                            cellType = isRotate ? Parame.RSquareEdgeType4 : Parame.SquareEdgeType4;
                             cell = null;
                             cellComp = null;
-                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, Parame.RSquareEdgeType4, isHex, isRotate);
+                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, cellType, isHex, isRotate);
                             id = HexCoordinates.CellIDFromNearList(listNear);
                             cell = cellsParent.FindChild(id);
                             if (cell) cellComp = cell.GetComponent<HexCellDynamicComponent>();
                             if (cellComp) cellComp.terrainID = currCellIndex + 2;
                             byteArr[currCellIndex + 2] = cell ? (byte)(cellComp.terrain << 4) : (byte)0;
 
+                            cellType = isRotate ? Parame.RSquarePointType1 : Parame.SquarePointType1;
                             cell = null;
                             cellComp = null;
-                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, Parame.RSquarePointType1, isHex, isRotate);
+                            listNear = HexCoordinates.FindNearCellIDList(j + hexGridDyn.MinX, 0, i + hexGridDyn.MinZ, cellType, isHex, isRotate);
                             id = HexCoordinates.CellIDFromNearList(listNear);
                             cell = cellsParent.FindChild(id);
                             if (cell) cellComp = cell.GetComponent<HexCellDynamicComponent>();

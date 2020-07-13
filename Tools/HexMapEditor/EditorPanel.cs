@@ -392,11 +392,11 @@ public class EditorPanel : EditorWindow
                             }
                             else
                             {
-                                if (!Parame.EditPoint && cellType > 20)
+                                if (!Parame.EditPoint && ((cellType > 20 && cellType < 30) || cellType > 40 ) )
                                 {
                                     continue;
                                 }
-                                if (!Parame.EditEdge && (cellType > 10 && cellType < 20))
+                                if (!Parame.EditEdge && ((cellType > 10 && cellType < 20) || (cellType > 30 && cellType < 40)))
                                 {
                                     continue;
                                 }
@@ -440,7 +440,7 @@ public class EditorPanel : EditorWindow
                             if ((!cellListComp || !cellListComp.transform.FindChild(specialName)) && !gridDyn.transform.FindChild(specialName))
                             {
                                 hexGridDyn.UpdateMinMax(specialNear);
-                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn, cellType, specialName);
+                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos() - backgroundGrid.transform.position, templateCellDyn, cellType, specialName);
                             }
                         }
                         else
@@ -451,7 +451,7 @@ public class EditorPanel : EditorWindow
                             if ((!cellListComp || !cellListComp.transform.FindChild(specialName)) && !gridDyn.transform.FindChild(specialName))
                             {
                                 hexGridDyn.UpdateMinMax(specialNear);
-                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos(), templateCellDyn, cellType, specialName);
+                                hexGridDyn.CreateCellDynamic(specialNear[0], specialNear[1], specialNear[2], backgroundGrid.isHex, backgroundGrid.isRotate, backgroundGrid.cellSize, info.getPos() - backgroundGrid.transform.position, templateCellDyn, cellType, specialName);
                             }
                         }
 
