@@ -311,6 +311,13 @@
 
 #### Depth Pass
 
+* 绘制所有不透明物体
+    + 开启深度写和深度读
+    + CPU绘制顺序不用排序
+    + 片段着色器输出
+* 只清空颜色缓冲区
+* 正常绘制所有内容
+
 #### Draw Order Guarantees
 
 #### Vertex Buffer Structure

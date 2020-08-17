@@ -453,6 +453,7 @@ namespace HexMapEditor
                             info.iz = v.hz;
 
                             info.fx = v.fx + transform.position.x;
+                            info.fy = v.fy + transform.position.y;
                             info.fz = v.fz + transform.position.z;
                             list.Add(info);
                         }
@@ -470,6 +471,7 @@ namespace HexMapEditor
                             info.iz = v.hz;
 
                             info.fx = v.fx + transform.position.x;
+                            info.fy = v.fy + transform.position.y;
                             info.fz = v.fz + transform.position.z;
                             list.Add(info);
                         }

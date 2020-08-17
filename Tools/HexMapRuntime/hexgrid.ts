@@ -293,6 +293,20 @@ export class HexGrid {
     }
 
     /**
+     * 修改指定地块地形信息
+     * @param terrainID 地块地形ID
+     * @param value 地形数据
+     * @default
+     */
+    public modifyTerrainInfo(terrainID: number, value: number) : number {
+        if (this.terrain && value >= 0 && value < 256)  {
+            return this.terrain[terrainID] = value;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
      * 获取指定地形ID的地块的邻居地形ID
      * @param terrainID 地块地形ID
      * @default

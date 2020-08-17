@@ -308,8 +308,6 @@ export class MouseTrial {
                 // Smooth the curve with cubic interpolation to prevent sharp edges.
                 const ix = MouseTrial.cubicInterpolation(xArr, i / this.ropeSize * count);
                 const iy = MouseTrial.cubicInterpolation(yArr, i / this.ropeSize * count);
-                // const ix = MouseTrial.cubicInterpolation(this.historyX, i / this.ropeSize * count1);
-                // const iy = MouseTrial.cubicInterpolation(this.historyY, i / this.ropeSize * count1);
 
                 p[0] = ix;
                 p[1] = iy;

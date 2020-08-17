@@ -559,6 +559,26 @@ namespace HexMapEditor
             UpdateMaterial(template.mat);
         }
 
+        public void customRender() {
+            var mat = new Material(Shader.Find("Legacy Shaders/Transparent/Diffuse"));
+            mat.renderQueue = 4000;
+            var name = "";
+            try
+            {
+                name = transform.name + "_" + transform.GetComponentInParent<HexGridDynamicComponent>().name + "_" + transform.GetComponentInParent<HexMapComponent>().name;
+            }
+            finally 
+            {
+                name = transform.name + DateTime.Now.ToLongTimeString();
+            }
+
+            AssetDatabase.CreateAsset(mat, "Assets/" + name + ".mat");
+
+            _TemplateName = name;
+
+            UpdateMaterial(mat);
+        }
+
         public static Boolean CheckCanCreate(Boolean gridEnableEdge, Boolean rotate, Boolean hex)
         {
             Boolean flag = false;

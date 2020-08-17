@@ -50,6 +50,13 @@ public class EditorPanel : EditorWindow
 
         EditorGUILayout.HelpBox(Parame.activeDesc, MessageType.Info);
 
+        if (GUILayout.Button("为选中的单元格单独创建渲染", GUILayout.Width(180), GUILayout.Height(24)))
+        {
+            cellSimpleRender();
+        }
+
+        GUILayout.Label("     ");
+
         GUILayout.BeginHorizontal();
         GUILayout.Label("编辑 HexGridDynamic 的 正方形 时 锚点类型:");
         Parame.planIndex = EditorGUILayout.Popup(Parame.planIndex, Parame.planOptions);
@@ -547,5 +554,16 @@ public class EditorPanel : EditorWindow
     {
         SceneView.onSceneGUIDelegate -= this.OnSceneGUI;
     }
-    
+    private void cellSimpleRender()
+    {
+        HexCellDynamicComponent dynCell = null;
+        if (Selection.gameObjects.Length == 1)
+        {
+            var temp = Selection.gameObjects[0];
+            dynCell = temp.GetComponent<HexCellDynamicComponent>();
+            if (dynCell) {
+                dynCell.customRender();
+            }
+        }
+    }
 }

@@ -14,5 +14,21 @@
 </head>
 <body style="margin: 0;">
     <canvas id="your_canvas" style="position:absolute;touch-action: none;"></canvas>
-<script type="text/javascript" src="index.js"></script></body>
+<script type="text/javascript">
+    var canvas = document.getElementById('your_canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    var gl = canvas.getContext('2d');
+    for (let i = 0; i < 64; i++) {
+        const angle = i / 64 * Math.PI / 2;
+        gl.fillStyle = `rgb(
+            0,
+            ${Math.cos(angle) * 255},
+            ${Math.sin(angle) * 255}
+            )`;
+        for (let j = 0; j < 64; j++) {
+            gl.fillRect(j,i,1,1)
+        }
+    } 
+</script></body>
 </html>

@@ -30,9 +30,14 @@
     "html-webpack-plugin": "^3.2.0",
     "ts-loader": "^6.0.4",
     "tsify": "^4.0.1",
-    "typescript": "^3.5.3",
+    "typedoc": "^0.17.8",
+    "typescript": "^3.9.6",
     "vinyl-source-stream": "^2.0.0",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@types/source-map": "^0.5.2",
+    "source-map": "^0.7.3"
   }
 }
