@@ -9,7 +9,7 @@ module.exports = {
     },
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, 'webpack_build/grass')
+        path: path.resolve(__dirname, 'webpack_build/native/grass')
     },
     // devtool: 'inline-source-map',                                  // 告诉 webpack 提取这些 source map，并内联到最终的 文件 中。
     module: {

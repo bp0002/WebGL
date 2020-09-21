@@ -7,7 +7,7 @@ canvas.height = 800;
 
 const bar = new Bar({
     canvas,
-    bg: '/resources/texture.png'
+    bg: '../../../resources/texture.png'
 });
 
 bar.show('vvv', 100, 10);

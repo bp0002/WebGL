@@ -71,7 +71,7 @@ export class RenderLauncher {
         mesh01.rotate[0] = 1.57;
         mesh01.triangleFrame = true;
 
-        mesh01.texture = RenderLauncher.webgldemo.createTexture('/resources/alpha.png');
+        mesh01.texture = RenderLauncher.webgldemo.createTexture('../../../resources/alpha.png');
         RenderLauncher.mesh = mesh01;
         scene01.addMesh(mesh01);
 

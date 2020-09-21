@@ -136,8 +136,8 @@ export class RenderLauncher {
         meshicon.translate[1] = -0.2;
         meshicon.scale[0] = 0.1;
         meshicon.scale[1] = 1.0;
-        meshicon.texture = RenderLauncher.webgldemo.createTexture('/resources/grass.jpg');
-        meshicon.maskTexture = RenderLauncher.webgldemo.createTexture('/resources/grass_mark.jpg', 1);
+        meshicon.texture = RenderLauncher.webgldemo.createTexture('../../../resources/grass.jpg');
+        meshicon.maskTexture = RenderLauncher.webgldemo.createTexture('../../../resources/grass_mark.jpg', 1);
         meshicon.triangleFrame = true;
         scene05.addMesh(meshicon);
 
