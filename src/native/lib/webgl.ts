@@ -565,13 +565,18 @@ export class TextureInstance {
         const texIns = <TextureInstance>engine.getTexture(fname);
         if (texIns) {
             const GL = <WebGLRenderingContext>engine.gl;
+            const gl = GL;
+
             const tex   = <WebGLTexture>GL.createTexture();
             GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
             GL.bindTexture(GL.TEXTURE_2D, tex);
             GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, GL.RGBA, GL.UNSIGNED_BYTE, img);
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-            GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST_MIPMAP_LINEAR);
-            GL.generateMipmap(GL.TEXTURE_2D);
+            
+            // No, it's not a power of 2. Turn of mips and set wrapping to clamp to edge
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
             GL.bindTexture(GL.TEXTURE_2D, null);
             texIns._tex = tex;
         }

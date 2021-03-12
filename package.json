@@ -12,7 +12,8 @@
     "native_fragment": "webpack --config webpack.native.fragment.js",
     "native_simple": "webpack --config webpack.native.simple.js",
     "native_mouse_move_ribbon": "webpack --config webpack.native.mousemove.js",
-    "libs": "webpack --config webpack.libs.js"
+    "libs": "webpack --config webpack.libs.js",
+    "wave2d": "webpack --config webpack.native.wave2d.js"
   },
   "author": "",
   "license": "ISC",

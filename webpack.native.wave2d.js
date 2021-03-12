@@ -5,11 +5,11 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     // entry: './src/logic_webgl/index.ts',
     entry: {
-        logic_webgl_vao: './src/native/progress/main.ts'
+        logic_webgl_vao: './src/native/wave2d/main.ts'
     },
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, 'webpack_build/native/progress')
+        path: path.resolve(__dirname, 'webpack_build/native/wave2d')
     },
     // devtool: 'inline-source-map',                                  // 告诉 webpack 提取这些 source map，并内联到最终的 文件 中。
     module: {

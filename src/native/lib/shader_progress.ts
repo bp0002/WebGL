@@ -12,6 +12,11 @@ void main( void ){
 }
 `;
 export const fs_progress = `
+#define SAMPLER3DBGRMAP 0.0
+
+#define SHADER_NAME fragment:default
+
+#extension GL_OES_standard_derivatives : enable
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -27,7 +32,7 @@ void main(void){
     color = st.y > (20.0 / u_resolution.y / 2.0) ? vec3(0.0) : color;
 
     float alpha = st.y > (20.0 / u_resolution.y / 2.0) ? 0.0 : 0.8;
-    alpha = st.x < u_float ? alpha : 0.8;
+    alpha = st.x < u_float ? alpha : 0.8 + SAMPLER3DBGRMAP;
 
     gl_FragColor = vec4( color, alpha );
 }

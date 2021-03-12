@@ -1,13 +1,13 @@
 import { Bar } from "./progress";
 
-const canvas = <HTMLCanvasElement>document.getElementById('your_canvas');
+const canvas = (<any>self).renderCanvas;
 
 canvas.width = 800;
 canvas.height = 800;
 
 const bar = new Bar({
     canvas,
-    bg: '../../../resources/texture.png'
+    bg: '../../../resources/choice_light.png'
 });
 
 bar.show('vvv', 100, 10);
