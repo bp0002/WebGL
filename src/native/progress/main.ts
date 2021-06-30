@@ -2,12 +2,12 @@ import { Bar } from "./progress";
 
 const canvas = (<any>self).renderCanvas;
 
-canvas.width = 800;
-canvas.height = 800;
+canvas.width = 1024;
+canvas.height = 1024;
 
 const bar = new Bar({
     canvas,
-    bg: '../../../resources/choice_light.png'
+    bg: '../../../resources/texture.png'
 });
 
 bar.show('vvv', 100, 10);

@@ -51,10 +51,12 @@ export class RenderLauncher {
         else {
             const img = new Image();
             img.onload = () => {
-                RenderLauncher.loadImageSucc(img, fname);
                 // setTimeout(() => { loadImageSucc(img, data.fname); }, 2000);
             };
             img.src = fname;
+            img.decode().then(() => {
+                RenderLauncher.loadImageSucc(img, fname);
+            })
         }
 
         // (<any>self).getATSCData().then((data: any) => {

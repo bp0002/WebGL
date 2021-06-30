@@ -171,43 +171,46 @@ export class RenderLauncher {
         const shader06 = new ShaderCfg('06', vs_progress, fs_progress);
 
         const scene = new Scene('06', webgldemo);
-        const dataBuffer02 = new DataBufferCfg('01');
-        dataBuffer02.addVertex(-1, -1, 0);
-        dataBuffer02.addUV(0, 0);
-        dataBuffer02.addVertex(1, -1, 0);
-        dataBuffer02.addUV(1, 0);
-        dataBuffer02.addVertex(1, 1, 0);
-        dataBuffer02.addUV(1, 1);
-        dataBuffer02.addVertex(-1, 1, 0);
-        dataBuffer02.addUV(0, 1);
-        dataBuffer02.addFace(0, 1, 2);
-        dataBuffer02.addFace(0, 2, 3);
-        dataBuffer02.update(webgldemo.gl);
 
-        const dataBuffer03 = new DataBufferCfg('03');
-        dataBuffer03.addVertex(-1, -1, 0);
-        dataBuffer03.addVertex(1, -1, 0);
-        dataBuffer03.addVertex(1, -1 + 20 / canvas.height, 0);
-        dataBuffer03.addVertex(-1, -1 + 20 / canvas.height, 0);
-        dataBuffer03.addFace(0, 1, 2);
-        dataBuffer03.addFace(0, 2, 3);
-        dataBuffer03.update(webgldemo.gl);
-
-        const meshBG = new Mesh('meshBG', dataBuffer02, shader05);
-        meshBG.translate[0] = 0.0;
-        meshBG.translate[1] = 0.0;
-        meshBG.scale[0] = 1;
-        meshBG.scale[1] = 1;
-        meshBG.texture = webgldemo.createTexture(args.bg);
-        scene.addMesh(meshBG);
-
-        const meshProgress = new Mesh('meshProgress', dataBuffer03, shader06);
-        meshProgress.translate[0] = 0.0;
-        meshProgress.translate[1] = 0.0;
-        meshProgress.scale[0] = 1;
-        meshProgress.scale[1] = 1;
-        meshProgress.ufloat = 0.01;
-        scene.addMesh(meshProgress);
+        for (let i = 0; i < 10; i++) {
+            const dataBuffer02 = new DataBufferCfg('01');
+            dataBuffer02.addVertex(-1, -1, 0);
+            dataBuffer02.addUV(0, 0);
+            dataBuffer02.addVertex(1, -1, 0);
+            dataBuffer02.addUV(1, 0);
+            dataBuffer02.addVertex(1, 1, 0);
+            dataBuffer02.addUV(1, 1);
+            dataBuffer02.addVertex(-1, 1, 0);
+            dataBuffer02.addUV(0, 1);
+            dataBuffer02.addFace(0, 1, 2);
+            dataBuffer02.addFace(0, 2, 3);
+            dataBuffer02.update(webgldemo.gl);
+    
+            const dataBuffer03 = new DataBufferCfg('03');
+            dataBuffer03.addVertex(-1, -1, 0);
+            dataBuffer03.addVertex(1, -1, 0);
+            dataBuffer03.addVertex(1, -1 + 20 / canvas.height, 0);
+            dataBuffer03.addVertex(-1, -1 + 20 / canvas.height, 0);
+            dataBuffer03.addFace(0, 1, 2);
+            dataBuffer03.addFace(0, 2, 3);
+            dataBuffer03.update(webgldemo.gl);
+    
+            const meshBG = new Mesh('meshBG', dataBuffer02, shader05);
+            meshBG.translate[0] = 0.0;
+            meshBG.translate[1] = 0.0;
+            meshBG.scale[0] = 1;
+            meshBG.scale[1] = 1;
+            meshBG.texture = webgldemo.createTexture(args.bg);
+            scene.addMesh(meshBG);
+    
+            const meshProgress = new Mesh('meshProgress', dataBuffer03, shader06);
+            meshProgress.translate[0] = 0.0;
+            meshProgress.translate[1] = 0.0;
+            meshProgress.scale[0] = 1;
+            meshProgress.scale[1] = 1;
+            meshProgress.ufloat = 0.01;
+            scene.addMesh(meshProgress);
+        }
 
         webgldemo.renderLoop = (timestamp) => {
             webgldemo.clearColor();
@@ -220,7 +223,7 @@ export class RenderLauncher {
 
         webgldemo.loop(0);
 
-        RenderLauncher.opt.meshProgress = meshProgress;
+        // RenderLauncher.opt.meshProgress = meshProgress;
     }
     public static updateProgress(num: number) {
         if (RenderLauncher.opt.meshProgress) {
