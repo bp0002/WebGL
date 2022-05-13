@@ -1,0 +1,6 @@
+export const POINT_POSITION_FLOAT_COUNT_3D = 3;
+export const POINT_POSITION_FLOAT_COUNT_2D = 2;
+export const POINT_NORMAL_FLOAT_COUNT_3D = 2;
+export const POINT_UV_FLOAT_COUNT = 2;
+export const TRIANGLE_POINT_COUNT = 3;
+export const TRIANGLE_INDICES_COUNT = 3;

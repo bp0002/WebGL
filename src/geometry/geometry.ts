@@ -1,4 +1,4 @@
-import { MathTools } from "./math";
+import { MathTools } from "../math/math";
 
 type NumberMathFunction = (x: number) => number;
 
