@@ -17,7 +17,8 @@
     "moving": "webpack --config webpack.native.moving.js",
     "math": "webpack --config webpack.math_test.js",
     "linear_dynamic_sys": "webpack --config webpack.linear_dynamic_sys_test.js",
-    "geometry_line_test": "webpack --config webpack.geometry_line_test.js"
+    "geometry_line_test": "webpack --config webpack.geometry_line_test.js",
+    "curves_hermit": "webpack --config webpack.curves_hermit.js"
   },
   "author": "",
   "license": "ISC",
