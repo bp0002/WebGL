@@ -1,5 +1,6 @@
 import { Nullable } from "../../base/types";
 import { Matrix } from "../../math/matrix";
+import { SquareMatrix } from "../../math/square_matrix";
 import { Vector2 } from "../../math/vector2";
 
 export type Matrix3x3 = Matrix<3, 3>;
@@ -27,8 +28,8 @@ export class Node implements INode {
         return this._rotation;
     }
 
-    protected _worldMatrix: Matrix3x3 = Matrix.Identify(3, 3);
-    protected _localMatrix: Matrix3x3 = Matrix.Identify(3, 3);
+    protected _worldMatrix: Matrix3x3 = SquareMatrix.Identity(3);
+    protected _localMatrix: Matrix3x3 = SquareMatrix.Identity(3);
 
     public get localMatrix() {
         return this._localMatrix;

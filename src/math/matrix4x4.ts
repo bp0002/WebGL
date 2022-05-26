@@ -1,13 +1,12 @@
-import { Dim, Matrix, SquareMatrix } from "./matrix";
-import { Quaternion } from "./quaternion";
-import { Vector3 } from "./vector3";
+import { Dim, Matrix } from "./matrix";
+import { SquareMatrix } from "./square_matrix";
 
-export class Matrix4x4 extends Matrix<4, 4> {
+export class Matrix4x4 extends SquareMatrix<4> {
     constructor() {
         super(4, 4);
     }
 
-    public static Determinant<N extends Dim, T extends Matrix<N, N>>(target: T): number {
+    public static Determinant<N extends Dim, T extends SquareMatrix<N>>(target: T): number {
         let result = 0;
 
         if (target.isIdentity()) {
@@ -37,33 +36,4 @@ export class Matrix4x4 extends Matrix<4, 4> {
         return result;
     }
 
-    public static Decompose(target: Matrix4x4, scaling?: Vector3, rotation?: Quaternion, translation?: Vector3): boolean {
-        let result = false;
-
-        if (target.isIdentity()) {
-            if (translation) {
-                Matrix.ModifyToRef(translation, 0);
-            }
-            if (scaling) {
-                Matrix.ModifyToRef(scaling, 1);
-            }
-            if (rotation) {
-                Quaternion.IdentifyToRef(rotation);
-            }
-
-            return true;
-        }
-
-        const m = target.m;
-
-        if (translation) {
-            Matrix.ModifyCellToRef(translation, 1, 1, m[12]);
-            Matrix.ModifyCellToRef(translation, 1, 2, m[12]);
-            Matrix.ModifyCellToRef(translation, 1, 3, m[12]);
-        }
-
-        let sx = 1, sy = 1, sz = 1;
-
-        return result;
-    }
 }

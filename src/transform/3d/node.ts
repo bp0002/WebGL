@@ -1,7 +1,7 @@
 import { Nullable } from "../../base/types";
-import { Matrix } from "../../math/matrix";
 import { Matrix4x4 } from "../../math/matrix4x4";
 import { Quaternion } from "../../math/quaternion";
+import { SquareMatrix } from "../../math/square_matrix";
 import { Vector3 } from "../../math/vector3";
 
 export interface INode {
@@ -29,8 +29,8 @@ export class Node implements INode {
         return this._rotationQuaternion;
     }
 
-    protected _localMatrix: Matrix4x4 = Matrix.Identify(4, 4);
-    protected _worldMatrix: Matrix4x4 = Matrix.Identify(4, 4);
+    protected _localMatrix: Matrix4x4 = SquareMatrix.Identity(4);
+    protected _worldMatrix: Matrix4x4 = SquareMatrix.Identity(4);
 
     public readonly id: string;
 

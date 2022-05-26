@@ -4,8 +4,6 @@ import { FloatScalar } from "./scalar";
 
 export type Dim = 1 | 2 | 3 | 4;
 
-export type SquareMatrix<N extends Dim> = Matrix<N, N>;
-
 /**
  * 行主序 存储
  * * 0  1  2  3
@@ -22,9 +20,6 @@ export class Matrix<R extends Dim, C extends Dim> {
     public readonly _size: number;
     public readonly row: R;
     public readonly col: C;
-
-    private _isIdentityDirty: boolean;
-    private _isIdentity: boolean;
 
     /** @hidden */
     public _isDirty: boolean = true;
@@ -45,9 +40,6 @@ export class Matrix<R extends Dim, C extends Dim> {
         for (let i = 0; i < this._size; i++) {
             this._m[i] = value;
         }
-
-        this._isIdentityDirty = false;
-        this._isIdentity = false;
     }
 
     public dispose() {
@@ -82,34 +74,6 @@ export class Matrix<R extends Dim, C extends Dim> {
         }
 
         return result;
-    }
-
-    /**
-     * 矩阵是否为单位矩阵
-     * @returns bool
-     */
-    public isIdentity() {
-        if (this._isIdentityDirty) {
-            this._isIdentity = true;
-
-            for (let i = 0; i < this.col; i++) {
-                let indexDiagonal = i * this.col + i;
-                for (let j = 0; j < this.row; j++) {
-                    let index = i * this.col + j;
-                    if (index == indexDiagonal) {
-                        this._isIdentity = this._m[index] == 1.;
-                    } else {
-                        this._isIdentity = this._m[index] == 0.;
-                    }
-
-                    if (!this._isIdentity) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return this._isIdentity;
     }
 
     /**
@@ -182,7 +146,6 @@ export class Matrix<R extends Dim, C extends Dim> {
         for (let i = 0; i < target._size; i++) {
             target._m[i] = value;
         }
-        target._isIdentityDirty = true;
         target._isDirty = true;
     }
 
@@ -196,7 +159,6 @@ export class Matrix<R extends Dim, C extends Dim> {
     public static ModifyCellToRef<R extends Dim, C extends Dim>(target: Matrix<R, C>, rowIndex: Dim, colIndex: Dim, value: number) {
         if (rowIndex <= target.row && colIndex <= target.col) {
             target._m[Matrix.RowMajorOrder(rowIndex, colIndex, target.row, target.col)] = value;
-            target._isIdentityDirty = true;
             target._isDirty = true;
         } else {
             throw new Error(`Matrix ModifyToRef Error: rowIndex or colIndex is out of bound.`);
@@ -211,39 +173,6 @@ export class Matrix<R extends Dim, C extends Dim> {
      */
     public static One<R extends Dim, C extends Dim>(row: R, col: C): Matrix<R, C> {
         let result = new Matrix(row, col, 1.);
-        return result;
-    }
-
-    /**
-     * 创建单位矩阵
-     * @param row 行数目
-     * @param col 列数目
-     * @return Identify Matrix
-     */
-    public static Identify<R extends Dim, C extends Dim>(row: R, col: C): Matrix<R, C> {
-        let result = new Matrix(row, col, 0.);
-        Matrix.IdentifyToRef(result);
-
-        return result;
-    }
-
-    /**
-     * 将矩阵设置为单位矩阵
-     * @param result result
-     */
-    public static IdentifyToRef<R extends Dim, C extends Dim>(result: Matrix<R, C>) {
-        Matrix.ModifyToRef(result, 0.);
-
-        for (let i = 0; i < result.col; i++) {
-            if (i >= result.row) {
-                break;
-            }
-            result._m[ i * result.col + i] = 1;
-        }
-
-        result._isIdentity = true;
-        result._isIdentityDirty = false;
-        result._isDirty = true;
         return result;
     }
 
@@ -268,8 +197,6 @@ export class Matrix<R extends Dim, C extends Dim> {
             result._m[i] = source._m[i];
         }
 
-        result._isIdentity = source._isIdentity;
-        result._isIdentityDirty = source._isIdentityDirty;
         result._isDirty = true;
     }
 
@@ -307,7 +234,6 @@ export class Matrix<R extends Dim, C extends Dim> {
             result._m[i] = left._m[i] + right._m[i];
         }
 
-        result._isIdentityDirty = true;
         result._isDirty = true;
     }
 
@@ -335,7 +261,6 @@ export class Matrix<R extends Dim, C extends Dim> {
             result._m[i] = left._m[i] - right._m[i];
         }
 
-        result._isIdentityDirty = true;
         result._isDirty = true;
     }
 
@@ -362,7 +287,6 @@ export class Matrix<R extends Dim, C extends Dim> {
             result._m[i] = left._m[i] * scalar;
         }
 
-        result._isIdentityDirty = true;
         result._isDirty = true;
     }
 
@@ -396,7 +320,6 @@ export class Matrix<R extends Dim, C extends Dim> {
             }
         }
 
-        result._isIdentityDirty = true;
         result._isDirty = true;
     }
 
@@ -457,7 +380,6 @@ export class Matrix<R extends Dim, C extends Dim> {
                 result._m[i] = temp[i];
             }
 
-            result._isIdentityDirty = true;
             result._isDirty = true;
         // }
     }
@@ -618,36 +540,5 @@ export class Matrix<R extends Dim, C extends Dim> {
         }
 
         result._isDirty = true;
-    }
-
-    /**
-     * 只能对方阵使用
-     * @param source source
-     * @param result multiplicative inverse
-     */
-     public static InvertToRef<N extends Dim, T extends SquareMatrix<N>>(source: T, result: T) {
-        //
-    }
-
-    /**
-     * 判断方阵是否是奇异的 - 不存在乘法逆元(逆矩阵)
-     * @param source source matrix
-     */
-    public static IsSingular<N extends Dim, T extends SquareMatrix<N>>(source: T): boolean {
-        return true;
-    }
-
-    /**
-     * 求行列式 - 当N>5，消元法优于递归
-     * @param target SquareMatrix
-     * @returns number
-     */
-    public static Determinant<N extends Dim, T extends SquareMatrix<N>>(target: T): number {
-        let result = 0;
-
-        let iteration = target.row;
-        // for ()
-
-        return result;
     }
 }

@@ -5,10 +5,11 @@ import { Vector3 } from "../math/vector3";
 import { ECameraMode } from "./base";
 import { ICameraOrthoGraphic } from "./orthographic";
 import { ICameraPerspective } from "./perspective";
+import { LeftHandCoordinateSys3D } from "../coordinate_system/left_coordinate_sys_3d";
 
 export class Camera extends Node implements ICameraPerspective, ICameraOrthoGraphic {
     protected static defaultUp = new Vector3(0, 1, 0);
-    protected static rotationMatrix = Matrix4x4.Identify(4, 4);
+    protected static rotationMatrix = Matrix4x4.Identity(4);
 
     public _minZ: number = 1;
     public get minZ(): number {
@@ -61,6 +62,6 @@ export class Camera extends Node implements ICameraPerspective, ICameraOrthoGrap
     public readonly viewport: [number, number, number, number] = [0, 0, 1, 1];
 
     public getViewMatrix() {
-        Quaternion.TransformToMatrixRef(this._rotationQuaternion, Camera.rotationMatrix);
+        LeftHandCoordinateSys3D.QuaternionToRotationMatrixRef(this._rotationQuaternion, Camera.rotationMatrix);
     }
 }

@@ -1,6 +1,4 @@
-import { Column } from "./column";
 import { Row } from "./row";
-import { FloatScalar } from "./scalar";
 
 export type Point2 = Vector2;
 

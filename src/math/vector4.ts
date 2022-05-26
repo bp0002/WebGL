@@ -1,5 +1,3 @@
-import { Column } from "./column";
-import { Matrix } from "./matrix";
 import { Row } from "./row";
 
 export class Vector4 extends Row<4> {

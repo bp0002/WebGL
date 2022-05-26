@@ -1,6 +1,3 @@
-import { IConstructor } from "../base/types";
-import { Column } from "./column";
-import { Matrix } from "./matrix";
 import { Row } from "./row";
 
 export type Point3 = Vector3;
@@ -52,6 +49,14 @@ export class Vector3 extends Row<3> {
         this._m[2] = z;
 
         return this;
+    }
+
+    public copyFromFloats(x: number, y: number, z: number) {
+        this._m[0] = x;
+        this._m[1] = y;
+        this._m[2] = z;
+
+        this._isDirty = true;
     }
 
     public static Cross(a: Vector3, b: Vector3): Vector3 {
