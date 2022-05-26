@@ -96,7 +96,106 @@
                             "created": 1651729753436,
                             "text": "公告板"
                         },
-                        "children": []
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "ck9bip4ixnc0",
+                                    "created": 1653530151975,
+                                    "text": "3D 场景中公告板"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "ck9bj9fkn6w0",
+                                            "created": 1653530196179,
+                                            "text": "Billboard"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bjd33sm80",
+                                            "created": 1653530204132,
+                                            "text": "Stretched Billboard"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bjjtj01k0",
+                                            "created": 1653530218790,
+                                            "text": "Horizontal Billboard"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bjtqpesg0",
+                                            "created": 1653530240388,
+                                            "text": "Vertical Billboard"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bithoz680",
+                                    "created": 1653530161478,
+                                    "text": "3D坐标投射到2D渲染"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "ck9bkvqzj600",
+                            "created": 1653530323122,
+                            "text": "方向对齐模式"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "ck9bl43bccw0",
+                                    "created": 1653530341282,
+                                    "text": "View"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bl5zglxc0",
+                                    "created": 1653530345403,
+                                    "text": "World"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bl7i4co00",
+                                    "created": 1653530348708,
+                                    "text": "Local"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bl99v72g0",
+                                    "created": 1653530352562,
+                                    "text": "Facing"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9blbinhm00",
+                                    "created": 1653530357447,
+                                    "text": "Velocity"
+                                },
+                                "children": []
+                            }
+                        ]
                     }
                 ]
             },
@@ -104,7 +203,8 @@
                 "data": {
                     "id": "cjrkxcbtdr40",
                     "created": 1651728610349,
-                    "text": "模型"
+                    "text": "模型",
+                    "expandState": "expand"
                 },
                 "children": [
                     {
@@ -328,6 +428,31 @@
                     },
                     {
                         "data": {
+                            "id": "cjrltb5b32w0",
+                            "created": 1651731115432,
+                            "text": "PointCloud"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrlti4l0wg0",
+                                    "created": 1651731130626,
+                                    "text": "网格计算"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bn74srxs0",
+                                    "created": 1653530504630,
+                                    "text": "向量场移动"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
                             "id": "cjrlll6yy7c0",
                             "created": 1651730510387,
                             "text": "骨骼"
@@ -353,16 +478,675 @@
                     },
                     {
                         "data": {
-                            "id": "cjrltb5b32w0",
-                            "created": 1651731115432,
-                            "text": "PointCloud"
+                            "id": "ck9bgvukvpk0",
+                            "created": 1653530009883,
+                            "text": "自适应顶点分布"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "ck9bh065jjc0",
+                            "created": 1653530019290,
+                            "text": "大型地形自适应LOD"
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrkxgmcieg0",
+                    "created": 1651728619693,
+                    "text": "材质",
+                    "expandState": "expand"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "cjrl4e8wmsw0",
+                            "created": 1651729163076,
+                            "text": "Shader",
+                            "expandState": "expand"
                         },
                         "children": [
                             {
                                 "data": {
-                                    "id": "cjrlti4l0wg0",
-                                    "created": 1651731130626,
-                                    "text": "网格计算"
+                                    "id": "cjrl3ntdmtc0",
+                                    "created": 1651729105541,
+                                    "text": "编译器"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrl3u2lxz40",
+                                            "created": 1651729119160,
+                                            "text": "DXC"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrl4j314yw0",
+                                    "created": 1651729173605,
+                                    "text": "语言"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrl4o7h0p40",
+                                            "created": 1651729184757,
+                                            "text": "HLSL"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl4pk63340",
+                                            "created": 1651729187702,
+                                            "text": "GLSL"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl4t3uhsg0",
+                                            "created": 1651729195422,
+                                            "text": "SPIR-V"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl3r9817s0",
+                            "created": 1651729113029,
+                            "text": "编辑器"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrl83gg8ew0",
+                                    "created": 1651729453045,
+                                    "text": "节点材质编辑器"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl5bs4em00",
+                            "created": 1651729236072,
+                            "text": "效果"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrl5ebvchs0",
+                                    "created": 1651729241620,
+                                    "text": "光照模型",
+                                    "expandState": "expand"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrl5p6kqw00",
+                                            "created": 1651729265244,
+                                            "text": "Unlit"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl5gkr30o0",
+                                            "created": 1651729246510,
+                                            "text": "Phong"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl5i8k6xs0",
+                                            "created": 1651729250127,
+                                            "text": "PBR"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl5jed8qw0",
+                                            "created": 1651729252654,
+                                            "text": "NBR",
+                                            "expandState": "expand"
+                                        },
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "ck9be5i3fm00",
+                                                    "created": 1653529795803,
+                                                    "text": "Diffuse Ramp"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "ck9be9zgzjc0",
+                                                    "created": 1653529805561,
+                                                    "text": "Specular Ramp"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "ck9beqv18xc0",
+                                                    "created": 1653529842298,
+                                                    "text": "Shadow Ramp"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "ck9bedc146w0",
+                                                    "created": 1653529812851,
+                                                    "text": "Fresnel Rim"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrl5vub3gg0",
+                                    "created": 1651729279740,
+                                    "text": "特效"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrl5xvinpk0",
+                                            "created": 1651729284166,
+                                            "text": "UV 扭曲"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl5zqnxso0",
+                                            "created": 1651729288227,
+                                            "text": "UV 流动"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl629b8a80",
+                                            "created": 1651729293708,
+                                            "text": "遮罩层"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bd74gco00",
+                                            "created": 1653529720968,
+                                            "text": "alpha 剔除"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrl695qc880",
+                                    "created": 1651729308729,
+                                    "text": "后处理"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrl6adzlrc0",
+                                            "created": 1651729311405,
+                                            "text": "模糊"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl6bm3xgg0",
+                                            "created": 1651729314072,
+                                            "text": "故障"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrl6cznth40",
+                                            "created": 1651729317069,
+                                            "text": "PS",
+                                            "expandState": "expand"
+                                        },
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "cjrl6p814000",
+                                                    "created": 1651729343696,
+                                                    "text": "HSV"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "cjrl7fqjnwg0",
+                                                    "created": 1651729401412,
+                                                    "text": "色彩平衡"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "cjrl6r8veqw0",
+                                                    "created": 1651729348101,
+                                                    "text": "色阶"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrlcutpbfc0",
+                    "created": 1651729826075,
+                    "text": "阴影",
+                    "expandState": "expand"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "cjrlczvmc7k0",
+                            "created": 1651729837075,
+                            "text": "伪阴影"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrlda5ssio0",
+                                    "created": 1651729859459,
+                                    "text": "跟随模型的底部面片"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "cjrld4a1x1k0",
+                            "created": 1651729846655,
+                            "text": "烘培阴影"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrldjiybvk0",
+                                    "created": 1651729879845,
+                                    "text": "光照图/阴影图"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "cjrld2htzzk0",
+                            "created": 1651729842772,
+                            "text": "实时阴影"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrldqz3tk80",
+                                    "created": 1651729896059,
+                                    "text": "定向光"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrldyu3ce80",
+                                    "created": 1651729913170,
+                                    "text": "点光"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrle05n6k00",
+                                    "created": 1651729916046,
+                                    "text": "锥体光"
+                                },
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrlejo9jo00",
+                    "created": 1651729958530,
+                    "text": "全局光照"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "ck9bfc6vgfk0",
+                            "created": 1653529888726,
+                            "text": "光线跟踪"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "ck9bfgeft800",
+                            "created": 1653529897891,
+                            "text": "路径跟踪"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "ck9bp5sopzs0",
+                            "created": 1653530658450,
+                            "text": "AO"
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrlluhgrrc0",
+                    "created": 1651730530613,
+                    "text": "动画"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "cjrlsbdjq340",
+                            "created": 1651731037566,
+                            "text": "K-V"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrlsigfkkg0",
+                                    "created": 1651731052978,
+                                    "text": "动画混合"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrlski86cg0",
+                                    "created": 1651731057440,
+                                    "text": "动画组合"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrlsmsxdv40",
+                                    "created": 1651731062441,
+                                    "text": "动画过渡/切换"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlsel4j3c0",
+                            "created": 1651731044555,
+                            "text": "过程动画"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrlt1m42bc0",
+                                    "created": 1651731094681,
+                                    "text": "顶点形变"
+                                },
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrl8x1sbhk0",
+                    "created": 1651729517461,
+                    "text": "纹理",
+                    "expandState": "expand"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "cjrl901qj0g0",
+                            "created": 1651729523989,
+                            "text": "BaseTexture"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl95bgb1s0",
+                            "created": 1651729535460,
+                            "text": "Bump"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl978xly00",
+                            "created": 1651729539661,
+                            "text": "AmbientOcclusion"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl9ehtdio0",
+                            "created": 1651729555436,
+                            "text": "Metallic"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl9hbkyu80",
+                            "created": 1651729561589,
+                            "text": "Roughness"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl9jzds6o0",
+                            "created": 1651729567382,
+                            "text": "Lightingmap",
+                            "layout_left_offset": {
+                                "x": -2,
+                                "y": 3
+                            }
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrla6slivs0",
+                            "created": 1651729617038,
+                            "text": "Emissive"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrl93qnzww0",
+                            "created": 1651729532026,
+                            "text": "Noise"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrladr0pwg0",
+                            "created": 1651729632180,
+                            "text": "Detail"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlnjjc2e00",
+                            "created": 1651730663510,
+                            "text": "BoneMatrix"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "ck9bps310ig0",
+                            "created": 1653530706964,
+                            "text": "Ramp Texture"
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "cjrlc5zqbjs0",
+                    "created": 1651729772020,
+                    "text": "相机"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "cjrlc7n46oo0",
+                            "created": 1651729775611,
+                            "text": "正交"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlc9atfpc0",
+                            "created": 1651729779221,
+                            "text": "透视"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlcejwj280",
+                            "created": 1651729790654,
+                            "text": "可见性检测"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlivvmjmo0",
+                            "created": 1651730298554,
+                            "text": "阴影渲染物件检测"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlj3d72mw0",
+                            "created": 1651730314853,
+                            "text": "物件阴影渲染级别检测"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "cjrlp7id1i00",
+                            "created": 1651730794058,
+                            "text": "控制",
+                            "expandState": "expand"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "cjrlorr1z200",
+                                    "created": 1651730759755,
+                                    "text": "第三人称相机"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrlp0otgnc0",
+                                            "created": 1651730779211,
+                                            "text": "跟随"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "cjrlptrh9nc0",
+                                            "created": 1651730842498,
+                                            "text": "场景碰撞规避"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "cjrlpafnucg0",
+                                    "created": 1651730800425,
+                                    "text": "第一人称"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "cjrlq2v2pns0",
+                                            "created": 1651730862307,
+                                            "text": "处理人物模型遮挡问题"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bfutkmc80",
+                                    "created": 1653529929281,
+                                    "text": "绕轴旋转"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "ck9bg3sfr1s0",
+                                    "created": 1653529948803,
+                                    "text": "绕点旋转"
                                 },
                                 "children": []
                             }
@@ -594,7 +1378,8 @@
                         "data": {
                             "id": "cjrl0t81wcw0",
                             "created": 1651728882220,
-                            "text": "拓展"
+                            "text": "拓展",
+                            "expandState": "expand"
                         },
                         "children": [
                             {
@@ -604,39 +1389,6 @@
                                     "text": "拖尾"
                                 },
                                 "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrlfbmhbs80",
-                                    "created": 1651730019372,
-                                    "text": "公告板模式"
-                                },
-                                "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrlfehu7u00",
-                                    "created": 1651730025622,
-                                    "text": "朝向控制"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrlflnwoo80",
-                                            "created": 1651730041227,
-                                            "text": "始终面向相机"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrlfrr6fts0",
-                                            "created": 1651730054485,
-                                            "text": "正常模式"
-                                        },
-                                        "children": []
-                                    }
-                                ]
                             },
                             {
                                 "data": {
@@ -695,575 +1447,55 @@
                                         "children": []
                                     }
                                 ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "data": {
-                    "id": "cjrkxgmcieg0",
-                    "created": 1651728619693,
-                    "text": "材质",
-                    "expandState": "expand"
-                },
-                "children": [
-                    {
-                        "data": {
-                            "id": "cjrl4e8wmsw0",
-                            "created": 1651729163076,
-                            "text": "Shader",
-                            "expandState": "expand"
-                        },
-                        "children": [
+                            },
                             {
                                 "data": {
-                                    "id": "cjrl3ntdmtc0",
-                                    "created": 1651729105541,
-                                    "text": "编译器"
+                                    "id": "ck9bkvqzj600",
+                                    "created": 1653530323122,
+                                    "text": "方向对齐模式"
                                 },
                                 "children": [
                                     {
                                         "data": {
-                                            "id": "cjrl3u2lxz40",
-                                            "created": 1651729119160,
-                                            "text": "DXC"
+                                            "id": "ck9bl43bccw0",
+                                            "created": 1653530341282,
+                                            "text": "View"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bl5zglxc0",
+                                            "created": 1653530345403,
+                                            "text": "World"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bl7i4co00",
+                                            "created": 1653530348708,
+                                            "text": "Local"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9bl99v72g0",
+                                            "created": 1653530352562,
+                                            "text": "Facing"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "ck9blbinhm00",
+                                            "created": 1653530357447,
+                                            "text": "Velocity"
                                         },
                                         "children": []
                                     }
                                 ]
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrl4j314yw0",
-                                    "created": 1651729173605,
-                                    "text": "语言"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrl4o7h0p40",
-                                            "created": 1651729184757,
-                                            "text": "HLSL"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl4pk63340",
-                                            "created": 1651729187702,
-                                            "text": "GLSL"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl4t3uhsg0",
-                                            "created": 1651729195422,
-                                            "text": "SPIR-V"
-                                        },
-                                        "children": []
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl3r9817s0",
-                            "created": 1651729113029,
-                            "text": "编辑器"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrl83gg8ew0",
-                                    "created": 1651729453045,
-                                    "text": "节点材质编辑器"
-                                },
-                                "children": []
-                            }
-                        ]
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl5bs4em00",
-                            "created": 1651729236072,
-                            "text": "效果"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrl5ebvchs0",
-                                    "created": 1651729241620,
-                                    "text": "光照模型",
-                                    "expandState": "expand"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrl5p6kqw00",
-                                            "created": 1651729265244,
-                                            "text": "Unlit"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl5gkr30o0",
-                                            "created": 1651729246510,
-                                            "text": "Phong"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl5i8k6xs0",
-                                            "created": 1651729250127,
-                                            "text": "PBR"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl5jed8qw0",
-                                            "created": 1651729252654,
-                                            "text": "NBR"
-                                        },
-                                        "children": []
-                                    }
-                                ]
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrl5vub3gg0",
-                                    "created": 1651729279740,
-                                    "text": "特效"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrl5xvinpk0",
-                                            "created": 1651729284166,
-                                            "text": "UV 扭曲"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl5zqnxso0",
-                                            "created": 1651729288227,
-                                            "text": "UV 流动"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl629b8a80",
-                                            "created": 1651729293708,
-                                            "text": "遮罩层"
-                                        },
-                                        "children": []
-                                    }
-                                ]
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrl695qc880",
-                                    "created": 1651729308729,
-                                    "text": "后处理"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrl6adzlrc0",
-                                            "created": 1651729311405,
-                                            "text": "模糊"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl6bm3xgg0",
-                                            "created": 1651729314072,
-                                            "text": "故障"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrl6cznth40",
-                                            "created": 1651729317069,
-                                            "text": "PS",
-                                            "expandState": "expand"
-                                        },
-                                        "children": [
-                                            {
-                                                "data": {
-                                                    "id": "cjrl6p814000",
-                                                    "created": 1651729343696,
-                                                    "text": "HSV"
-                                                },
-                                                "children": []
-                                            },
-                                            {
-                                                "data": {
-                                                    "id": "cjrl7fqjnwg0",
-                                                    "created": 1651729401412,
-                                                    "text": "色彩平衡"
-                                                },
-                                                "children": []
-                                            },
-                                            {
-                                                "data": {
-                                                    "id": "cjrl6r8veqw0",
-                                                    "created": 1651729348101,
-                                                    "text": "色阶"
-                                                },
-                                                "children": []
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "data": {
-                    "id": "cjrl8x1sbhk0",
-                    "created": 1651729517461,
-                    "text": "纹理",
-                    "expandState": "expand",
-                    "layout_mind_offset": {
-                        "x": -552.4166703195206,
-                        "y": -3003.0832248135594
-                    }
-                },
-                "children": [
-                    {
-                        "data": {
-                            "id": "cjrl901qj0g0",
-                            "created": 1651729523989,
-                            "text": "BaseTexture"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl95bgb1s0",
-                            "created": 1651729535460,
-                            "text": "Bump"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl978xly00",
-                            "created": 1651729539661,
-                            "text": "AmbientOcclusion"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl9ehtdio0",
-                            "created": 1651729555436,
-                            "text": "Metallic"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl9hbkyu80",
-                            "created": 1651729561589,
-                            "text": "Roughness"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl9jzds6o0",
-                            "created": 1651729567382,
-                            "text": "Lightingmap"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrla6slivs0",
-                            "created": 1651729617038,
-                            "text": "Emissive"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrl93qnzww0",
-                            "created": 1651729532026,
-                            "text": "Noise"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrladr0pwg0",
-                            "created": 1651729632180,
-                            "text": "Detail"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlnjjc2e00",
-                            "created": 1651730663510,
-                            "text": "BoneMatrix"
-                        },
-                        "children": []
-                    }
-                ]
-            },
-            {
-                "data": {
-                    "id": "cjrlc5zqbjs0",
-                    "created": 1651729772020,
-                    "text": "相机"
-                },
-                "children": [
-                    {
-                        "data": {
-                            "id": "cjrlc7n46oo0",
-                            "created": 1651729775611,
-                            "text": "正交"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlc9atfpc0",
-                            "created": 1651729779221,
-                            "text": "透视"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlcejwj280",
-                            "created": 1651729790654,
-                            "text": "可见性检测"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlivvmjmo0",
-                            "created": 1651730298554,
-                            "text": "阴影渲染物件检测"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlj3d72mw0",
-                            "created": 1651730314853,
-                            "text": "物件阴影渲染级别检测"
-                        },
-                        "children": []
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlp7id1i00",
-                            "created": 1651730794058,
-                            "text": "控制",
-                            "expandState": "expand"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrlorr1z200",
-                                    "created": 1651730759755,
-                                    "text": "第三人称相机"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrlp0otgnc0",
-                                            "created": 1651730779211,
-                                            "text": "跟随"
-                                        },
-                                        "children": []
-                                    },
-                                    {
-                                        "data": {
-                                            "id": "cjrlptrh9nc0",
-                                            "created": 1651730842498,
-                                            "text": "场景碰撞规避"
-                                        },
-                                        "children": []
-                                    }
-                                ]
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrlpafnucg0",
-                                    "created": 1651730800425,
-                                    "text": "第一人称"
-                                },
-                                "children": [
-                                    {
-                                        "data": {
-                                            "id": "cjrlq2v2pns0",
-                                            "created": 1651730862307,
-                                            "text": "处理人物模型遮挡问题"
-                                        },
-                                        "children": []
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "data": {
-                    "id": "cjrlcutpbfc0",
-                    "created": 1651729826075,
-                    "text": "阴影",
-                    "expandState": "expand"
-                },
-                "children": [
-                    {
-                        "data": {
-                            "id": "cjrlczvmc7k0",
-                            "created": 1651729837075,
-                            "text": "伪阴影"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrlda5ssio0",
-                                    "created": 1651729859459,
-                                    "text": "跟随模型的底部面片"
-                                },
-                                "children": []
-                            }
-                        ]
-                    },
-                    {
-                        "data": {
-                            "id": "cjrld4a1x1k0",
-                            "created": 1651729846655,
-                            "text": "烘培阴影"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrldjiybvk0",
-                                    "created": 1651729879845,
-                                    "text": "光照图/阴影图"
-                                },
-                                "children": []
-                            }
-                        ]
-                    },
-                    {
-                        "data": {
-                            "id": "cjrld2htzzk0",
-                            "created": 1651729842772,
-                            "text": "实时阴影"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrldqz3tk80",
-                                    "created": 1651729896059,
-                                    "text": "定向光"
-                                },
-                                "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrldyu3ce80",
-                                    "created": 1651729913170,
-                                    "text": "点光"
-                                },
-                                "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrle05n6k00",
-                                    "created": 1651729916046,
-                                    "text": "锥体光"
-                                },
-                                "children": []
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "data": {
-                    "id": "cjrlejo9jo00",
-                    "created": 1651729958530,
-                    "text": "全局光照"
-                },
-                "children": []
-            },
-            {
-                "data": {
-                    "id": "cjrlluhgrrc0",
-                    "created": 1651730530613,
-                    "text": "动画"
-                },
-                "children": [
-                    {
-                        "data": {
-                            "id": "cjrlsbdjq340",
-                            "created": 1651731037566,
-                            "text": "K-V"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrlsigfkkg0",
-                                    "created": 1651731052978,
-                                    "text": "动画混合"
-                                },
-                                "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrlski86cg0",
-                                    "created": 1651731057440,
-                                    "text": "动画组合"
-                                },
-                                "children": []
-                            },
-                            {
-                                "data": {
-                                    "id": "cjrlsmsxdv40",
-                                    "created": 1651731062441,
-                                    "text": "动画过渡/切换"
-                                },
-                                "children": []
-                            }
-                        ]
-                    },
-                    {
-                        "data": {
-                            "id": "cjrlsel4j3c0",
-                            "created": 1651731044555,
-                            "text": "过程动画"
-                        },
-                        "children": [
-                            {
-                                "data": {
-                                    "id": "cjrlt1m42bc0",
-                                    "created": 1651731094681,
-                                    "text": "顶点形变"
-                                },
-                                "children": []
                             }
                         ]
                     }
