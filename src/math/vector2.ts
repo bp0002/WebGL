@@ -37,7 +37,20 @@ export class Vector2 extends Row<2> {
         this._m[1] = y;
     }
 
-    public static Cross(a: Vector2, b: Vector2): number {
-        return a.x * b.y - b.x * a.y;
+    public static Cross(v: Vector2) {
+        let result = new Vector2();
+        Vector2.CrossToRef(v, result);
+        return result;
+    }
+
+    public static CrossToRef(v: Vector2, result: Vector2) {
+        let x = v.x;
+        let y = v.y;
+        result.x = -y;
+        result.y = x;
+    }
+
+    public static FF(v: Vector2, b: Vector2) {
+        return v.x * b.y - b.x * v.y;
     }
 }
