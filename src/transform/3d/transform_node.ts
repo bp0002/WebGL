@@ -13,16 +13,4 @@ export class TransformNode extends Node implements ITransformNode {
     public get scaling() {
         return this._scaling;
     }
-
-    public computeWorldMatrix(force: boolean = false): Matrix4x4 {
-        if (force || this._rotationQuaternion._isDirty || this._scaling._isDirty) {
-            // TODO
-        }
-
-        if (force || this._position._isDirty) {
-            // TODO
-        }
-
-        return this._worldMatrix;
-    }
 }

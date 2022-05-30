@@ -1,19 +1,16 @@
 import { Row } from "./row";
+import { FloatScalar } from "./scalar";
 
 export type Point2 = Vector2;
 
 export class Vector2 extends Row<2> {
-    /** @hidden */
-    public _isEqual(oldValue: number, newValue: number) {
-        return oldValue != newValue;
-    }
 
     /** @hidden */
     public get x() {
         return this._m[0];
     }
     public set x(value: number) {
-        if (!this._isEqual(this._m[0], value)) {
+        if (!FloatScalar.Equal(this._m[0], value)) {
             this._m[0] = value;
             this._isDirty = true;
         }
@@ -24,7 +21,7 @@ export class Vector2 extends Row<2> {
         return this._m[1];
     }
     public set y(value: number) {
-        if (!this._isEqual(this._m[1], value)) {
+        if (!FloatScalar.Equal(this._m[1], value)) {
             this._m[1] = value;
             this._isDirty = true;
         }

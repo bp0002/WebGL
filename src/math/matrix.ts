@@ -2,7 +2,11 @@ import { PerformanceConfigurator } from "./performanceConfigurator";
 import { createFloat32Array, recycleFloat32Array } from "./pool";
 import { FloatScalar } from "./scalar";
 
-export type Dim = 1 | 2 | 3 | 4;
+export const N1 = 1;
+export const N2 = 2;
+export const N3 = 3;
+export const N4 = 4;
+export type Dim = typeof N1 | typeof N2 | typeof N3 | typeof N4;
 
 /**
  * 行主序 存储
@@ -40,6 +44,19 @@ export class Matrix<R extends Dim, C extends Dim> {
         for (let i = 0; i < this._size; i++) {
             this._m[i] = value;
         }
+    }
+
+    public isEqual(b: Matrix<R, C>) {
+        let size = this._m.length;
+        let result = true;
+        for (let i = 0; i < size; i++) {
+            if (!FloatScalar.Equal(this._m[i], b._m[i])) {
+                result = false;
+                break;
+            }
+        }
+
+        return result;
     }
 
     public dispose() {
@@ -182,7 +199,7 @@ export class Matrix<R extends Dim, C extends Dim> {
      */
     public clone() {
         let result = new Matrix(this.row, this.col, 0.);
-        Matrix.CopyFrom(this, result);
+        Matrix.CopyTo(this, result);
 
         return result;
     }
@@ -192,7 +209,7 @@ export class Matrix<R extends Dim, C extends Dim> {
      * @param source source matrix
      * @param result result matrix
      */
-    public static CopyFrom<R extends Dim, C extends Dim, T extends Matrix<R, C>>(source: T, result: T) {
+    public static CopyTo<R extends Dim, C extends Dim, T extends Matrix<R, C>>(source: T, result: T) {
         for (let i = 0; i < result._size; i++) {
             result._m[i] = source._m[i];
         }

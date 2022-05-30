@@ -91,7 +91,7 @@ export class Line3DPreSegment2Point {
         }
         this.keyPoints[keyPointResortCount] = lastPoint;
 
-        Vector3.CopyFrom(point, lastPoint);
+        Vector3.CopyTo(point, lastPoint);
         Line3DPreSegment2Point.modify(prePoint, point, normal, keyPointResortCount, this.width / 2, this.positions, this.indices);
     }
 }

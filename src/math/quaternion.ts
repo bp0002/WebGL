@@ -1,18 +1,14 @@
 import { Row } from "./row";
+import { FloatScalar } from "./scalar";
 
 export class Quaternion extends Row<4> {
-
-    /** @hidden */
-    public _isEqual(oldValue: number, newValue: number) {
-        return oldValue != newValue;
-    }
 
     /** @hidden */
     public get x() {
         return this._m[0];
     }
     public set x(value: number) {
-        if (!this._isEqual(this._m[0], value)) {
+        if (!FloatScalar.Equal(this._m[0], value)) {
             this._m[0] = value;
 
             this._isDirty = true;
@@ -24,7 +20,7 @@ export class Quaternion extends Row<4> {
         return this._m[1];
     }
     public set y(value: number) {
-        if (!this._isEqual(this._m[1], value)) {
+        if (!FloatScalar.Equal(this._m[1], value)) {
             this._m[1] = value;
 
             this._isDirty = true;
@@ -36,7 +32,7 @@ export class Quaternion extends Row<4> {
         return this._m[2];
     }
     public set z(value: number) {
-        if (!this._isEqual(this._m[2], value)) {
+        if (!FloatScalar.Equal(this._m[2], value)) {
             this._m[2] = value;
 
             this._isDirty = true;
@@ -48,7 +44,7 @@ export class Quaternion extends Row<4> {
         return this._m[3];
     }
     public set w(value: number) {
-        if (!this._isEqual(this._m[3], value)) {
+        if (!FloatScalar.Equal(this._m[3], value)) {
             this._m[3] = value;
 
             this._isDirty = true;
@@ -81,6 +77,8 @@ export class Quaternion extends Row<4> {
         result._m[1] = 0;
         result._m[2] = 0;
         result._m[3] = 1;
+
+        result._isDirty = true;
     }
 
     public static InverseToRef(source: Quaternion, result: Quaternion) {
@@ -88,6 +86,8 @@ export class Quaternion extends Row<4> {
         result._m[1] = -source._m[1];
         result._m[2] = -source._m[2];
         result._m[3] = +source._m[3];
+
+        result._isDirty = true;
     }
 
     /**
@@ -124,6 +124,8 @@ export class Quaternion extends Row<4> {
         result._m[1]    = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
         result._m[2]    = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
         result._m[3]    = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
+
+        result._isDirty = true;
     }
 
     public static RotationAlphaBetaGammaToRef(alpha: number, beta: number, gamma: number, result: Quaternion) {
@@ -135,6 +137,8 @@ export class Quaternion extends Row<4> {
         result._m[1]    = Math.sin(halfGammaMinusAlpha) * Math.sin(halfBeta);
         result._m[2]    = Math.sin(halfGammaPlusAlpha)  * Math.cos(halfBeta);
         result._m[3]    = Math.cos(halfGammaPlusAlpha)  * Math.cos(halfBeta);
+
+        result._isDirty = true;
     }
 
     public static TransformToEularAnglesRef(source: Quaternion, result: Row<3>) {
@@ -157,5 +161,7 @@ export class Quaternion extends Row<4> {
             result.m[1] = Math.asin(-2.0 * (qz * qy - qz * qw));
             result.m[2] = Math.atan2(2.0 * (qz * qx + qy * qw), (sqz - sqx - sqy + sqw));
         }
+
+        result._isDirty = true;
     }
 }

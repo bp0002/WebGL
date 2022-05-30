@@ -62,6 +62,6 @@ export class Camera extends Node implements ICameraPerspective, ICameraOrthoGrap
     public readonly viewport: [number, number, number, number] = [0, 0, 1, 1];
 
     public getViewMatrix() {
-        LeftHandCoordinateSys3D.QuaternionToRotationMatrixRef(this._rotationQuaternion, Camera.rotationMatrix);
+        this.coordinateSys.quaternionToRotationMatrixRef(this._rotationQuaternion, Camera.rotationMatrix);
     }
 }

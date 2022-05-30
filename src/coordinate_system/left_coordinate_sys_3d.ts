@@ -2,15 +2,11 @@ import { Matrix } from "../math/matrix";
 import { Matrix4x4 } from "../math/matrix4x4";
 import { Quaternion } from "../math/quaternion";
 import { Vector3 } from "../math/vector3";
+import { ICoordinateSystem } from "./coordinate_sys";
 
-export class LeftHandCoordinateSys3D {
-    /**
-     * 获取绕任意轴旋转指定角度的旋转矩阵表达
-     * @param axisDirection 旋转轴
-     * @param angleRadians 旋转弧度
-     * @param result 结果矩阵
-     */
-    public static GetRotationMatrixWithAixsAndAngle(axisDirection: Vector3, angleRadians: number, result: Matrix4x4) {
+export class LeftHandCoordinateSys3D implements ICoordinateSystem {
+    public tempMatrix4x4 = new Matrix4x4();
+    getRotationMatrixWithAixsAndAngle(axisDirection: Vector3, angleRadians: number, result: Matrix4x4): void {
         let cosA = Math.cos(angleRadians);
         let one_cosA = 1.0 - cosA;
         let sinA = Math.sin(angleRadians);
@@ -33,16 +29,7 @@ export class LeftHandCoordinateSys3D {
 
         result._isDirty = true;
     }
-
-    /**
-     * 计算目标向量绕轴旋转指定角度后的结果
-     * @link https://en.wikipedia.org/wiki/Rodrigues'_rotation_formula
-     * @param axisDirection 旋转轴
-     * @param angleRadians 旋转弧度
-     * @param source 源向量
-     * @param result 结果向量
-     */
-    public static Vector3RotateWithAxisAndAngle(axisDirection: Vector3, angleRadians: number, source: Vector3, result: Vector3) {
+    vector3RotateWithAxisAndAngle(axisDirection: Vector3, angleRadians: number, source: Vector3, result: Vector3): void {
         let cosA = Math.cos(angleRadians);
         let one_cosA = 1.0 - cosA;
         let sinA = Math.sin(angleRadians);
@@ -61,16 +48,7 @@ export class LeftHandCoordinateSys3D {
 
         tempV.dispose();
     }
-
-    /**
-     * 拆解矩阵数据
-     * @param target 目标矩阵
-     * @param scaling 缩放
-     * @param rotation 旋转四元数
-     * @param translation 位移
-     * @returns 是否成功
-     */
-    public static Decompose(target: Matrix4x4, scaling?: Vector3, rotation?: Quaternion, translation?: Vector3): boolean {
+    decompose(target: Matrix4x4, scaling?: Vector3, rotation?: Quaternion, translation?: Vector3): boolean {
         let result = false;
 
         if (target.isIdentity()) {
@@ -134,20 +112,20 @@ export class LeftHandCoordinateSys3D {
 
         if (rotation) {
             sx = 1 / sx, sy = 1 / sy; sz = 1 / sz;
+            let tempM = this.tempMatrix4x4.m;
+            tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
+            tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
+            tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
+            tempM[12] = 0,          tempM[13] = 0,          tempM[14] = 0,          tempM[15] = 1;
 
+            this.tempMatrix4x4._isDirty = true;
+
+            this.rotationMatrixToQuaternion(this.tempMatrix4x4, rotation);
         }
 
         return result;
     }
-
-    /**
-     * Sets a matrix to a value composed by merging scale (vector3), rotation (quaternion) and translation (vector3)
-     * @param scaling defines the scale vector3
-     * @param rotation defines the rotation quaternion
-     * @param translation defines the translation vector3
-     * @param result defines the target matrix
-     */
-     public static ComposeToRef(scaling: Vector3, rotation: Quaternion, translation: Vector3, result: Matrix4x4): void {
+    composeToRef(scaling: Vector3, rotation: Quaternion, translation: Vector3, result: Matrix4x4): void {
         let m = result.m;
         let x = rotation.x, y = rotation.y, z = rotation.z, w = rotation.w;
         let x2 = x + x, y2 = y + y, z2 = z + z;
@@ -179,13 +157,7 @@ export class LeftHandCoordinateSys3D {
 
         result._isDirty = true;
     }
-
-    /**
-     * 四元数转换为旋转矩阵
-     * @param quat 四元数
-     * @param result 结果矩阵
-     */
-    public static QuaternionToRotationMatrixRef(quat: Quaternion, result: Matrix<4, 4>) {
+    quaternionToRotationMatrixRef(quat: Quaternion, result: Matrix4x4): void {
         var xx = quat.x * quat.x;
         var yy = quat.y * quat.y;
         var zz = quat.z * quat.z;
@@ -218,13 +190,7 @@ export class LeftHandCoordinateSys3D {
 
         result._isDirty = true;
     }
-
-    /**
-     * 将旋转矩阵转换为四元数
-     * @param source 源旋转矩阵
-     * @param result 结果四元数
-     */
-    public static RotationMatrixToQuaternion(source: Matrix4x4, result: Quaternion) {
+    rotationMatrixToQuaternion(source: Matrix4x4, result: Quaternion): void {
         const m = source.m;
         let   m11 = m[0], m12 = m[1], m13 = m[2]
             , m21 = m[4], m22 = m[5], m23 = m[6]
@@ -262,5 +228,30 @@ export class LeftHandCoordinateSys3D {
             result.y = (m23 + m32) / s;
             result.z = 0.25 * s;
         }
+    }
+    transformCoordinatesFromFloatsToRef(x: number, y: number, z: number, transformation: Matrix4x4, result: Vector3): void {
+        let m = transformation.m;
+
+        let rx = x * m[ 0] + y * m[ 4] + z * m[ 8] + m[12];
+        let ry = x * m[ 1] + y * m[ 5] + z * m[ 9] + m[13];
+        let rz = x * m[ 2] + y * m[ 6] + z * m[10] + m[14];
+
+        let rw = 1 / (x * m[ 3] + y * m[ 7] + z * m[ 11] + m[15]);
+
+        result.x = rx * rw;
+        result.y = ry * rw;
+        result.z = rz * rw;
+    }
+
+    public directionToQuaternion(direction: Vector3, quaternion: Quaternion, yawCor: number = 0, pitchCor: number = 0, rollCor: number = 0) {
+        let yaw = -Math.atan2(direction.z, direction.x) + Math.PI / 2;
+        let len = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
+        let pitch = -Math.atan2(direction.y, len);
+
+        Quaternion.RotationYawPitchRollToRef(yaw + yawCor, pitch + pitchCor, rollCor, quaternion);
+    }
+
+    public getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void {
+        throw new Error("Method not implemented.");
     }
 }
