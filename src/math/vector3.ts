@@ -56,19 +56,28 @@ export class Vector3 extends Row<3> {
         this._isDirty = true;
     }
 
-    public static Cross(a: Vector3, b: Vector3): Vector3 {
+    /**
+     * 3D 向量叉积 v X w
+     * @tip ║v X w║ = ║v║ ║w║ |sinΘ| Θ 为 v 与 w 之间夹角, 该模长为 原点与两向量组成的平行四边形面积
+     * @param v v
+     * @param w w
+     * @returns 
+     */
+    public static Cross(v: Vector3, w: Vector3): Vector3 {
         let result = new Vector3(0, 0, 0);
 
-        Vector3.CrossToRef(a, b, result);
+        Vector3.CrossToRef(v, w, result);
 
         return result;
     }
 
-    public static CrossToRef(a: Vector3, b: Vector3, result: Vector3) {
-        let ax = a.x, ay = a.y, az = a.z;
-        let bx = b.x, by = b.y, bz = b.z;
+    public static CrossToRef(v: Vector3, w: Vector3, result: Vector3) {
+        let ax = v.x, ay = v.y, az = v.z;
+        let bx = w.x, by = w.y, bz = w.z;
         result._m[0] = ay * bz - by * az;
         result._m[1] = az * bx - bz * ax;
         result._m[2] = ax * by - bx * ay;
     }
 }
+
+Vector3.Dot
