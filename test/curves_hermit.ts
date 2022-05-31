@@ -1,5 +1,5 @@
-import { canvas2DDisplay } from "../../display/canvas2d_display";
-import { FloatScalar } from "../../math/scalar";
+import { canvas2DDisplay } from "../src/display/canvas2d_display";
+import { FloatScalar } from "../src/math/scalar";
 
 // Hermit
 let v0 = 0, t0 = 8.728395, f0 = 0.0;

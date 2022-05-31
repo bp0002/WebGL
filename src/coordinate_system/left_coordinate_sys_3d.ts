@@ -1,11 +1,13 @@
 import { Matrix } from "../math/matrix";
 import { Matrix4x4 } from "../math/matrix4x4";
 import { Quaternion } from "../math/quaternion";
+import { SquareMatrix } from "../math/square_matrix";
 import { Vector3 } from "../math/vector3";
 import { ICoordinateSystem } from "./coordinate_sys";
 
 export class LeftHandCoordinateSys3D implements ICoordinateSystem {
     public tempMatrix4x4 = new Matrix4x4();
+    public tempVector3 = new Vector3();
     getRotationMatrixWithAixsAndAngle(axisDirection: Vector3, angleRadians: number, result: Matrix4x4): void {
         let cosA = Math.cos(angleRadians);
         let one_cosA = 1.0 - cosA;
@@ -49,7 +51,7 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
         tempV.dispose();
     }
     decompose(target: Matrix4x4, scaling?: Vector3, rotation?: Quaternion, translation?: Vector3): boolean {
-        let result = false;
+        let result = true;
 
         if (target.isIdentity()) {
             if (translation) {
@@ -252,6 +254,20 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
     }
 
     public getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void {
-        throw new Error("Method not implemented.");
+        if (this.decompose(source, this.tempVector3, undefined, undefined)) {
+            SquareMatrix.IdentityToRef(result);
+            return;
+        } else {
+            let m = source.m;
+            let tempM = result.m;
+            let sx = 1 / this.tempVector3.x, sy = 1 / this.tempVector3.y, sz = 1 / this.tempVector3.z;
+
+            tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
+            tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
+            tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
+            tempM[12] = 0,          tempM[13] = 0,          tempM[14] = 0,          tempM[15] = 1;
+
+            result._isDirty = true;
+        }
     }
 }

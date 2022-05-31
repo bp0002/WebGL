@@ -15,11 +15,11 @@
     "libs": "webpack --config webpack.libs.js",
     "wave2d": "webpack --config webpack.native.wave2d.js",
     "moving": "webpack --config webpack.native.moving.js",
-    "math": "webpack --config webpack.math_test.js",
-    "linear_dynamic_sys": "webpack --config webpack.linear_dynamic_sys_test.js",
-    "geometry_line_test": "webpack --config webpack.geometry_line_test.js",
-    "curves_hermit": "webpack --config webpack.curves_hermit.js",
-    "transform_3d_test": "webpack --config webpack.transform_3d_test.js"
+    "test_math": "webpack --config webpack.test_math.js",
+    "test_curves_hermit": "webpack --config webpack.test_curves_hermit.js",
+    "test_linear_dynamic_sys": "webpack --config webpack.test_linear_dynamic_sys.js",
+    "test_geometry_line": "webpack --config webpack.test_geometry_line.js",
+    "test_transform_3d": "webpack --config webpack.test_transform_3d.js"
   },
   "author": "",
   "license": "ISC",

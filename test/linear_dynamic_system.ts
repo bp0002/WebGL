@@ -1,7 +1,11 @@
-import { MarkovOne } from "../../linear_dynamic_system/markov";
-import { canvas2DDisplay } from "../../display/canvas2d_display";
-import { FloatScalar } from "../../math/scalar";
-import { display } from "../../display/html_display";
+import { MarkovOne } from "../src/linear_dynamic_system/markov";
+import { canvas2DDisplay } from "../src/display/canvas2d_display";
+import { FloatScalar } from "../src/math/scalar";
+import { display } from "../src/display/html_display";
+
+function breakRow() {
+    display('--------------------------------------------------------------<br>');
+}
 
 let markov = new MarkovOne();
 markov.F = 0.001;
@@ -21,7 +25,9 @@ let tempDisplay = (p: number, v: number) => {
 for (let i = 0; i < 1000; i++) {
     markov.compute(tempDisplay);
 }
+
+display(`<br>`);
 for (let i = 0; i < 1000; i++) {
     display(FloatScalar.FormatString(i * markov.deltaH, 8, 2, "-") + ", " + FloatScalar.FormatString(markovResult[i][0], 28, 6, "-") + ", " + FloatScalar.FormatString(markovResult[i][1], 28, 6, "-") + '<br>');
 }
-display('-------------------------------<br>');
+breakRow();

@@ -1,8 +1,8 @@
-import { LeftHandCoordinateSys3D } from "../../../coordinate_system/left_coordinate_sys_3d";
-import { display } from "../../../display/html_display";
-import { Matrix4x4 } from "../../../math/matrix4x4";
-import { Node } from "../node";
-import { TransformNode } from "../transform_node";
+import { LeftHandCoordinateSys3D } from "../src/coordinate_system/left_coordinate_sys_3d";
+import { display } from "../src/display/html_display";
+import { Matrix4x4 } from "../src/math/matrix4x4";
+import { Node } from "../src/transform/3d/node";
+import { TransformNode } from "../src/transform/3d/transform_node";
 
 function breakRow() {
     display('--------------------------------------------------------------<br>');

@@ -39,11 +39,16 @@ export class ModifierLookAt implements INodeModifier {
         if (this.spcae === ESpace.WORLD && nodeRef.parentNode) {
             nodeRef.coordinateSys.quaternionToRotationMatrixRef(nodeRef.rotationQuaternion, ModifierLookAt.tempMatrix1);
 
-            nodeRef.coordinateSys.rota
-            nodeRef.parentNode.computeWorldMatrix().
+            nodeRef.coordinateSys.getRotationMatrixFromMatrix(nodeRef.parentNode.computeWorldMatrix(), ModifierLookAt.tempMatrix2);
+            Matrix4x4.InvertToRef(ModifierLookAt.tempMatrix2, ModifierLookAt.tempMatrix2);
+            Matrix4x4.MultiplyToRef(ModifierLookAt.tempMatrix1, ModifierLookAt.tempMatrix2, ModifierLookAt.tempMatrix1);
+
+            nodeRef.coordinateSys.rotationMatrixToQuaternion(ModifierLookAt.tempMatrix1, nodeRef.rotationQuaternion);
         }
     }
     dispose(): void {
-        throw new Error("Method not implemented.");
+        this.target.dispose();
+
+        (<any>this).target = undefined;
     }
 }

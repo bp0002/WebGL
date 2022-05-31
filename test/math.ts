@@ -1,14 +1,14 @@
-import { Dim, Matrix } from "../matrix";
-import { Matrix4x4 } from "../matrix4x4";
-import { Vector2 } from "../vector2";
-import { Vector3 } from "../vector3";
-import { Vector4 } from "../vector4";
-import { display } from "../../display/html_display";
-import { LeftHandCoordinateSys3D } from "../../coordinate_system/left_coordinate_sys_3d";
-import { Quaternion } from "../quaternion";
-import { SquareMatrix } from "../square_matrix";
-import { Row } from "../row";
-import { ICoordinateSystem } from "../../coordinate_system/coordinate_sys";
+import { Dim, Matrix } from "../src/math/matrix";
+import { Matrix4x4 } from "../src/math/matrix4x4";
+import { Vector2 } from "../src/math/vector2";
+import { Vector3 } from "../src/math/vector3";
+import { Vector4 } from "../src/math/vector4";
+import { display } from "../src/display/html_display";
+import { LeftHandCoordinateSys3D } from "../src/coordinate_system/left_coordinate_sys_3d";
+import { Quaternion } from "../src/math/quaternion";
+import { SquareMatrix } from "../src/math/square_matrix";
+import { Row } from "../src/math/row";
+import { ICoordinateSystem } from "../src/coordinate_system/coordinate_sys";
 
 function breakRow() {
     display('--------------------------------------------------------------<br>');

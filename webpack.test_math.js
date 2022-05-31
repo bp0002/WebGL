@@ -5,11 +5,11 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     // entry: './src/logic_webgl/index.ts',
     entry: {
-        logic_webgl_vao: './src/curves/test/hermit.ts'
+        logic_webgl_vao: './test/math.ts'
     },
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, 'webpack_build/curves/test/hermit')
+        path: path.resolve(__dirname, 'webpack_build/test/math')
     },
     // devtool: 'inline-source-map',                                  // 告诉 webpack 提取这些 source map，并内联到最终的 文件 中。
     module: {
