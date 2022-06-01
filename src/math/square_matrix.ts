@@ -107,17 +107,17 @@ export class SquareMatrix<N extends Dim> extends Matrix<N, N> {
             , m31 = m[ 8], m32 = m[ 9], m33 = m[10], m34 = m[11]
             , m41 = m[12], m42 = m[13], m43 = m[14], m44 = m[15];
 
-        let det_31_42 = m31 * m42 - m41 * m32;
-        let det_32_43 = m32 * m43 - m42 * m33;
         let det_33_44 = m33 * m44 - m43 * m34;
+        let det_32_44 = m32 * m44 - m42 * m34;
+        let det_32_43 = m32 * m43 - m42 * m33;
         let det_31_44 = m31 * m44 - m41 * m34;
         let det_31_43 = m31 * m43 - m41 * m33;
-        let det_32_44 = m32 * m44 - m42 * m34;
+        let det_31_42 = m31 * m42 - m41 * m32;
 
-        let cofact_11 = +(m22 * (+det_33_44) + m23 * (-det_32_44) + m24 * (+det_32_43));
-        let cofact_12 = -(m21 * (+det_33_44) + m23 * (-det_31_44) + m24 * (+det_31_43));
-        let cofact_13 = +(m21 * (+det_32_44) + m22 * (-det_31_44) + m24 * (+det_31_42));
-        let cofact_14 = -(m21 * (+det_32_43) + m22 * (-det_31_43) + m23 * (+det_31_42));
+        let cofact_11 = +(m22 * (det_33_44) - m23 * (det_32_44) + m24 * (det_32_43));
+        let cofact_12 = -(m21 * (det_33_44) - m23 * (det_31_44) + m24 * (det_31_43));
+        let cofact_13 = +(m21 * (det_32_44) - m22 * (det_31_44) + m24 * (det_31_42));
+        let cofact_14 = -(m21 * (det_32_43) - m22 * (det_31_43) + m23 * (det_31_42));
 
         let det = m11 * cofact_11 + m12 * cofact_12 + m13 * cofact_13 + m14 * cofact_14;
 
@@ -196,19 +196,19 @@ export class SquareMatrix<N extends Dim> extends Matrix<N, N> {
                 , m31 = m[ 8], m32 = m[ 9], m33 = m[10], m34 = m[11]
                 , m41 = m[12], m42 = m[13], m43 = m[14], m44 = m[15];
 
-            let det_31_42 = m31 * m42 - m41 * m32;
-            let det_32_43 = m32 * m43 - m42 * m33;
             let det_33_44 = m33 * m44 - m43 * m34;
+            let det_32_44 = m32 * m44 - m42 * m34;
+            let det_32_43 = m32 * m43 - m42 * m33;
             let det_31_44 = m31 * m44 - m41 * m34;
             let det_31_43 = m31 * m43 - m41 * m33;
-            let det_32_44 = m32 * m44 - m42 * m34;
+            let det_31_42 = m31 * m42 - m41 * m32;
 
-            let cofact_11 = m22 * (+det_33_44) + m23 * (-det_32_44) + m24 * (+det_32_43);
-            let cofact_12 = m21 * (+det_33_44) + m23 * (-det_31_44) + m24 * (+det_31_43);
-            let cofact_13 = m21 * (+det_32_44) + m22 * (-det_31_44) + m24 * (+det_31_42);
-            let cofact_14 = m21 * (+det_32_43) + m22 * (-det_31_43) + m23 * (+det_31_42);
+            let cofact_11 = +(m22 * (det_33_44) - m23 * (det_32_44) + m24 * (det_32_43));
+            let cofact_12 = -(m21 * (det_33_44) - m23 * (det_31_44) + m24 * (det_31_43));
+            let cofact_13 = +(m21 * (det_32_44) - m22 * (det_31_44) + m24 * (det_31_42));
+            let cofact_14 = -(m21 * (det_32_43) - m22 * (det_31_43) + m23 * (det_31_42));
 
-            result = m11 * (+cofact_11) + m12 * (-cofact_12) + m13 * (+cofact_13) + m14 * (-cofact_14);
+            result = m11 * cofact_11 + m12 * cofact_12 + m13 * cofact_13 + m14 * cofact_14;
         }
 
         return result;

@@ -19,7 +19,8 @@
     "test_curves_hermit": "webpack --config webpack.test_curves_hermit.js",
     "test_linear_dynamic_sys": "webpack --config webpack.test_linear_dynamic_sys.js",
     "test_geometry_line": "webpack --config webpack.test_geometry_line.js",
-    "test_transform_3d": "webpack --config webpack.test_transform_3d.js"
+    "test_transform_3d": "webpack --config webpack.test_transform_3d.js",
+    "test_node_lookat": "webpack --config webpack.test_node_lookat.js"
   },
   "author": "",
   "license": "ISC",

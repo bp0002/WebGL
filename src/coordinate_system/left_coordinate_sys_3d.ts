@@ -115,6 +115,11 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
         if (rotation) {
             sx = 1 / sx, sy = 1 / sy; sz = 1 / sz;
             let tempM = this.tempMatrix4x4.m;
+            // tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
+            // tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
+            // tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
+            // tempM[12] = 0,          tempM[13] = 0,          tempM[14] = 0,          tempM[15] = 1;
+
             tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
             tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
             tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
@@ -194,9 +199,9 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
     }
     rotationMatrixToQuaternion(source: Matrix4x4, result: Quaternion): void {
         const m = source.m;
-        let   m11 = m[0], m12 = m[1], m13 = m[2]
-            , m21 = m[4], m22 = m[5], m23 = m[6]
-            , m31 = m[8], m32 = m[9], m33 = m[10];
+        let   m11 = m[0], m12 = m[4], m13 = m[8]
+            , m21 = m[1], m22 = m[5], m23 = m[9]
+            , m31 = m[2], m32 = m[6], m33 = m[10];
 
         let trace = m11 + m22 + m33;
         let s = 0;

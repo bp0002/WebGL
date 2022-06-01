@@ -120,12 +120,10 @@ export class Quaternion extends Row<4> {
         let sinYaw      = Math.sin(halfYaw);
         let cosYaw      = Math.cos(halfYaw);
 
-        result._m[0]    = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
-        result._m[1]    = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
-        result._m[2]    = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
-        result._m[3]    = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
-
-        result._isDirty = true;
+        result.x    = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
+        result.y    = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
+        result.z    = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
+        result.w    = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
     }
 
     public static RotationAlphaBetaGammaToRef(alpha: number, beta: number, gamma: number, result: Quaternion) {

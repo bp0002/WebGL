@@ -103,7 +103,7 @@ export class Node implements INode {
         // Modify for local
         let modifierCount = this.modifierLocalList.length;
         for (let i = 0; i < modifierCount; i++) {
-            let modifier = this.modifierWorldList[i];
+            let modifier = this.modifierLocalList[i];
             modifier.modify(this);
         }
 

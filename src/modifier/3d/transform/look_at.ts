@@ -13,7 +13,7 @@ export class ModifierLookAt implements INodeModifier {
     /**
      * the position (must be in same space as current mesh) to look at
      */
-    target: Vector3 = new Vector3(0, 0, 0);
+    readonly target: Vector3 = new Vector3(0, 0, 0);
     /**
      * the choosen space of the target
      */
