@@ -46,7 +46,38 @@ export interface ICoordinateSystem {
      * @param result 结果矩阵
      */
     quaternionToRotationMatrixRef(quat: Quaternion, result: Matrix4x4): void;
-
+    /**
+     * 四元数转换为欧拉角
+     * @param quat 四元数
+     * @param result 结果
+     * @link https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+     * @link http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+     */
+    quaternionToEulerAngles(quat: Quaternion, result: Vector3): void;
+    /**
+     * 欧拉角(弧度)转换到四元数
+     * @param x Pitch 弧度
+     * @param y Yaw 弧度
+     * @param z Roll 弧度
+     * @param result Quaternion
+     */
+    eulerAnglesToQuaternion(x: number, y: number, z: number, result: Quaternion): void;
+    /**
+     * 欧拉角(弧度)转换到四元数 (in the z-y-x orientation (Tait-Bryan angles))
+     * @param yaw rotation around Y axis
+     * @param pitch rotation around X axis
+     * @param roll rotation around Z aixs
+     * @param result quaternion
+     */
+    rotationYawPitchRollToQuaternion(yaw: number, pitch: number, roll: number, result: Quaternion): void;
+    /**
+     * Creates a new quaternion from the given Euler float angles expressed in z-x-z orientation
+     * @param alpha defines the rotation around first axis
+     * @param beta defines the rotation around second axis
+     * @param gamma defines the rotation around third axis
+     * @param result quaternion
+     */
+    rotationAlphaBetaGammaToQuaternion(alpha: number, beta: number, gamma: number, result: Quaternion): void;
     /**
      * 将旋转矩阵转换为四元数
      * @param source 源旋转矩阵
@@ -54,6 +85,14 @@ export interface ICoordinateSystem {
      */
     rotationMatrixToQuaternion(source: Matrix4x4, result: Quaternion): void;
 
+    /**
+     * 对目标向量实施指定矩阵变换
+     * @param x 坐标X
+     * @param y 坐标y
+     * @param z 坐标z
+     * @param transformation 目标变换矩阵
+     * @param result 结果坐标
+     */
     transformCoordinatesFromFloatsToRef(x: number, y: number, z: number, transformation: Matrix4x4, result: Vector3): void;
 
     /**
@@ -67,5 +106,10 @@ export interface ICoordinateSystem {
      */
     directionToQuaternion(direction: Vector3, quaternion: Quaternion, yawCor: number, pitchCor: number, rollCor: number): void;
 
+    /**
+     * 从目标矩阵获取对应旋转矩阵
+     * @param source 源矩阵
+     * @param result 结果矩阵
+     */
     getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void;
 }

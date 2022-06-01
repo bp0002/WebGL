@@ -197,6 +197,83 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
 
         result._isDirty = true;
     }
+    quaternionToEulerAngles(quat: Quaternion, result: Vector3) {
+        let qz = quat.z, qx = quat.x, qy = quat.y, qw = quat.w;
+        let sqw = qw * qw, sqx = qx * qx, sqy = qy * qy, sqz = qz * qz;
+
+        let zAxisY = qy * qz - qx * qw;
+        let limit = 0.4999999;
+
+        if (zAxisY < -limit) {
+            result.m[1] = 2 * Math.atan2(qy, qw);
+            result.m[0] = Math.PI / 2;
+            result.m[2] = 0;
+        } else if (zAxisY > limit) {
+            result.m[1] = 2 * Math.atan2(qy, qw);
+            result.m[0] = -Math.PI / 2;
+            result.m[2] = 0;
+        } else {
+            result.m[2] = Math.atan2(2.0 * (qx * qy + qz * qw), (-sqz - sqx + sqy + sqw));
+            result.m[0] = Math.asin(-2.0 * (qz * qy - qx * qw));
+            result.m[1] = Math.atan2(2.0 * (qz * qx + qy * qw), (sqz - sqx - sqy + sqw));
+        }
+
+        result._isDirty = true;
+
+        // let qx = quat.x, qy = quat.y, qz = quat.z, qw = quat.w;
+
+        // let sqx = qx * qx, sqy = qy * qy, sqz = qz * qz, sqw = qw * qw;
+
+        // let zAxisY = qx * qy + qz * qw;
+
+        // let limit = 0.49999999;
+
+        // if (zAxisY < -limit) {
+        //     result.z = - 2 * Math.atan2(qx, qw);
+        //     result.y = Math.asin(2 * qx * qy + 2 * qz * qw);
+        //     result.x = 0;
+        // } else if (zAxisY > limit) {
+        //     result.z = 2 * Math.atan2(qx, qw);
+        //     result.y = Math.asin(2 * qx * qy + 2 * qz * qw);
+        //     result.x = 0;
+        // } else {
+        //     result.z = Math.atan2(2 * (qy * qw - qx * qz), 1 - 2 * (sqy - sqz));
+        //     result.y = Math.asin(2 * qx * qy + 2 * qz * qw);
+        //     result.x = Math.atan2(2 * (qx * qw - qy * qz), 1 - 2 * (sqx - sqz));
+        // }
+    }
+    eulerAnglesToQuaternion(x: number, y: number, z: number, result: Quaternion) {
+        this.rotationYawPitchRollToQuaternion(y, x, z, result);
+    }
+    rotationYawPitchRollToQuaternion(yaw: number, pitch: number, roll: number, result: Quaternion) {
+        let halfRoll    = roll  * 0.5;
+        let halfPitch   = pitch * 0.5;
+        let halfYaw     = yaw   * 0.5;
+
+        let sinRoll     = Math.sin(halfRoll);
+        let cosRoll     = Math.cos(halfRoll);
+        let sinPitch    = Math.sin(halfPitch);
+        let cosPitch    = Math.cos(halfPitch);
+        let sinYaw      = Math.sin(halfYaw);
+        let cosYaw      = Math.cos(halfYaw);
+
+        result.x    = (cosYaw * sinPitch * cosRoll) + (sinYaw * cosPitch * sinRoll);
+        result.y    = (sinYaw * cosPitch * cosRoll) - (cosYaw * sinPitch * sinRoll);
+        result.z    = (cosYaw * cosPitch * sinRoll) - (sinYaw * sinPitch * cosRoll);
+        result.w    = (cosYaw * cosPitch * cosRoll) + (sinYaw * sinPitch * sinRoll);
+    }
+    rotationAlphaBetaGammaToQuaternion(alpha: number, beta: number, gamma: number, result: Quaternion) {
+        let halfGammaPlusAlpha  = (gamma + alpha) * 0.5;
+        let halfGammaMinusAlpha = (gamma - alpha) * 0.5;
+        let halfBeta            = beta * 0.5;
+
+        result.m[0]    = Math.cos(halfGammaMinusAlpha) * Math.sin(halfBeta);
+        result.m[1]    = Math.sin(halfGammaMinusAlpha) * Math.sin(halfBeta);
+        result.m[2]    = Math.sin(halfGammaPlusAlpha)  * Math.cos(halfBeta);
+        result.m[3]    = Math.cos(halfGammaPlusAlpha)  * Math.cos(halfBeta);
+
+        result._isDirty = true;
+    }
     rotationMatrixToQuaternion(source: Matrix4x4, result: Quaternion): void {
         const m = source.m;
         let   m11 = m[0], m12 = m[4], m13 = m[8]
@@ -255,7 +332,7 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
         let len = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
         let pitch = -Math.atan2(direction.y, len);
 
-        Quaternion.RotationYawPitchRollToRef(yaw + yawCor, pitch + pitchCor, rollCor, quaternion);
+        this.rotationYawPitchRollToQuaternion(yaw + yawCor, pitch + pitchCor, rollCor, quaternion);
     }
 
     public getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void {

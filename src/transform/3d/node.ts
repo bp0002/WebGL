@@ -83,7 +83,7 @@ export class Node implements INode {
     }
 
     public modifyRotationByEulerAngle(x: number, y: number, z: number) {
-        Quaternion.RotationYawPitchRollToRef(y, x, z, this._rotationQuaternion);
+        this.coordinateSys.rotationYawPitchRollToQuaternion(y, x, z, this._rotationQuaternion);
     }
 
     public setParent(value: Nullable<Node>, keepAbsolute?: boolean) {

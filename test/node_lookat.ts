@@ -39,7 +39,7 @@ display(node.absoluteRotationQuaternion.toFormatString(10, 4) + `<br>`);
 display(node.computeWorldMatrix().toFormatString(10, 4) + `<br>`);
 
 display(`Look at <0, -1, 0> 与 旋转角度 (-90,0,0) 不同 <br>`);
-Quaternion.EulerAnglesToRef(-90 / 180 * Math.PI, 0, 0, testQuaternion);
+coordinate_sys.eulerAnglesToQuaternion(-90 / 180 * Math.PI, 0, 0, testQuaternion);
 display(testQuaternion.toFormatString(10, 4) + `<br>`);
 
 display(`Look at <0, -1, 1> <br>`);
@@ -51,5 +51,5 @@ display(`absoluteRotationQuaternion <br>`);
 display(node.absoluteRotationQuaternion.toFormatString(10, 4) + `<br>`);
 
 display(`Look at <0, -1, 1> 与 旋转角度 (-45,0,0) 是相同的 <br>`);
-Quaternion.EulerAnglesToRef(-45 / 180 * Math.PI, 0, 0, testQuaternion);
+coordinate_sys.eulerAnglesToQuaternion(-45 / 180 * Math.PI, 0, 0, testQuaternion);
 display(testQuaternion.toFormatString(10, 4) + `<br>`);
