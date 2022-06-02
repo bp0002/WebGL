@@ -1,4 +1,4 @@
-import { Node } from "../../../transform/3d/node";
+import { INode } from "../../../transform/3d/base";
 
 export enum ENodeModifierClassId {
     Billboard = 1,
@@ -11,6 +11,6 @@ export enum ENodeModifierClassId {
 export interface INodeModifier {
     readonly classId: ENodeModifierClassId;
     forCache: boolean;
-    modify(nodeRef: Node): void;
+    modify(nodeRef: INode): void;
     dispose(): void;
 }

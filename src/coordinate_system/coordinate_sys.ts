@@ -3,6 +3,18 @@ import { Quaternion } from "../math/quaternion";
 import { Vector3 } from "../math/vector3";
 
 export interface ICoordinateSystem {
+    tempMatrix4x4A: Matrix4x4;
+    tempMatrix4x4B: Matrix4x4;
+    tempMatrix4x4C: Matrix4x4;
+    tempMatrix4x4D: Matrix4x4;
+    tempQuaternionA: Vector3;
+    tempQuaternionB: Vector3;
+    tempQuaternionC: Vector3;
+    tempQuaternionD: Vector3;
+    tempVector3A: Vector3;
+    tempVector3B: Vector3;
+    tempVector3C: Vector3;
+    tempVector3D: Vector3;
     /**
      * 获取绕任意轴旋转指定角度的旋转矩阵表达
      * @param axisDirection 旋转轴
@@ -112,4 +124,5 @@ export interface ICoordinateSystem {
      * @param result 结果矩阵
      */
     getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void;
+    lookAtToViewMatrix(eye: Vector3, target: Vector3, up: Vector3, result: Matrix4x4): void;
 }

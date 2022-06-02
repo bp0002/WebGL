@@ -6,8 +6,18 @@ import { Vector3 } from "../math/vector3";
 import { ICoordinateSystem } from "./coordinate_sys";
 
 export class LeftHandCoordinateSys3D implements ICoordinateSystem {
-    public tempMatrix4x4 = new Matrix4x4();
-    public tempVector3 = new Vector3();
+    public tempMatrix4x4A = new Matrix4x4();
+    public tempMatrix4x4B = new Matrix4x4();
+    public tempMatrix4x4C = new Matrix4x4();
+    public tempMatrix4x4D = new Matrix4x4();
+    public tempQuaternionA = new Vector3();
+    public tempQuaternionB = new Vector3();
+    public tempQuaternionC = new Vector3();
+    public tempQuaternionD = new Vector3();
+    public tempVector3A = new Vector3();
+    public tempVector3B = new Vector3();
+    public tempVector3C = new Vector3();
+    public tempVector3D = new Vector3();
     getRotationMatrixWithAixsAndAngle(axisDirection: Vector3, angleRadians: number, result: Matrix4x4): void {
         let cosA = Math.cos(angleRadians);
         let one_cosA = 1.0 - cosA;
@@ -114,7 +124,7 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
 
         if (rotation) {
             sx = 1 / sx, sy = 1 / sy; sz = 1 / sz;
-            let tempM = this.tempMatrix4x4.m;
+            let tempM = this.tempMatrix4x4A.m;
             // tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
             // tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
             // tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
@@ -125,9 +135,9 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
             tempM[ 8] = m[ 8] * sz, tempM[ 9] = m[ 9] * sz, tempM[10] = m[10] * sz, tempM[11] = 0,
             tempM[12] = 0,          tempM[13] = 0,          tempM[14] = 0,          tempM[15] = 1;
 
-            this.tempMatrix4x4._isDirty = true;
+            this.tempMatrix4x4A._isDirty = true;
 
-            this.rotationMatrixToQuaternion(this.tempMatrix4x4, rotation);
+            this.rotationMatrixToQuaternion(this.tempMatrix4x4A, rotation);
         }
 
         return result;
@@ -336,13 +346,13 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
     }
 
     public getRotationMatrixFromMatrix(source: Matrix4x4, result: Matrix4x4): void {
-        if (this.decompose(source, this.tempVector3, undefined, undefined)) {
+        if (this.decompose(source, this.tempVector3A, undefined, undefined)) {
             SquareMatrix.IdentityToRef(result);
             return;
         } else {
             let m = source.m;
             let tempM = result.m;
-            let sx = 1 / this.tempVector3.x, sy = 1 / this.tempVector3.y, sz = 1 / this.tempVector3.z;
+            let sx = 1 / this.tempVector3A.x, sy = 1 / this.tempVector3A.y, sz = 1 / this.tempVector3A.z;
 
             tempM[ 0] = m[ 0] * sx, tempM[ 1] = m[ 1] * sx, tempM[ 2] = m[ 2] * sx, tempM[ 3] = 0,
             tempM[ 4] = m[ 4] * sy, tempM[ 5] = m[ 5] * sy, tempM[ 6] = m[ 6] * sy, tempM[ 7] = 0,
@@ -351,5 +361,31 @@ export class LeftHandCoordinateSys3D implements ICoordinateSystem {
 
             result._isDirty = true;
         }
+    }
+    lookAtToViewMatrix(eye: Vector3, target: Vector3, up: Vector3, result: Matrix4x4): void {
+        let xAxis = this.tempVector3A;
+        let yAxis = this.tempVector3B;
+        let zAxis = this.tempVector3C;
+
+        Vector3.SubstractToRef(target, eye, zAxis);
+        Vector3.NormalizeToRef(zAxis, zAxis);
+
+        Vector3.CrossToRef(up, zAxis, xAxis);
+        Vector3.NormalizeToRef(xAxis, xAxis);
+
+        Vector3.CrossToRef(zAxis, xAxis, yAxis);
+        Vector3.NormalizeToRef(yAxis, yAxis);
+
+        let ex = -Vector3.Dot(xAxis, eye);
+        let ey = -Vector3.Dot(yAxis, eye);
+        let ez = -Vector3.Dot(zAxis, eye);
+
+        let m = result.m;
+        m[ 0] = xAxis.x, m[ 1] = yAxis.x, m[ 2] = zAxis.x, m[ 3] = 0,
+        m[ 4] = xAxis.y, m[ 5] = yAxis.y, m[ 6] = zAxis.y, m[ 7] = 0,
+        m[ 8] = xAxis.z, m[ 9] = yAxis.z, m[10] = zAxis.z, m[11] = 0,
+        m[12] = ex,      m[13] = ey,      m[14] = ez,      m[15] = 0;
+
+        result._isDirty = true;
     }
 }
